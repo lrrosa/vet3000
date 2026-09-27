@@ -19,6 +19,7 @@ if not exist "%MAME%" (
     exit /b 1
 )
 echo Controles: ESPACO joga/lanca, Z/X movem, RETURN pausa, V sobrepoe, EXT MODE ^(TAB^) sai.
+echo No editor do titulador, SHIFT+TAB ^(SHIFT+EXT MODE^) volta a demo.
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\mame\run_cart.ps1" -Mame "%MAME%" -Cart "%~dp0cartridge\demo\vet3000_demo.bin"
 if errorlevel 1 pause
 endlocal

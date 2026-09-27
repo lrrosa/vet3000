@@ -5,8 +5,9 @@
 * ===========================================================================
 *  VET 3000 DEMO - cartucho para o conector traseiro CN1 ($4000-$7FFF)
 *
-*  Abertura com barras de cor, scroller suave e sprites + o jogo
-*  QUEBRA-TIJOLO. Montar com asm6809 (ver build.sh / build.ps1):
+*  Abertura com logotipo em ciclo de cores, barras de cor, scroller suave e
+*  sprites + o jogo QUEBRA-TIJOLO. Montar com asm6809 (ver build.sh /
+*  build.ps1):
 *      python gen_assets.py
 *      asm6809 -B -o build/vet3000_demo.bin demo.asm
 *
@@ -16,6 +17,8 @@
 *     assinatura "POWER" ($0030-$0034) ficam intactos.
 *   - EXT MODE volta ao titulador (reset com a marca "EXIT" em $0080).
 *   - Segurar EXT MODE ao ligar pula o cartucho.
+*   - No editor do titulador, SHIFT+EXT MODE volta à demo: o cartucho troca
+*     esse comando (que só repetia o EXT MODE) na tabela em RAM do firmware.
 *   - Sincronismo por SYNC com IRQ mascarada (INT do VDP), sem vetores.
 *   - Entre acessos à porta de dados do VDP há sempre >= 8 ciclos
 *     (8,9 us a 0,895 MHz), o pior caso do TMS9128 na área ativa.
@@ -87,7 +90,13 @@ speed		equ	$28		; 2 bytes (velocidade vertical 8.8)
 paused		equ	$2A
 dirty		equ	$2B		; bit0 = placar, bit1 = vidas/fase
 hitcnt		equ	$2C
+* logotipo
+logo_theme	equ	$2D		; tema de cores (0..LOGO_THEMES-1)
+logo_pos	equ	$2E		; linhas já trocadas para o tema
+logo_timer	equ	$2F		; passos até a próxima troca
 * $30-$34: "POWER" do titulador - não tocar
+CMD_TABLE	equ	$0040		; tabela de comandos do titulador (recriada no boot)
+CMD_SHIFT_EXT	equ	$15		; código de SHIFT+EXT MODE
 BARBUF		equ	$0040		; 64 bytes: cor de cada linha das barras
 EXIT_MAGIC	equ	$0080		; "EXIT" = voltar ao titulador após o reset
 BRICKS		equ	$0084		; 6 palavras: tijolos de cada linha (bit15 = coluna 0)
@@ -107,7 +116,7 @@ STACK_TOP	equ	$0200
 		fcc	"OBJECT"		; assinatura
 		fdb	cart_vec		; a ROM faz LDX [$4006]: ponteiro para...
 cart_vec	fdb	entry-$4000		; ...o deslocamento da entrada (JSR $4000,X)
-		fcc	"VET 3000 DEMO 1.0 (C) 2026 LEONARDO ROMAN DA ROSA - GPL-3.0",0
+		fcc	"VET 3000 DEMO 1.1 (C) 2026 LEONARDO ROMAN DA ROSA - GPL-3.0",0
 
 * ===========================================================================
 *  Entrada: chamada pela ROM com JSR durante o boot (VDP já inicializado,
@@ -121,13 +130,15 @@ entry		ldd	EXIT_MAGIC		; voltando da demo por EXT MODE?
 		bne	1F
 		clr	EXIT_MAGIC
 		clr	EXIT_MAGIC+2
-		rts				; -> firmware segue para o titulador
+		bra	2F			; -> firmware segue para o titulador
 1		lda	#$FB			; linha 3 do teclado
 		sta	KEYBOARD
 		lda	KEYBOARD
 		bita	#$08			; EXT MODE apertado?
-		bne	start
-		rts				; pula o cartucho
+		bne	start			; solta: roda a demo
+2		ldd	#back_to_demo		; indo para o titulador: lá, SHIFT+EXT MODE
+		std	CMD_TABLE+2*CMD_SHIFT_EXT	; passa a trazer a demo de volta
+		rts
 
 start		orcc	#$50			; IRQ e FIRQ mascaradas (usamos SYNC)
 		lds	#STACK_TOP
@@ -152,6 +163,26 @@ exit_to_titler
 		std	EXIT_MAGIC
 		ldd	#"IT"
 		std	EXIT_MAGIC+2
+		jmp	[$FFFE]
+
+* ---------------------------------------------------------------------------
+*  back_to_demo: comando SHIFT+EXT MODE instalado na tabela do titulador
+*  pela entrada. Apaga a tela, espera EXT MODE ficar solta (apertada, ela faz
+*  o boot pular o cartucho) e reinicia a máquina, que volta a rodar a demo.
+* ---------------------------------------------------------------------------
+back_to_demo	orcc	#$50
+		lda	#$82			; R1: imagem e interrupção desligadas
+		ldb	#1
+		lbsr	vdp_reg
+		clr	EXIT_MAGIC
+1		ldx	#1000			; ~28 ms seguidos com a tecla solta
+2		lda	#$FB			; linha 3: EXT MODE (bit 3)
+		sta	KEYBOARD
+		lda	KEYBOARD
+		bita	#$08
+		beq	1B			; ainda apertada: recomeça a contagem
+		leax	-1,X
+		bne	2B
 		jmp	[$FFFE]
 
 * ===========================================================================
@@ -449,6 +480,11 @@ title		lbsr	screen_off
 		clr	scroll_s
 		clr	blink
 		clr	keys
+		clr	logo_theme		; o logotipo começa no tema gravado na tela
+		lda	#LOGO_LINES
+		sta	logo_pos
+		lda	#LOGO_HOLD
+		sta	logo_timer
 		lbsr	build_bars
 		lbsr	build_balls
 		lbsr	put_sat
@@ -515,6 +551,74 @@ title_step	lda	bar_phase
 2		stx	scroll_ptr
 		clra
 1		sta	scroll_s
+*		(segue em logo_step)
+
+* ---------------------------------------------------------------------------
+*  Logotipo em ciclo de cores. A cor de cada linha de pixel vem de um tema
+*  (LOGO_COLORS, gerado com degradê por nível de brilho). A cada LOGO_STEP
+*  passos uma linha passa para o tema seguinte, na ordem de LOGO_ORDER; com
+*  todas trocadas, o tema fica LOGO_HOLD passos e o ciclo continua.
+*  Trocar uma linha custa ~900 ciclos (uma vez a cada LOGO_STEP passos).
+* ---------------------------------------------------------------------------
+LOGO_STEP	equ	4		; passos entre duas linhas (15 linhas/s)
+LOGO_HOLD	equ	60		; passos com o tema completo (1 s)
+
+logo_step	dec	logo_timer
+		beq	1F
+		rts
+1		ldb	logo_pos
+		cmpb	#LOGO_LINES
+		blo	2F
+		lda	logo_theme		; tema completo: começa o próximo
+		inca
+		cmpa	#LOGO_THEMES
+		blo	3F
+		clra
+3		sta	logo_theme
+		clrb
+2		incb
+		stb	logo_pos
+		lda	#LOGO_STEP
+		cmpb	#LOGO_LINES
+		bne	4F
+		lda	#LOGO_HOLD
+4		sta	logo_timer
+		ldx	#LOGO_ORDER-1
+		ldb	B,X			; linha a trocar
+		pshs	b
+		lda	logo_theme		; cor = LOGO_COLORS[tema*LOGO_LINES + linha]
+		ldb	#LOGO_LINES
+		mul
+		addb	,S
+		adca	#0
+		ldx	#LOGO_COLORS
+		lda	D,X
+		puls	b
+*		(segue em logo_line)
+
+* logo_line: grava a cor A (frente<<4 | fundo) na linha B do logotipo, nas
+*   colunas LOGO_COL0..LOGO_COL1-1: um byte por tile, refazendo o endereço a
+*   cada coluna (34 ciclos por coluna, >= 9 entre acessos ao VDP)
+logo_line	sta	tmp+1			; cor
+		addb	#LOGO_Y			; linha de pixels no banco 0
+		tfr	b,a
+		lsra
+		lsra
+		lsra
+		ora	#(COL>>8)|$40		; COL + linha de tiles * $100, para escrita
+		sta	tmp
+		andb	#7
+		addb	#LOGO_COL0*8
+		lda	#LOGO_COL1-LOGO_COL0
+		sta	cnt
+1		stb	VDP_CTRL		; endereço: byte baixo...
+		lda	tmp
+		sta	VDP_CTRL		; ...e alto
+		lda	tmp+1
+		sta	VDP_DATA
+		addb	#8			; a mesma linha na próxima coluna
+		dec	cnt
+		bne	1B
 		rts
 
 * toggle_video: EXTVID (R0 bit 0) + fundo transparente = texto sobre o vídeo

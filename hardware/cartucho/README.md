@@ -51,7 +51,8 @@ Roteada com o Freerouting.
 | 28C256 (EEPROM) | A14: escolhe a metade | 2-3 (/WE = +5 V, nunca escreve) |
 
 **JP3 fechado** = cartucho ativo. **Aberto** = o VET não enxerga o cartucho e liga direto no
-titulador. Com a demo dá para fazer o mesmo sem mexer no jumper: segure EXT MODE ao ligar.
+titulador. Com a demo dá para fazer o mesmo sem mexer no jumper: segure EXT MODE ao ligar. Depois,
+SHIFT+EXT MODE no editor do titulador chama a demo.
 
 Para gravar: a imagem `cartridge/demo/vet3000_demo.bin` tem 16 KB e vai direto na 27C128. Numa
 27C256/27C512, grave-a na metade ou banco escolhido pelos jumpers (ex.: duplicada nas duas metades).

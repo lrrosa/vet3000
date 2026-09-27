@@ -134,6 +134,14 @@ def text_index(s):
     return out
 
 
+def center_x(s):
+    """X que centraliza na tela a parte desenhada do texto (sem a margem vazia
+    à direita dos glifos, que têm 6 ou 7 colunas úteis de 8)."""
+    cols = [i * 8 + x for i, g in enumerate(text_index(s))
+            for x in range(8) if any(row & (0x80 >> x) for row in FONT[g])]
+    return (256 - (max(cols) - min(cols) + 1)) // 2 - min(cols)
+
+
 # ---------------------------------------------------------------------------
 # Bitmap Graphics II: cada "banco" = 256x64 pixels, 2 cores por segmento 8x1
 # ---------------------------------------------------------------------------
@@ -167,6 +175,10 @@ class Bank:
                     for cx in range((x + i * 8 * scale_x) // 8,
                                     min(32, (x + (i + 1) * 8 * scale_x + 7 + italic) // 8)):
                         self.fg[py][cx] = color
+
+    def centered(self, y, s, color):
+        """Escreve o texto centralizado na linha de pixels y."""
+        self.text(center_x(s), y, s, color=color)
 
     def hline(self, x0, x1, y, color):
         for x in range(x0, x1):
@@ -261,17 +273,42 @@ def unrle(data):
 # ---------------------------------------------------------------------------
 # Tela de abertura
 # ---------------------------------------------------------------------------
-LOGO_GRADIENT = [WHITE, WHITE, CYAN, CYAN, CYAN, LBLUE, LBLUE, LBLUE, LBLUE,
-                 LBLUE, DBLUE, DBLUE, LBLUE, CYAN]
+# Logotipo "VET 3000": cada linha de pixel tem um nível de brilho (3 = mais claro)
+# e cada tema dá as cores dos 4 níveis. A demo passa de um tema ao seguinte
+# trocando uma linha por vez, na ordem de LOGO_ORDER, e percorre os temas em
+# ciclo. O primeiro tema é o que vai gravado na tela.
+LOGO_X, LOGO_Y = 30, 4
+LOGO_LINES = 28                 # 7 linhas de glifo x 4 (a 8a linha da fonte é vazia)
+LOGO_SHADE = [3] * 5 + [2] * 7 + [1] * 11 + [0] * 5
+LOGO_THEMES = [                 # cores dos níveis 3, 2, 1 e 0
+    (WHITE, CYAN, LBLUE, DBLUE),            # azul, como na arte do teclado
+    (WHITE, LRED, MAGENTA, DBLUE),          # roxo
+    (LYELLOW, LRED, MRED, DRED),            # vermelho
+    (WHITE, LYELLOW, DYELLOW, DYELLOW),     # dourado
+    (WHITE, LGREEN, MGREEN, DGREEN),        # verde
+    (WHITE, CYAN, LGREEN, MGREEN),          # água
+]
+LOGO_ORDER = list(range(LOGO_LINES))    # de cima para baixo
+FOOTER_GRADIENT = [WHITE, CYAN, CYAN, LBLUE, LBLUE, LBLUE, DBLUE, DBLUE]
+
+
+def logo_colors(theme):
+    """Cor de frente de cada linha do logotipo no tema dado."""
+    return [LOGO_THEMES[theme][3 - s] for s in LOGO_SHADE]
+
+
+def logo_columns(b):
+    """Colunas de tiles ocupadas pelo logotipo: (primeira, última + 1)."""
+    xs = [x for y in range(LOGO_Y, LOGO_Y + LOGO_LINES) for x in range(256) if b.pix[y][x]]
+    return min(xs) // 8, max(xs) // 8 + 1
 
 
 def title_top():
     b = Bank()
     # logotipo "VET 3000" em itálico, 4x (28 px de altura)
-    lx, ly = 30, 4
-    b.text(lx, ly, "VET", scale_x=3, scale_y=4, italic=7)
-    b.text(lx + 88, ly, "3OOO", scale_x=3, scale_y=4, italic=7)   # 'O' sem o corte do '0'
-    b.color_rows(ly, ly + 32, LOGO_GRADIENT)
+    b.text(LOGO_X, LOGO_Y, "VET", scale_x=3, scale_y=4, italic=7)
+    b.text(LOGO_X + 88, LOGO_Y, "3OOO", scale_x=3, scale_y=4, italic=7)   # 'O' sem o corte do '0'
+    b.color_rows(LOGO_Y, LOGO_Y + LOGO_LINES, logo_colors(0))
     # duas faixas como na arte do teclado
     for x0, x1 in ((8, 248),):
         b.hline(x0, x1, 38, LBLUE)
@@ -279,7 +316,7 @@ def title_top():
         b.hline(x0, x1, 42, DBLUE)
     b.text(128, 47, "VIDEO TITLER", color=LBLUE)
     b.text(16, 47, "TMS 1988", color=GRAY)
-    b.text(40, 56, "DEMO DE CARTUCHO", color=LYELLOW)
+    b.centered(56, "DEMO DE CARTUCHO", LYELLOW)
     b.color_rows(56, 64, [LYELLOW, LYELLOW, DYELLOW, DYELLOW, LYELLOW, WHITE, DYELLOW, DYELLOW], 0, 256)
     return b
 
@@ -290,14 +327,15 @@ BLINK_ROW = 0         # linha piscante "ESPACO: JOGAR" (tela: linha 16)
 
 def title_bottom():
     b = Bank()
-    b.text(16, BLINK_ROW * 8, "ESPAÇO: JOGAR   V: SOBREPOR", color=WHITE)
+    b.centered(BLINK_ROW * 8, "ESPAÇO: JOGAR   V: SOBREPOR", WHITE)
     # gradiente do scroller (tiles da linha SCROLL_ROW)
     grad = [LYELLOW, LYELLOW, DYELLOW, LRED, LRED, MRED, DRED, DRED]
     for i in range(8):
         for cx in range(32):
             b.fg[SCROLL_ROW * 8 + i][cx] = grad[i]
-    b.text(8, 40, "EXT MODE: VOLTA AO TITULADOR", color=GRAY)
-    b.text(12, 56, "@ 2026 LEONARDO ROMAN DA ROSA", color=MAGENTA)
+    b.centered(40, "EXT MODE: VOLTA AO TITULADOR", GRAY)
+    b.centered(56, "@ 2026 LEONARDO ROMAN DA ROSA", WHITE)
+    b.color_rows(56, 64, FOOTER_GRADIENT)
     return b
 
 
@@ -310,7 +348,8 @@ SCROLL_TEXT = (
     "'OBJECT' EM $4000.     BARRAS DE COR SEM INTERRUPÇÃO DE LINHA, SCROLLER "
     "COM FONTES PRÉ-DESLOCADAS E SPRITES 16X16...     "
     "APERTE ESPAÇO PARA JOGAR QUEBRA-TIJOLO!     "
-    "OS SEUS TÍTULOS NA RAM FICAM INTACTOS.     "
+    "OS SEUS TÍTULOS NA RAM FICAM INTACTOS, E NO TITULADOR "
+    "SHIFT+EXT MODE VOLTA PARA A DEMO.     "
     "DEMO E JOGO POR LEONARDO ROMAN DA ROSA - SOFTWARE LIVRE (GPL-3).     <<<    ")
 
 # mensagens do jogo (ASCII + códigos dos acentuados, 0 no fim)
@@ -480,6 +519,11 @@ def fcb_lines(data, per=16):
 
 def main():
     os.makedirs(BUILD, exist_ok=True)
+    top, bottom = title_top(), title_bottom()
+    logo_c0, logo_c1 = logo_columns(top)
+    logo_bg = {top.bg[y][cx] for y in range(LOGO_Y, LOGO_Y + LOGO_LINES) for cx in range(32)}
+    assert len(logo_bg) == 1 and sorted(LOGO_ORDER) == list(range(LOGO_LINES))
+    logo_bg = logo_bg.pop()
     out = []
     w = out.append
     w("* Gerado por gen_assets.py - não editar à mão")
@@ -494,6 +538,11 @@ def main():
     w("NUM_BARS\tequ\t%d" % len(BARS))
     w("BAR_H\t\tequ\t%d" % len(BARS[0]))
     w("T_WALL_TOP\tequ\t%d" % T_WALL_TOP)
+    w("LOGO_Y\t\tequ\t%d" % LOGO_Y)
+    w("LOGO_LINES\tequ\t%d" % LOGO_LINES)
+    w("LOGO_COL0\tequ\t%d" % logo_c0)
+    w("LOGO_COL1\tequ\t%d" % logo_c1)
+    w("LOGO_THEMES\tequ\t%d" % len(LOGO_THEMES))
     w("")
     w("FONT")
     out.extend(fcb_lines(bytes(b for g in FONT for b in g), 8))
@@ -519,8 +568,12 @@ def main():
     w("BAR_GRAD")
     for bar in BARS:
         out.extend(fcb_lines(bytes((c << 4) | c for c in bar), 8))
+    w("LOGO_ORDER\t; linhas do logotipo na ordem da troca de tema")
+    out.extend(fcb_lines(bytes(LOGO_ORDER), 14))
+    w("LOGO_COLORS\t; %d temas x %d linhas (frente<<4 | fundo)" % (len(LOGO_THEMES), LOGO_LINES))
+    for t in range(len(LOGO_THEMES)):
+        out.extend(fcb_lines(bytes((c << 4) | logo_bg for c in logo_colors(t)), 14))
     w("")
-    top, bottom = title_top(), title_bottom()
     for name, data in (("TITLE0_PAT", top.patterns()), ("TITLE0_COL", top.colors()),
                        ("TITLE2_PAT", bottom.patterns()), ("TITLE2_COL", bottom.colors())):
         packed = rle(data)

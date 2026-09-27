@@ -69,6 +69,26 @@ sair    ldd  #"EX"
 Boa prática: se uma tecla estiver apertada no boot (a demo usa EXT MODE), faça `RTS` na hora.
 Assim o usuário usa o titulador sem tirar o cartucho.
 
+### Voltar do titulador para o cartucho
+
+O firmware só chama o cartucho no boot, mas a tabela de comandos fica em RAM e é recriada antes
+dessa chamada. Antes do `RTS`, o cartucho pode trocar uma entrada por uma rotina sua. O editor do
+titulador a chama com `JSR` quando a tecla correspondente é apertada. A demo usa o código `$15`
+(SHIFT+EXT MODE), que no firmware só repetia o EXT MODE:
+
+```asm
+CMD_TABLE equ $0040             ; 32 ponteiros, um por código de tecla
+        ldd  #volta
+        std  CMD_TABLE+2*$15    ; SHIFT+EXT MODE
+        rts                     ; segue para o titulador
+volta   ...                     ; espera EXT MODE ser solta e faz jmp [$FFFE]
+```
+
+O código `$15` é aceito com o cursor desligado e com a imagem desligada (BORDER BLK). Na tela de
+abertura do titulador ("Pressione qualquer tecla") a ROM trata EXT MODE sem passar pela tabela, então
+o atalho só vale depois de entrar no editor. Espere a tecla ser solta antes do reset: a demo pula o
+cartucho se EXT MODE estiver apertada no boot.
+
 ### RAM: não apague os títulos do usuário
 
 A RAM tem bateria e guarda até 30 páginas de títulos. Áreas **livres** para o cartucho:
@@ -142,7 +162,8 @@ A cerca de 60 Hz e 0,895 MHz, um quadro tem **~14.930 ciclos**. Custos de alguma
 | Atualizar 32 sprites (128 bytes) | ~2.000 | estimado |
 | Tabela de nomes inteira (768 bytes) | ~9.000 | estimado (use o apagamento vertical ou divida entre quadros) |
 | Scroller suave de 32 colunas (256 bytes calculados) | ~5.300 | contagem de ciclos |
-| Abertura completa da demo | ~11.000 | **medido** (build DEBUG) |
+| Trocar a cor de uma linha de pixel em 23 colunas (endereço refeito a cada byte) | ~900 | contagem de ciclos |
+| Abertura completa da demo | ~12.000 | **medido** (build DEBUG) |
 | Jogo QUEBRA-TIJOLO | ~1.600 com 3 passos de lógica | **medido** no MAME |
 
 O driver do MAME 0.289 roda o VDP a 20 Hz (ver [mame.md](mame.md)), o que dá **3 vezes mais
