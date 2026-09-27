@@ -9,8 +9,9 @@
 		(date "2026-09-27")
 		(rev "1.0")
 		(company "Leonardo Roman da Rosa")
-		(comment 1 "Copyright (C) 2026 Leonardo Roman da Rosa - GPL-3.0-or-later")
-		(comment 2 "Gerado por hardware/cartucho/gen/gen_schematic.py")
+		(comment 1 "Copyright (C) 2026 Leonardo Roman da Rosa - CERN-OHL-S-2.0")
+		(comment 2 "Source location: https://github.com/lrrosa/vet3000")
+		(comment 3 "Gerado por hardware/cartucho/gen/gen_schematic.py")
 	)
 	(lib_symbols
 		(symbol "Connector_Generic:Conn_02x18_Row_Letter_First"

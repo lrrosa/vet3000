@@ -5,13 +5,13 @@
       "Application": "Pcbnew",
       "Version": "10.0.4"
     },
-    "CreationDate": "2026-09-27T01:09:36-03:00"
+    "CreationDate": "2026-09-27T12:18:16-03:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
       "Name": "vet3000_cartucho",
       "GUID": "76657433-3030-4305-9f63-617274756368",
-      "Revision": "rev?"
+      "Revision": "1.0"
     },
     "Size": {
       "X": 72.1,

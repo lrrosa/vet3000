@@ -1,6 +1,7 @@
 # Copyright (C) 2026 Leonardo Roman da Rosa
-# SPDX-License-Identifier: GPL-3.0-or-later
-# Software livre sob a GNU GPL versão 3 ou (a seu critério) posterior; veja LICENSE.
+# SPDX-License-Identifier: CERN-OHL-S-2.0
+# Hardware aberto sob a CERN-OHL-S v2 (ver hardware/cartucho/LICENSE).
+# Source location: https://github.com/lrrosa/vet3000
 #
 """Monta a placa (sem trilhas) a partir do netlist do esquemático. Rodar com o Python do KiCad:
 
@@ -223,12 +224,12 @@ text("ATIVO", 156.4, 117.3, 0.8, just="right")
 text("+5V IRQ HLT RW Y2 ROM 1G GND", 120.9, 107.0, 0.8)
 text("COMPONENTES VOLTADOS PARA O VET", 136.0, 158.7, 0.8)
 # verso: é o lado que fica à vista com o cartucho encaixado (textos nas faixas sem pads)
-text("VET 3000", 136.0, 131.5, 3.0, layer=pcbnew.B_SilkS, bold=True)
-text("cartucho de ROM - conector CN1", 136.0, 135.6, 1.2, layer=pcbnew.B_SilkS)
-text("ESTE LADO PARA FORA", 136.0, 138.9, 1.2, layer=pcbnew.B_SilkS, bold=True)
+text("VET 3000", 136.0, 132.0, 2.6, layer=pcbnew.B_SilkS, bold=True)
+text("cartucho de ROM - conector CN1", 136.0, 135.7, 1.2, layer=pcbnew.B_SilkS)
+text("ESTE LADO PARA FORA", 136.0, 139.0, 1.2, layer=pcbnew.B_SilkS, bold=True)
 text("27C128: JP1 2-3, JP2 2-3; JP3 fechado = ativo", 136.0, 123.9, 1.0, layer=pcbnew.B_SilkS)
-text("(c) 2026 Leonardo Roman da Rosa - GPL-3.0 - github.com/lrrosa/vet3000", 136.0, 146.3, 0.8,
-     layer=pcbnew.B_SilkS)
+text("(c) 2026 Leonardo Roman da Rosa - CERN-OHL-S-2.0", 136.0, 146.3, 0.8, layer=pcbnew.B_SilkS)
+text("github.com/lrrosa/vet3000", 136.0, 128.7, 0.8, layer=pcbnew.B_SilkS)   # source location
 text("pino 1 do CN1", 152.0, 158.6, 0.8, layer=pcbnew.B_SilkS)
 
 # zonas de GND nas duas faces (preenchidas depois do roteamento)

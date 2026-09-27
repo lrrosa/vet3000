@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 # Copyright (C) 2026 Leonardo Roman da Rosa
-# SPDX-License-Identifier: GPL-3.0-or-later
-# Software livre sob a GNU GPL versão 3 ou (a seu critério) posterior; veja LICENSE.
+# SPDX-License-Identifier: CERN-OHL-S-2.0
+# Hardware aberto sob a CERN-OHL-S v2 (ver hardware/cartucho/LICENSE).
+# Source location: https://github.com/lrrosa/vet3000
 #
 """Gera o footprint do soquete fêmea de borda 2x18 que encaixa nos dedos do CN1 do VET 3000.
 
     python gen_footprint.py [passo_mm] [distancia_entre_fileiras_mm]
 
-Padrão: passo 2,54 mm (0,1"), fileiras a 5,08 mm (0,2"), o comum em soquetes de borda
-de 0,1" com terminais para PCI (ex.: Sullins EBC18DCxN, TE 5530843). CONFIRA no datasheet
-do soquete comprado e meça o passo dos dedos do VET (43,18 mm entre os centros do 1o e do
-18o dedo = 2,54 mm).
+Padrão: passo 2,54 mm (0,1"), medido nos dedos do CN1 de um VET 3000 real; fileiras a
+5,08 mm (0,2"), o comum em soquetes de borda de 0,1" com terminais para PCI (ex.: Sullins
+EBC18DCxN). CONFIRA a distância entre fileiras no datasheet do soquete comprado.
 
 Orientação: o cartucho fica em pé atrás do VET com os componentes voltados para o
 aparelho. Visto pela frente da placa (como no KiCad), o pino 1 fica à DIREITA.

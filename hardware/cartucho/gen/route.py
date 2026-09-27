@@ -1,6 +1,7 @@
 # Copyright (C) 2026 Leonardo Roman da Rosa
-# SPDX-License-Identifier: GPL-3.0-or-later
-# Software livre sob a GNU GPL versão 3 ou (a seu critério) posterior; veja LICENSE.
+# SPDX-License-Identifier: CERN-OHL-S-2.0
+# Hardware aberto sob a CERN-OHL-S v2 (ver hardware/cartucho/LICENSE).
+# Source location: https://github.com/lrrosa/vet3000
 #
 """Etapas KiCad <-> Freerouting (rodar com o Python do KiCad; caminhos SEM espaços para o Freerouting).
 

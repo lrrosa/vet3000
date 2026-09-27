@@ -7,6 +7,14 @@
 		(legacy_teardrops no)
 	)
 	(paper "A4")
+	(title_block
+		(title "VET 3000 - Cartucho de ROM (CN1)")
+		(date "2026-09-27")
+		(rev "1.0")
+		(company "Leonardo Roman da Rosa")
+		(comment 1 "Copyright (C) 2026 Leonardo Roman da Rosa - CERN-OHL-S-2.0")
+		(comment 2 "Source location: https://github.com/lrrosa/vet3000")
+	)
 	(layers
 		(0 "F.Cu" signal)
 		(2 "B.Cu" signal)
@@ -4797,7 +4805,19 @@
 			)
 		)
 	)
-	(gr_text "(c) 2026 Leonardo Roman da Rosa - GPL-3.0 - github.com/lrrosa/vet3000"
+	(gr_text "github.com/lrrosa/vet3000"
+		(at 136 128.699999 0)
+		(layer "B.SilkS")
+		(uuid "911efe90-24de-45ae-a97a-b5360ca5a3f2")
+		(effects
+			(font
+				(size 0.8 0.8)
+				(thickness 0.12)
+			)
+			(justify mirror)
+		)
+	)
+	(gr_text "(c) 2026 Leonardo Roman da Rosa - CERN-OHL-S-2.0"
 		(at 136 146.3 0)
 		(layer "B.SilkS")
 		(uuid "e92faae0-910b-42f8-bcf3-33203442518c")
@@ -4834,7 +4854,7 @@
 		)
 	)
 	(gr_text "cartucho de ROM - conector CN1"
-		(at 136 135.6 0)
+		(at 136 135.7 0)
 		(layer "B.SilkS")
 		(uuid "de10d522-6963-4fcd-8c6d-865617a1b45c")
 		(effects
@@ -4846,7 +4866,7 @@
 		)
 	)
 	(gr_text "ESTE LADO PARA FORA"
-		(at 136 138.9 0)
+		(at 136 139 0)
 		(layer "B.SilkS")
 		(uuid "b2301eb3-a855-4794-af37-7f58345c04d7")
 		(effects
@@ -4859,13 +4879,13 @@
 		)
 	)
 	(gr_text "VET 3000"
-		(at 136 131.5 0)
+		(at 136 132 0)
 		(layer "B.SilkS")
 		(uuid "c049bfbb-2f7a-4e53-832e-d1ef5a6701f2")
 		(effects
 			(font
-				(size 3 3)
-				(thickness 0.6)
+				(size 2.6 2.6)
+				(thickness 0.52)
 				(bold yes)
 			)
 			(justify mirror)

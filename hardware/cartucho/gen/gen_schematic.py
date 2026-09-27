@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # Copyright (C) 2026 Leonardo Roman da Rosa
-# SPDX-License-Identifier: GPL-3.0-or-later
-# Software livre sob a GNU GPL versão 3 ou (a seu critério) posterior; veja LICENSE.
+# SPDX-License-Identifier: CERN-OHL-S-2.0
+# Hardware aberto sob a CERN-OHL-S v2 (ver hardware/cartucho/LICENSE).
+# Source location: https://github.com/lrrosa/vet3000
 #
 """Gera o esquemático (KiCad 10) do cartucho de ROM do VET 3000.
 
@@ -351,8 +352,9 @@ w('\t(generator_version "10.0")')
 w('\t(uuid "%s")' % ROOT_UUID)
 w('\t(paper "A3")')
 w('\t(title_block\n\t\t(title "VET 3000 - Cartucho de ROM (CN1)")\n\t\t(date "2026-09-27")\n\t\t(rev "1.0")\n'
-  '\t\t(company "Leonardo Roman da Rosa")\n\t\t(comment 1 "Copyright (C) 2026 Leonardo Roman da Rosa - GPL-3.0-or-later")\n'
-  '\t\t(comment 2 "Gerado por hardware/cartucho/gen/gen_schematic.py")\n\t)')
+  '\t\t(company "Leonardo Roman da Rosa")\n\t\t(comment 1 "Copyright (C) 2026 Leonardo Roman da Rosa - CERN-OHL-S-2.0")\n'
+  '\t\t(comment 2 "Source location: https://github.com/lrrosa/vet3000")\n'
+  '\t\t(comment 3 "Gerado por hardware/cartucho/gen/gen_schematic.py")\n\t)')
 w('\t(lib_symbols')
 for lib, name in used_syms:
     blk = flatten(lib, name)

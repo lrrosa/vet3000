@@ -1,11 +1,11 @@
 %TF.GenerationSoftware,KiCad,Pcbnew,10.0.4*%
-%TF.CreationDate,2026-09-27T01:09:36-03:00*%
-%TF.ProjectId,vet3000_cartucho,76657433-3030-4305-9f63-617274756368,rev?*%
+%TF.CreationDate,2026-09-27T12:18:16-03:00*%
+%TF.ProjectId,vet3000_cartucho,76657433-3030-4305-9f63-617274756368,1.0*%
 %TF.SameCoordinates,Original*%
 %TF.FileFunction,Profile,NP*%
 %FSLAX46Y46*%
 G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
-G04 Created by KiCad (PCBNEW 10.0.4) date 2026-09-27 01:09:36*
+G04 Created by KiCad (PCBNEW 10.0.4) date 2026-09-27 12:18:16*
 %MOMM*%
 %LPD*%
 G01*

@@ -98,8 +98,8 @@ Observações:
   2 ou 4 imagens de 16 KB e escolher qual vai rodar. Uma EEPROM **28C256** permite regravar no
   próprio gravador sem apagar com UV. Nela o pino 1 é A14 (amarrar em GND ou +5 V) e o pino 27
   é `/WE`, que deve ir ao **+5 V** para a memória não ser escrita.
-- **Contatos:** use conector fêmea de borda 2×18. O passo é provavelmente 2,54 mm e deve ser
-  **medido** antes de comprar. Também dá para fazer uma placa que encaixe na borda.
+- **Contatos:** use conector fêmea de borda 2×18 com passo de **2,54 mm (0,1")**, medido nos
+  dedos do CN1 de um aparelho real.
 - **Não ligar** +3 V BAT (baixo 1) nem −5 V (baixo 16).
 - A imagem da demo ([cartridge/demo](../cartridge/demo/)) tem exatamente 16 KB e vai direto numa 27C128.
 

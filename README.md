@@ -106,6 +106,9 @@ Ferramentas, anotações do disassembly, documentação e o cartucho de demonstr
 sob a **GNU General Public License versão 3** ou (a seu critério) qualquer versão posterior. Veja
 [LICENSE](LICENSE).
 
+O projeto de hardware do cartucho ([hardware/cartucho](hardware/cartucho/)) é hardware aberto sob a
+**CERN-OHL-S-2.0** ([hardware/cartucho/LICENSE](hardware/cartucho/LICENSE)).
+
 O firmware original (a imagem em `rom/` e o código e os dados reproduzidos no disassembly) é
 © 1988, 1989 TMS – Tecnologia em Micro Sistemas. A empresa não existe mais, e o dump, extraído de um
 aparelho real, está incluído como **material histórico, para preservação e estudo**. Ele não é

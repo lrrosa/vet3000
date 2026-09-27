@@ -3,7 +3,8 @@
 Projeto KiCad 10 do cartucho que encaixa no conector traseiro **CN1** do VET 3000 e roda a
 [demo](../../cartridge/demo/) (ou qualquer programa com cabeçalho `"OBJECT"`/`"FONT"`).
 
-Copyright © 2026 Leonardo Roman da Rosa, sob a GPL-3.0-or-later.
+Copyright © 2026 Leonardo Roman da Rosa. Hardware aberto sob a **CERN-OHL-S-2.0** (ver
+[Licença](#licença)).
 
 | Frente (componentes, voltada para o VET) | Verso (fica à vista) | 3D |
 |---|---|---|
@@ -62,20 +63,18 @@ O CN1 do VET são **dedos de borda** na própria placa principal (macho). O cart
 para o VET**. Assim, olhando o VET por trás, o pino 1 fica à esquerda, como na medida original.
 Na serigrafia: "COMPONENTES VOLTADOS PARA O VET" na frente e "ESTE LADO PARA FORA" no verso.
 
-## Antes de mandar fabricar: medir
+## Antes de mandar fabricar
 
-1. **Passo dos dedos do CN1.** O projeto usa **2,54 mm (0,1")**. Pela foto da placa o passo ficou
-   em cerca de 2,5 mm, dentro do erro da medida. Com paquímetro: **43,18 mm** entre os centros do
-   1º e do 18º dedo = 2,54 mm; 42,5 mm = 2,5 mm.
-2. **Soquete.** O footprint supõe soquete de 0,1" com terminais em duas fileiras a **5,08 mm**
-   (0,2"), como o Sullins EBC18DCxN. Confira no datasheet do soquete comprado.
-3. **Espaço atrás do VET:** a abertura do painel, o comprimento dos dedos para fora e se a placa
-   de 72 × 60 mm em pé não bate em nada.
-4. Opcional: com ponta lógica, confirmar que o contato a14 (Y1) só vai a 0 nos acessos a
-   `$4000-$7FFF`.
+- **Passo dos dedos do CN1: 2,54 mm (0,1"), medido** no aparelho. É o passo do footprint.
+- **Soquete:** o footprint supõe soquete de 0,1" com terminais em duas fileiras a **5,08 mm**
+  (0,2"), como o Sullins EBC18DCxN. Confira no datasheet do soquete comprado.
+- **Espaço atrás do VET:** a abertura do painel, o comprimento dos dedos para fora e se a placa
+  de 72 × 60 mm em pé não bate em nada.
+- Opcional: com ponta lógica, confirmar que o contato a14 (Y1) só vai a 0 nos acessos a
+  `$4000-$7FFF`.
 
-Se o passo ou o soquete forem diferentes, gere o footprint com as medidas certas
-(`python gen/gen_footprint.py 2.50 5.08`), recrie a placa e roteie de novo (abaixo).
+Se o soquete tiver outra distância entre fileiras, gere o footprint com a medida certa
+(`python gen/gen_footprint.py 2.54 3.56`, por exemplo), recrie a placa e roteie de novo (abaixo).
 
 ## Lista de materiais
 
@@ -127,3 +126,25 @@ Fabricação:
 kicad-cli pcb export gerbers --layers "F.Cu,B.Cu,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts" --subtract-soldermask -o fabricacao/gerbers/ vet3000_cartucho.kicad_pcb
 kicad-cli pcb export drill --format excellon --drill-origin absolute --excellon-units mm --generate-map --map-format gerberx2 -o fabricacao/gerbers/ vet3000_cartucho.kicad_pcb
 ```
+
+## Licença
+
+Copyright © 2026 Leonardo Roman da Rosa.
+
+Esta fonte descreve Hardware Aberto e é licenciada sob a CERN-OHL-S v2 ([LICENSE](LICENSE)). Você
+pode redistribuir e modificar esta fonte e fabricar produtos com ela nos termos da CERN-OHL-S v2
+(https://ohwr.org/cern_ohl_s_v2.txt).
+
+Esta fonte é distribuída SEM QUALQUER GARANTIA EXPRESSA OU IMPLÍCITA, INCLUSIVE DE
+COMERCIABILIDADE, QUALIDADE SATISFATÓRIA E ADEQUAÇÃO A UM FIM ESPECÍFICO. Veja as condições
+aplicáveis na CERN-OHL-S v2.
+
+Source location: https://github.com/lrrosa/vet3000
+
+Conforme a seção 4 da CERN-OHL-S v2, quem fabricar hardware a partir desta fonte deve, quando
+possível, manter o Source Location visível no exterior do produto. A serigrafia do verso da placa
+já traz o endereço.
+
+A licença vale para tudo nesta pasta: esquemático, placa, footprint, arquivos de fabricação e os
+scripts de `gen/`, que são a fonte do projeto. O restante do repositório (ferramentas, disassembly
+e o software da demo) segue sob a GPL-3.0-or-later.
