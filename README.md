@@ -46,7 +46,8 @@ docs/                 documentação (hardware, memória, CN1, teclado, firmware
   img/                fotos reduzidas, fontes extraídas da ROM e capturas de tela
   medidas-originais/  anotações originais da pinagem do CN1 e do teclado
 photos/               fotos originais em alta resolução
-rom/                  dump da EPROM 27128 (VET 2.1)
+rom/                  dump da EPROM 27128 (VET 2.1), preservado como material histórico
+jogar_no_mame.bat     roda a demo no MAME (Windows)
 disasm/               disassembly comentado (vet3000_v2.1.asm), anotações (hints.py), cobertura
 tools/                dis6809.py, m6809.py, render_rom_gfx.py, show.py; mame/ (script Lua do cartucho)
 cartridge/demo/       fonte do cartucho de demonstração (asm6809) e imagem pronta para a EPROM
@@ -70,7 +71,9 @@ asm6809 -B -o /tmp/vet.bin disasm/vet3000_v2.1.asm && cmp /tmp/vet.bin rom/VET2.
 cd cartridge/demo && ./build.sh          # ou .\build.ps1 no Windows
 ```
 
-**Rodar no MAME**, sem recompilar: o script Lua simula o cartucho no conector CN1.
+**Rodar no MAME**, sem recompilar: o script Lua simula o cartucho no conector CN1. No Windows,
+basta dar dois cliques em **`jogar_no_mame.bat`**. Ajuste o caminho do MAME na linha
+`set "MAME=..."`, passe-o como argumento ou defina a variável `MAME`. O `.bat` chama:
 
 ```powershell
 .\tools\mame\run_cart.ps1 -Mame C:\mame\mame.exe -Cart cartridge\demo\vet3000_demo.bin
@@ -100,6 +103,7 @@ sob a **GNU General Public License versão 3** ou (a seu critério) qualquer ver
 [LICENSE](LICENSE).
 
 O firmware original (a imagem em `rom/` e o código e os dados reproduzidos no disassembly) é
-© 1988, 1989 TMS – Tecnologia em Micro Sistemas, e está aqui para estudo e preservação; ele **não** é
+© 1988, 1989 TMS – Tecnologia em Micro Sistemas. A empresa não existe mais, e o dump, extraído de um
+aparelho real, está incluído como **material histórico, para preservação e estudo**. Ele não é
 coberto pela GPL. VET 3000 e TMS são marcas dos respectivos donos. O patch do MAME segue a licença do
 MAME (GPL-2.0+).

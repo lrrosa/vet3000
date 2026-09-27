@@ -4,8 +4,9 @@ CN1 é um conector de borda de placa com **2 × 18 contatos**, na traseira do ap
 barramento da CPU e as seleções do decodificador de endereços. O firmware v2.1 procura programas
 (`"OBJECT"`) e fontes (`"FONT"`) em `$4000-$7FFF` durante o boot: é uma porta de cartucho.
 
-As medidas de continuidade originais estão em
+Todas as ligações abaixo vêm das medidas de continuidade originais, em
 [medidas-originais/conector CN1 VET3000.txt](medidas-originais/conector%20CN1%20VET3000.txt).
+As faixas de endereço de cada seleção foram deduzidas do firmware.
 
 ## Pinagem
 
@@ -13,7 +14,7 @@ Contagem da esquerda para a direita, **vista por fora** do aparelho:
 
 ```
          1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18
-cima   [IRQ D0 D1 D2 D3 D4 D5 D6 D7 E? Y2 RW HLT Y1 +5 1G GND NC]
+cima   [IRQ D0 D1 D2 D3 D4 D5 D6 D7 ROM Y2 RW HLT Y1 +5 1G GND NC]
 baixo  [BAT A0 A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 -5 GND NC]
 ```
 
@@ -23,7 +24,7 @@ baixo  [BAT A0 A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 -5 GND NC]
 |---|---|---|---|
 | 1 | **/IRQ** | 6809 pino 3 | Interrupção (compartilhada com o `/INT` do VDP) |
 | 2-9 | **D0-D7** | ROM, RAM, 6809, TMS9128 | Barramento de dados |
-| 10 | "E" | ROM pino 20 (`/CE`) | Anotado como E. Como vai ao `/CE` da EPROM, pode ser a seleção da ROM e não o clock E. **Confirmar** |
+| 10 | **E da ROM** | ROM pino 20 | *Chip Enable* da EPROM interna, ativo em 0. No datasheet da ST M27128A (a EPROM da placa) o pino 20 se chama **E**. É a seleção de `$C000-$FFFF`, provavelmente a saída `Y3` do decodificador |
 | 11 | **Y2** | 74LS139 (U15) pino 6 (`1Y2`) | Seleção provável de `$8000-$BFFF` (E/S), ativa em 0 |
 | 12 | **R/W** | RAM pino 27, 6809 pino 32 | Leitura (1) / escrita (0) |
 | 13 | **/HALT** | 6809 pino 40 | Permite parar a CPU (DMA externo) |
@@ -103,5 +104,5 @@ Observações:
 - que o pino 14 de cima fica em nível baixo só nos acessos a `$4000-$7FFF`: basta observar com
   osciloscópio ou ponta lógica enquanto um programa lê essa faixa;
 - a função do pino 16 de cima (entrada `1G` do 74LS139): se for a habilitação ligada a E ou a /E,
-  as seleções já saem qualificadas pelo clock;
-- o que o pino 10 de cima realmente carrega.
+  as seleções já saem qualificadas pelo clock. Se tiver só um resistor, um cartucho poderia desligar
+  a decodificação interna (RAM, E/S e ROM) e assumir o barramento.

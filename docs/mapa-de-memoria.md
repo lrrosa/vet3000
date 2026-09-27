@@ -14,7 +14,7 @@
 
 O mapa acima é o do driver do MAME, confirmado pelos acessos que a ROM faz. A decodificação
 provável usa o 74LS139 (U15) em blocos de 16 KB (A15/A14): `Y0` RAM, `Y1` cartucho, `Y2` E/S, `Y3` ROM.
-Isso bate com as saídas `Y1` e `Y2` expostas no CN1. Ver [conector-cn1.md](conector-cn1.md).
+Isso bate com o que chega ao CN1: `Y1` (pino 14), `Y2` (pino 11) e o *Chip Enable* da EPROM (pino 10). Ver [conector-cn1.md](conector-cn1.md).
 
 ## Vetores
 

@@ -24,8 +24,12 @@ O driver 0.289 não mapeia `$4000-$7FFF`. O script
 [tools/mame/vet3000_cart.lua](../tools/mame/vet3000_cart.lua) instala um *read tap* nessa faixa e
 devolve os bytes de um arquivo. A ROM original acha a assinatura no boot como no aparelho.
 
+No Windows, o mais simples é o [../jogar_no_mame.bat](../jogar_no_mame.bat), que chama o
+`run_cart.ps1` com a demo. A variável `VET_MAME_EXTRA` acrescenta parâmetros ao MAME, por exemplo
+`-window -nomaximize`.
+
 ```powershell
-# jeito fácil (copia a ROM para uma pasta temporária)
+# copia a ROM para uma pasta temporária e roda a partir da pasta do MAME
 .\tools\mame\run_cart.ps1 -Mame F:\jogos\emuladores\mame\mame.exe -Cart cartridge\demo\vet3000_demo.bin
 
 # manual

@@ -36,7 +36,7 @@ Fotos em alta resolução em [../photos/](../photos/).
 
 | Ref. | Componente | Função provável |
 |---|---|---|
-| XTAL1 | Cristal **3,579545 MHz** + trimmer CV2 | Subportadora de cor NTSC |
+| XTAL1 | Cristal **3,579545 MHz** + trimmer CV2 | Subportadora de cor **NTSC** (315/88 MHz): a referência de todo o sistema |
 | — | **LM1889N** (National) | Modulador de croma e RF: monta o vídeo composto a partir de Y, R-Y e B-Y |
 | — | **MC4044P** + **MC4024P** (Motorola) | Detector de fase/frequência + VCO: PLL do *genlock* (clock do VDP travado no vídeo de entrada) |
 | U13, U20 | **74LS191** ×2 | Contadores/divisores do PLL e da temporização de linha |
@@ -59,9 +59,9 @@ a RAM (pino 28 da HY6264) e mantém os títulos com o aparelho desligado.
 
 | Sinal | Valor | Observação |
 |---|---|---|
-| Entrada do TMS9128 | **10,738635 MHz** (nominal) | Necessário para 15.734 Hz de linha e 59,94 Hz de quadro. Provavelmente vem do VCO do PLL de *genlock* |
+| Entrada do TMS9128 | **10,738635 MHz** = 3 × 3,579545 | Necessário para 15.734 Hz de linha e 59,94 Hz de quadro. Provavelmente gerado pelo PLL (MC4044 + VCO MC4024), travado no cristal ou no sincronismo do vídeo de entrada (*genlock*) |
 | Pixel | 5,369 MHz | 342 pixels por linha, 262 linhas |
-| CPU (E) | 894,886 kHz | 3,579545 MHz ÷ 4, conforme o MAME. **Confirmar** com frequencímetro no pino 34 (E) do 6809 |
+| CPU (E) | 894,886 kHz | 3,579545 MHz ÷ 4 (o MC6809 divide o clock de entrada por 4), como no MAME e no TRS Color. Provavelmente vem do mesmo cristal NTSC. **Confirmar** com frequencímetro no pino 34 (E) |
 | Quadro | cerca de **14.930 ciclos de CPU** | Orçamento de processamento por quadro a 60 Hz |
 
 Não há cristal perto do 6809 nem do TMS9128: os dois recebem clock de fora. O driver do MAME 0.289
@@ -75,8 +75,9 @@ está ligado. Nesse modo a cor 0 (transparente) e o fundo transparente deixam ve
 A tecla **EXT MODE** do firmware liga e desliga esse bit. As chaves 4066 e o PLL (MC4044/MC4024)
 fazem a mistura e o travamento do sincronismo.
 
-O cristal de 3,579545 MHz indica codificação de cor **NTSC**. A compatibilidade com PAL-M (padrão
-brasileiro, também de 525 linhas e 60 Hz) não foi verificada.
+O cristal XTAL1 de **3,579545 MHz é a subportadora de cor do NTSC**, então o VET 3000 gera vídeo
+**NTSC** (o PAL-M brasileiro usaria 3,575611 MHz). Tudo deriva desse valor: o VDP roda a 3 × 3,579545
+= 10,738635 MHz, e o 6809 a 3,579545 ÷ 4 = 0,895 MHz, a mesma relação usada no MSX e no TRS Color.
 
 ## Temporização de acesso à VRAM
 
@@ -93,6 +94,6 @@ intervalo.
 ## Pontos a confirmar no aparelho real
 
 - clock real do 6809 (pino 34, E) e do TMS9128 (pinos 39/40, entrada de cristal);
-- função exata dos pinos 10, 11 e 16 da fileira superior do CN1 (ver [conector-cn1.md](conector-cn1.md));
-- função do CI U19, que está sem marcação;
-- padrão de cor da saída (NTSC ou PAL-M).
+- faixas de endereço de cada saída do 74LS139 que chega ao CN1 (pinos 11, 14 e 16 de cima). As
+  ligações estão todas medidas; falta ver o sinal funcionando (ver [conector-cn1.md](conector-cn1.md));
+- função do CI U19, que está sem marcação.
