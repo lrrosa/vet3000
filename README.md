@@ -1,0 +1,105 @@
+# VET 3000 — engenharia reversa e cartucho de demonstração
+
+O **VET 3000 "The Video Effects Titler"** é um titulador de vídeo brasileiro fabricado pela
+**TMS – Tecnologia em Micro Sistemas** (firmware © 1988, 1989). Por dentro, ele é um microcomputador:
+CPU **Motorola MC6809**, processador de vídeo **Texas TMS9128** (família do TMS9918 usado no MSX 1 e
+no ColecoVision), 16 KB de VRAM, 8 KB de RAM estática com bateria e 16 KB de ROM.
+
+Este repositório reúne tudo o que foi levantado sobre o aparelho:
+
+- **Hardware:** fotos da placa, lista de componentes, mapa de memória, pinagem do conector
+  traseiro CN1 e matriz do teclado.
+- **Firmware v2.1:** *disassembly* completo e comentado, que **remonta byte a byte idêntico** à EPROM
+  original.
+- **Interface de cartucho:** o firmware procura cartuchos `"OBJECT"` e `"FONT"` no conector
+  traseiro durante o boot. Aqui está documentado como escrever programas para ele.
+- **Cartucho de demonstração**, com abertura animada e o jogo **QUEBRA-TIJOLO**, testado no MAME.
+- **Ferramentas:** disassembler 6809 com rastreamento, script Lua que simula o cartucho no MAME sem
+  recompilá-lo, e um patch para o driver do MAME.
+
+| Titulador original (MAME) | Demo: abertura | Demo: jogo |
+|---|---|---|
+| ![](docs/img/mame_titulador_abertura.png) | ![](docs/img/demo_abertura1.png) | ![](docs/img/demo_jogo.png) |
+
+## Principais descobertas
+
+- **Memória:** RAM em `$0000-$1FFF` (8 KB — a HY6264 tem 64 Kbit), cartucho em `$4000-$7FFF`,
+  E/S em `$8000-$8002` e ROM em `$C000-$FFFF`. Detalhes em [docs/mapa-de-memoria.md](docs/mapa-de-memoria.md).
+- **Boot automático de cartucho:** no boot, a ROM compara `"OBJECT"` em `$4000` (e depois em `$6000`)
+  e executa `LDX [base+6]` / `JSR base,X`. Como o indireto lê duas vezes, `base+6` precisa conter um
+  *ponteiro* para a palavra com o deslocamento da entrada. Cartuchos `"FONT"` substituem as fontes.
+  Ver [docs/programando-cartuchos.md](docs/programando-cartuchos.md).
+- **Uso da RAM:** o firmware nunca habilita interrupções. Os vetores de IRQ/SWI apontam para RAM
+  (`$0039/$003B/$003D`) e existem só para os cartuchos. Os títulos ficam em `$00A0-$018F` e
+  `$0200-$1FFF` (30 páginas); um cartucho pode rodar sem apagá-los.
+- **Código enxuto:** o código ocupa só cerca de 4,5 KB. O resto da ROM são três fontes (16×24, 8×24 e
+  8×8), sprites e o logotipo. Há **3,2 KB livres** na EPROM.
+- **Tecla "C" amarela:** não tem função no firmware v2.1 (a coluna dos modificadores só é lida nas
+  linhas 1, 2 e 7, e o "C" amarelo fica na linha 6).
+- **Bug no MAME 0.289:** o driver `vet3000` usa 3,58 MHz como clock do TMS9128. A tela roda a **20 Hz**
+  em vez de 60 Hz. Há um patch em [mame/](mame/).
+
+## Estrutura
+
+```
+docs/                 documentação (hardware, memória, CN1, teclado, firmware, cartuchos, MAME)
+  img/                fotos reduzidas, fontes extraídas da ROM e capturas de tela
+  medidas-originais/  anotações originais da pinagem do CN1 e do teclado
+photos/               fotos originais em alta resolução
+rom/                  dump da EPROM 27128 (VET 2.1)
+disasm/               disassembly comentado (vet3000_v2.1.asm), anotações (hints.py), cobertura
+tools/                dis6809.py, m6809.py, render_rom_gfx.py, show.py; mame/ (script Lua do cartucho)
+cartridge/demo/       fonte do cartucho de demonstração (asm6809) e imagem pronta para a EPROM
+mame/                 patch do driver vet3000 (slot de cartucho + clock correto do VDP)
+```
+
+## Uso rápido
+
+Requisitos: Python 3 (com Pillow para as imagens) e o [asm6809](https://www.6809.org.uk/asm6809/).
+
+**Conferir o disassembly** (gera o `.asm` e remonta; o resultado tem que ser idêntico à ROM):
+
+```bash
+python tools/dis6809.py rom/VET2.1-TMS_VET3000_27128A.BIN --hints disasm/hints.py -o disasm/vet3000_v2.1.asm
+asm6809 -B -o /tmp/vet.bin disasm/vet3000_v2.1.asm && cmp /tmp/vet.bin rom/VET2.1-TMS_VET3000_27128A.BIN
+```
+
+**Montar o cartucho** (gera `build/vet3000_demo.bin`, com 16 KB, para uma EPROM 27128):
+
+```bash
+cd cartridge/demo && ./build.sh          # ou .\build.ps1 no Windows
+```
+
+**Rodar no MAME**, sem recompilar: o script Lua simula o cartucho no conector CN1.
+
+```powershell
+.\tools\mame\run_cart.ps1 -Mame C:\mame\mame.exe -Cart cartridge\demo\vet3000_demo.bin
+```
+
+Controles da demo: **ESPAÇO** joga, **Z/X** (ou O/P, ou ←→ com e sem SHIFT) movem a raquete,
+**RETURN** pausa, **V** sobrepõe ao vídeo externo e **EXT MODE** volta ao titulador. Segurar
+**EXT MODE** ao ligar pula o cartucho.
+
+## Documentação
+
+1. [Hardware](docs/hardware.md): placa, componentes, clocks, vídeo, fonte
+2. [Mapa de memória](docs/mapa-de-memoria.md): CPU, E/S, VRAM, variáveis de RAM, ROM
+3. [Conector CN1 e cartucho](docs/conector-cn1.md): pinagem e circuito de um cartucho com 27C128
+4. [Teclado](docs/teclado.md): matriz, códigos, modificadores, leitura por software
+5. [Firmware v2.1](docs/firmware.md): boot, laço principal, comandos, conjunto de caracteres, fontes
+6. [Programando cartuchos](docs/programando-cartuchos.md): cabeçalho, regras de RAM, temporização do VDP
+7. [MAME](docs/mame.md): como rodar, script Lua, bugs encontrados e patch do driver
+8. [Cartucho de demonstração](cartridge/demo/README.md): técnicas, orçamento de ciclos, controles
+
+## Licença
+
+Copyright © 2026 **Leonardo Roman da Rosa**.
+
+Ferramentas, anotações do disassembly, documentação e o cartucho de demonstração são software livre
+sob a **GNU General Public License versão 3** ou (a seu critério) qualquer versão posterior. Veja
+[LICENSE](LICENSE).
+
+O firmware original (a imagem em `rom/` e o código e os dados reproduzidos no disassembly) é
+© 1988, 1989 TMS – Tecnologia em Micro Sistemas, e está aqui para estudo e preservação; ele **não** é
+coberto pela GPL. VET 3000 e TMS são marcas dos respectivos donos. O patch do MAME segue a licença do
+MAME (GPL-2.0+).

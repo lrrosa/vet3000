@@ -1,0 +1,4 @@
+cartridge/demo/build/
+disasm/rebuild.bin
+__pycache__/
+*.pyc
