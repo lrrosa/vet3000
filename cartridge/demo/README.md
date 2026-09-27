@@ -19,6 +19,9 @@ encontra a assinatura `"OBJECT"` e passa o controle para a demo.
   o truque é que as 8 linhas de tiles da faixa usam **um único tile cada**, repetido nas 32 colunas.
   Trocar as 8 cores desse tile muda 8 scanlines inteiras. São **64 bytes por quadro** para pintar 64
   linhas, com 5 barras ordenadas por profundidade (primeiro as de trás).
+- **Textos em português com acentos**: a fonte 8×8 da demo tem Ç, Ã, Á, É, Ê, Í, Ó e Ú, gravados em
+  códigos ASCII que os textos não usam (`#`, `%`, `_`, `&`, `[`, `\`, `^`, `]`). O `gen_assets.py`
+  faz a tradução, então os textos são escritos normalmente ("ESPAÇO: LANÇA").
 - **Scroller suave** de 2 pixels por quadro. Cada um dos 256 bytes é `(glifo << s) | (próximo >> 8−s)`,
   lido de **fontes pré-deslocadas** guardadas na ROM do cartucho (4 KB de tabelas). O custo é de 15
   ciclos por byte (`LDA n,X` / `ORA n,Y` / `STA`), sem buffer em RAM.
@@ -79,7 +82,7 @@ No Windows: `.\build.ps1` ou `.\build.ps1 -Debug`. Use `-Asm C:\caminho\asm6809.
 | Arquivo | Conteúdo |
 |---|---|
 | `demo.asm` | Programa (6809, sintaxe asm6809) |
-| `gen_assets.py` | Fonte 8×8 original, logotipo, telas (RLE), fontes pré-deslocadas, seno, tijolos, fases → `assets.inc` |
+| `gen_assets.py` | Fonte 8×8 original (com Ç, Ã, Á, É, Ê, Í, Ó, Ú), textos, logotipo, telas (RLE), fontes pré-deslocadas, seno, tijolos, fases → `assets.inc` |
 | `assets.inc` | Gerado; versionado para montar sem Python |
 | `pad.py` | Completa a imagem até 16 KB |
 | `vet3000_demo.bin` | Imagem pronta para gravar numa 27C128 |

@@ -831,6 +831,7 @@ game_over	lbsr	draw_status
 		rts
 
 * pause_frames: espera B passos de 1/60 s (ou ESPAÇO)
+* (as mensagens msg_* ficam em assets.inc, com acentos)
 pause_frames	pshs	b
 		lbsr	wait_frame
 		lbsr	read_keys
@@ -842,10 +843,6 @@ pause_frames	pshs	b
 		bhi	pause_frames
 2		rts
 
-msg_level	fcc	"FASE COMPLETA!",0
-msg_over	fcc	" FIM DE JOGO  ",0
-msg_serve	fcc	"ESPACO: LANCA",0
-msg_blank	fcc	"             ",0
 
 * print_at: X = texto (ASCII, 0 no fim), D = endereço na tabela de nomes
 print_at	lbsr	vdp_wr
@@ -889,7 +886,6 @@ draw_field	ldd	#NAMES
 		ldx	#msg_hud
 		ldd	#NAMES
 		lbra	print_at
-msg_hud		fcc	"PONTOS         VIDAS    FASE",0
 
 * draw_status: placar (BCD), vidas e fase
 draw_status	clr	dirty

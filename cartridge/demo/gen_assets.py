@@ -90,12 +90,25 @@ _GLYPHS = {
     "[": [".####", ".##", ".##", ".##", ".##", ".##", ".####"],
     "]": [".####", "...##", "...##", "...##", "...##", "...##", ".####"],
     "_": ["", "", "", "", "", "", "", "########"],
+    "$": ["..##", ".#####", "##.#", ".####", "...#.##", "#####", "..##"],
+    # acentuados (gravados em códigos ASCII sem uso nos textos; ver ACCENTS)
+    "Ç": [".####", "##..##", "##", "##", "##..##", ".####", "...##", "..##"],
+    "Ã": [".##.#", "#.##", ".####", "##..##", "######", "##..##", "##..##"],
+    "Á": ["...##", "..##", ".####", "##..##", "######", "##..##", "##..##"],
+    "É": ["...##", "..##", "######", "##", "#####", "##", "######"],
+    "Ê": ["..##", ".#..#", "######", "##", "#####", "##", "######"],
+    "Í": ["...##", "..##", ".####", "..##", "..##", "..##", ".####"],
+    "Ó": ["...##", "..##", ".####", "##..##", "##..##", "##..##", ".####"],
+    "Ú": ["...##", "..##", "##..##", "##..##", "##..##", "##..##", ".####"],
 }
+# caractere acentuado -> código ASCII (sem uso nos textos) onde o glifo é gravado
+ACCENTS = {"Ç": "#", "Ã": "%", "É": "&", "Í": "\\", "Ó": "^", "Á": "_", "Ê": "[", "Ú": "]"}
+CODE_GLYPH = {v: k for k, v in ACCENTS.items()}
 FONT_FIRST = 0x20  # glifos para ASCII $20-$5F (64 glifos)
 
 
 def glyph(ch):
-    rows = _GLYPHS.get(ch, [""] * 7)
+    rows = _GLYPHS.get(CODE_GLYPH.get(ch, ch), [""] * 7)
     out = []
     for y in range(8):
         r = rows[y] if y < len(rows) else ""
@@ -114,7 +127,7 @@ def text_index(s):
     """Converte texto em índices de glifo (0-63)."""
     out = []
     for ch in s.upper():
-        c = ord(ch)
+        c = ord(ACCENTS.get(ch, ch))
         if not FONT_FIRST <= c < FONT_FIRST + 64:
             c = 0x20
         out.append(c - FONT_FIRST)
@@ -277,7 +290,7 @@ BLINK_ROW = 0         # linha piscante "ESPACO: JOGAR" (tela: linha 16)
 
 def title_bottom():
     b = Bank()
-    b.text(16, BLINK_ROW * 8, "ESPACO: JOGAR   V: SOBREPOR", color=WHITE)
+    b.text(16, BLINK_ROW * 8, "ESPAÇO: JOGAR   V: SOBREPOR", color=WHITE)
     # gradiente do scroller (tiles da linha SCROLL_ROW)
     grad = [LYELLOW, LYELLOW, DYELLOW, LRED, LRED, MRED, DRED, DRED]
     for i in range(8):
@@ -290,15 +303,24 @@ def title_bottom():
 
 SCROLL_TEXT = (
     "      *** VET 3000 - THE VIDEO EFFECTS TITLER ***     "
-    "O TITULADOR DE VIDEO DA TMS (1988) TAMBEM E UM MICROCOMPUTADOR:  "
+    "O TITULADOR DE VÍDEO DA TMS (1988) TAMBÉM É UM MICROCOMPUTADOR:  "
     "CPU MOTOROLA MC6809 A 0,89 MHZ  -  VDP TEXAS TMS9128 (O MESMO DO MSX)  -  "
     "16 KB DE VRAM  -  8 KB DE RAM COM BATERIA  -  ROM DE 16 KB.     "
     "ESTE CARTUCHO RODA PELO CONECTOR TRASEIRO CN1, DETECTADO PELA ASSINATURA "
-    "'OBJECT' EM $4000.     BARRAS DE COR SEM INTERRUPCAO DE LINHA, SCROLLER "
-    "COM FONTES PRE-DESLOCADAS E SPRITES 16X16...     "
-    "APERTE ESPACO PARA JOGAR QUEBRA-TIJOLO!     "
-    "OS SEUS TITULOS NA RAM FICAM INTACTOS.     "
+    "'OBJECT' EM $4000.     BARRAS DE COR SEM INTERRUPÇÃO DE LINHA, SCROLLER "
+    "COM FONTES PRÉ-DESLOCADAS E SPRITES 16X16...     "
+    "APERTE ESPAÇO PARA JOGAR QUEBRA-TIJOLO!     "
+    "OS SEUS TÍTULOS NA RAM FICAM INTACTOS.     "
     "DEMO E JOGO POR LEONARDO ROMAN DA ROSA - SOFTWARE LIVRE (GPL-3).     <<<    ")
+
+# mensagens do jogo (ASCII + códigos dos acentuados, 0 no fim)
+MESSAGES = [
+    ("msg_level", "FASE COMPLETA!"),
+    ("msg_over", " FIM DE JOGO  "),
+    ("msg_serve", "ESPAÇO: LANÇA"),
+    ("msg_blank", "             "),
+    ("msg_hud", "PONTOS         VIDAS    FASE"),
+]
 
 # ---------------------------------------------------------------------------
 # Barras de cor (degradês de 7 linhas) e seno
@@ -514,6 +536,9 @@ def main():
     out.extend(fcb_lines(rle(gp)))
     w("GAME_COL")
     out.extend(fcb_lines(rle(gc)))
+    for label, text in MESSAGES:
+        codes = [ord(ACCENTS.get(ch, ch)) for ch in text.upper()]
+        w("%s\tfcb\t%s,0\t; %s" % (label, ",".join("$%02X" % c for c in codes), text))
     w("LEVELS\t\t; %d fases x 6 linhas x 16 bits" % len(LEVELS))
     for lv in LEVELS:
         out.extend(fcb_lines(level_bits(lv)))
