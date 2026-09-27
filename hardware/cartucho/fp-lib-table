@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "vet3000")(type "KiCad")(uri "${KIPRJMOD}/vet3000.pretty")(options "")(descr "Footprints do cartucho do VET 3000"))
+)

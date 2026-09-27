@@ -59,6 +59,10 @@ O formato exato dos cabeçalhos está em [programando-cartuchos.md](programando-
 
 ## Circuito de um cartucho com EPROM 27C128
 
+O projeto completo em KiCad, com placa roteada e Gerbers, está em
+[hardware/cartucho](../hardware/cartucho/README.md). Ele segue o circuito abaixo e acrescenta a
+proteção de `/OE` com um 74HCT00, os jumpers para outras memórias e uma chave de ativação.
+
 O cartucho mais simples é uma única EPROM de 16 KB (27128 / 27C128) ligada direto ao conector:
 
 ```

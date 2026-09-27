@@ -2,3 +2,8 @@ cartridge/demo/build/
 disasm/rebuild.bin
 __pycache__/
 *.pyc
+hardware/cartucho/*.net
+hardware/cartucho/*.kicad_prl
+hardware/cartucho/*-backups/
+hardware/cartucho/fp-info-cache
+hardware/cartucho/*.rpt

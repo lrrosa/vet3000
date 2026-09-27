@@ -14,6 +14,8 @@ Este repositório reúne tudo o que foi levantado sobre o aparelho:
 - **Interface de cartucho:** o firmware procura cartuchos `"OBJECT"` e `"FONT"` no conector
   traseiro durante o boot. Aqui está documentado como escrever programas para ele.
 - **Cartucho de demonstração**, com abertura animada e o jogo **QUEBRA-TIJOLO**, testado no MAME.
+- **Placa do cartucho** em KiCad 10 (esquemático, placa roteada com Freerouting, Gerbers prontos),
+  com EPROM 27C128 e soquete de borda para o CN1.
 - **Ferramentas:** disassembler 6809 com rastreamento, script Lua que simula o cartucho no MAME sem
   recompilá-lo, e um patch para o driver do MAME.
 
@@ -52,6 +54,7 @@ disasm/               disassembly comentado (vet3000_v2.1.asm), anotações (hin
 tools/                dis6809.py, m6809.py, render_rom_gfx.py, show.py; mame/ (script Lua do cartucho)
 cartridge/demo/       fonte do cartucho de demonstração (asm6809) e imagem pronta para a EPROM
 mame/                 patch do driver vet3000 (slot de cartucho + clock correto do VDP)
+hardware/cartucho/    projeto KiCad do cartucho (EPROM 27C128), Gerbers e scripts geradores
 ```
 
 ## Uso rápido
@@ -93,6 +96,7 @@ Controles da demo: **ESPAÇO** joga, **Z/X** (ou O/P, ou ←→ com e sem SHIFT)
 6. [Programando cartuchos](docs/programando-cartuchos.md): cabeçalho, regras de RAM, temporização do VDP
 7. [MAME](docs/mame.md): como rodar, script Lua, bugs encontrados e patch do driver
 8. [Cartucho de demonstração](cartridge/demo/README.md): técnicas, orçamento de ciclos, controles
+9. [Placa do cartucho (KiCad)](hardware/cartucho/README.md): circuito, jumpers, montagem, fabricação
 
 ## Licença
 
