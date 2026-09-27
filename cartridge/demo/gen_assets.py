@@ -146,9 +146,14 @@ def center_x(s):
 # Bitmap Graphics II: cada "banco" = 256x64 pixels, 2 cores por segmento 8x1
 # ---------------------------------------------------------------------------
 class Bank:
-    """Um terço da tela (8 linhas de tiles) em layout bitmap (nomes 0..255)."""
+    """Um terço da tela (8 linhas de tiles) em layout bitmap (nomes 0..255).
 
-    def __init__(self, fg=WHITE, bg=BLACK):
+    O fundo é transparente (cor 0), não preto: com o backdrop preto (R7 = 1) a
+    tela fica igual, e com EXTVID (tecla V) o vídeo externo aparece atrás dos
+    textos. Ele só passa onde a cor do padrão é transparente (manual do
+    TMS9918A, p. 51); com fundo preto apareceria só na borda."""
+
+    def __init__(self, fg=WHITE, bg=TRANSPARENT):
         self.pix = [[0] * 256 for _ in range(64)]      # 1 = frente
         self.fg = [[fg] * 32 for _ in range(64)]         # cor de frente por segmento
         self.bg = [[bg] * 32 for _ in range(64)]
@@ -451,12 +456,13 @@ BRICK_COLORS = [      # (clara, média, escura) por linha de tijolos
 
 
 def game_tiles():
+    """Fundos e vãos em cor 0 (transparente), como na abertura (ver Bank)."""
     pats = bytearray(96 * 8)
     cols = bytearray(96 * 8)
     for g in range(64):
         pats[g * 8:g * 8 + 8] = bytes(FONT[g])
         for y in range(8):
-            cols[g * 8 + y] = (WHITE << 4) | BLACK
+            cols[g * 8 + y] = (WHITE << 4) | TRANSPARENT
     # parede lateral: cano vertical (claro no meio, escuro nas bordas)
     for y in range(8):
         pats[T_WALL * 8 + y] = 0x7E
@@ -466,7 +472,7 @@ def game_tiles():
     for t in (T_WALL_TOP, T_CORNER_L, T_CORNER_R):
         for y in range(8):
             pats[t * 8 + y] = 0xFF if y < 7 else 0x00
-            cols[t * 8 + y] = ((top[y] if y < 7 else BLACK) << 4) | BLACK
+            cols[t * 8 + y] = ((top[y] if y < 7 else TRANSPARENT) << 4) | TRANSPARENT
     # tijolos 16x8 com relevo: brilho em cima/à esquerda, sombra embaixo/à direita
     for r, (hi, mid, lo) in enumerate(BRICK_COLORS):
         tl, tr = T_BRICK + r * 2, T_BRICK + r * 2 + 1
@@ -477,8 +483,8 @@ def game_tiles():
                 pl, cl, pr, cr = 0x7F, (mid << 4) | hi, 0xFE, (mid << 4) | lo
             elif y == 6:
                 pl, cl, pr, cr = 0xFF, (lo << 4) | lo, 0xFF, (lo << 4) | lo
-            else:
-                pl, cl, pr, cr = 0x00, (BLACK << 4) | BLACK, 0x00, (BLACK << 4) | BLACK
+            else:           # vão entre as linhas de tijolos
+                pl, cl, pr, cr = 0x00, TRANSPARENT, 0x00, TRANSPARENT
             pats[tl * 8 + y], cols[tl * 8 + y] = pl, cl
             pats[tr * 8 + y], cols[tr * 8 + y] = pr, cr
     return bytes(pats), bytes(cols)
@@ -524,6 +530,11 @@ def main():
     logo_bg = {top.bg[y][cx] for y in range(LOGO_Y, LOGO_Y + LOGO_LINES) for cx in range(32)}
     assert len(logo_bg) == 1 and sorted(LOGO_ORDER) == list(range(LOGO_LINES))
     logo_bg = logo_bg.pop()
+    # nada de preto opaco (cor 1): com EXTVID ele esconderia o vídeo externo, e
+    # com o backdrop preto a cor 0 já aparece preta
+    used = (top.colors() + bottom.colors() + game_tiles()[1] + bytes(sum(BARS, []))
+            + bytes(sum((logo_colors(t) for t in range(len(LOGO_THEMES))), [])))
+    assert all(BLACK not in (b >> 4, b & 15) for b in used), "cor preta (1) opaca nos dados"
     out = []
     w = out.append
     w("* Gerado por gen_assets.py - não editar à mão")

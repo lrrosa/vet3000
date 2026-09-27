@@ -33,9 +33,13 @@ encontra a assinatura `"OBJECT"` e passa o controle para a demo.
   ciclos por byte (`LDA n,X` / `ORA n,Y` / `STA`), sem buffer em RAM.
 - **Sprites** 16×16 numa curva de Lissajous. A ordem na tabela de atributos gira a cada quadro para
   contornar o limite de 4 sprites por linha, e os sprites piscam em vez de sumir.
-- **Sobreposição de vídeo (tecla V):** liga o bit EXTVID e deixa o fundo transparente. Com uma
-  câmera ou videocassete na entrada, o letreiro fica sobre o vídeo, que é a função original do
-  aparelho. O MAME não emula a entrada de vídeo.
+- **Sobreposição de vídeo (tecla V):** liga o bit EXTVID e troca o backdrop (R7) de preto para
+  transparente. Com uma câmera ou videocassete na entrada, o letreiro fica sobre o vídeo, que é a
+  função original do aparelho. O vídeo externo só aparece onde a cor do pixel é 0 (transparente,
+  manual do TMS9918A, p. 51). Por isso todos os fundos da demo usam a cor 0, e não o preto (1): os
+  tiles da abertura e do jogo, a faixa das barras, o logotipo e os vãos entre os tijolos. Com o
+  backdrop preto a tela fica igual, e com V o vídeo aparece atrás dos textos, das barras, do
+  logotipo e dos sprites. O MAME não emula a entrada de vídeo: lá a cor 0 sai preta.
 
 **QUEBRA-TIJOLO**
 

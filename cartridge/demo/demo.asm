@@ -622,7 +622,9 @@ logo_line	sta	tmp+1			; cor
 		rts
 
 * toggle_video: EXTVID (R0 bit 0) + fundo transparente = texto sobre o vídeo
-*   da entrada do VET (no MAME a entrada de vídeo não é emulada)
+*   da entrada do VET (no MAME a entrada de vídeo não é emulada). O vídeo só
+*   passa onde a cor é 0, então todos os fundos da demo (tiles, barras,
+*   logotipo) são cor 0, não preto: com o backdrop preto parecem pretos
 toggle_video	lda	vdp_r0
 		eora	#$01
 		sta	vdp_r0
@@ -668,8 +670,8 @@ put_bars	ldd	#COL+$0800		; cores dos tiles 0..7 do banco 1
 		bne	1B
 		rts
 
-build_bars	ldx	#BARBUF			; fundo preto
-		ldd	#$1111
+build_bars	ldx	#BARBUF			; fundo transparente (cor 0; ver toggle_video)
+		ldd	#$0000
 		ldy	#32
 1		std	,X++
 		leay	-1,Y

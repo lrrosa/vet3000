@@ -137,6 +137,13 @@ alternados pela tecla CURSOR.
 - Nos **~4,3 ms após a interrupção** de quadro (cerca de 3.800 ciclos), ou com a imagem desligada,
   qualquer velocidade funciona.
 
+### Sobreposição ao vídeo externo
+
+Com o bit EXTVID (R0 bit 0) ligado, o vídeo da entrada só aparece onde a cor do pixel é **0
+(transparente)**, e o backdrop (R7) também tem de ser 0. Um fundo preto (cor 1) esconde o vídeo.
+Use a cor 0 nos fundos e deixe R7 = 1 no uso normal: a tela fica preta igual. Para sobrepor, ligue
+o EXTVID e ponha R7 = 0, como faz a tecla V da demo. O MAME mostra a cor 0 como preto.
+
 ## 4. Sincronismo com o quadro sem vetores
 
 Ligue o bit IE (R1 bit 5) e mantenha a IRQ **mascarada** na CPU. A instrução `SYNC` do 6809 espera a
