@@ -43,7 +43,7 @@ encontra a assinatura `"OBJECT"` e passa o controle para a demo.
 
 **QUEBRA-TIJOLO**
 
-- Tijolos com relevo em 6 cores (tiles com cor por linha), paredes, placar em BCD, 3 vidas e 4 fases
+- Tijolos com relevo em 6 cores (tiles com cor por linha), paredes, placar em BCD, 4 vidas e 4 fases
   que se repetem, cada vez mais rápidas.
 - Bola e raquete são sprites. A física usa ponto fixo 8.8, colisão por eixo com os tijolos (mapa de
   bits de 6 × 16 bits em RAM) e ângulo de rebote pela posição na raquete (8 zonas).

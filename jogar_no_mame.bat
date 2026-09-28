@@ -6,9 +6,10 @@ rem Roda o cartucho de demonstracao (abertura + jogo QUEBRA-TIJOLO) no VET 3000 
 rem sem recompilar o MAME (usa tools\mame\run_cart.ps1 e o script Lua do cartucho).
 rem
 rem Uso:  jogar_no_mame.bat [caminho\mame.exe]
-rem O caminho do MAME vem do argumento, da variavel de ambiente MAME ou da linha abaixo.
+rem Prefere o build local corrigido (60 Hz); argumento e variavel MAME tem prioridade.
 rem Parametros extras do MAME: variavel VET_MAME_EXTRA (ex.: "-window -nomaximize").
 setlocal
+if not defined MAME if exist "%~dp0..\mame-build\vet.exe" set "MAME=%~dp0..\mame-build\vet.exe"
 if not defined MAME set "MAME=F:\jogos\emuladores\mame\mame.exe"
 if not "%~1"=="" set "MAME=%~1"
 if not exist "%MAME%" for /f "delims=" %%i in ('where mame.exe 2^>nul') do set "MAME=%%i"
@@ -18,6 +19,7 @@ if not exist "%MAME%" (
     pause
     exit /b 1
 )
+echo MAME: "%MAME%"
 echo Controles: ESPACO joga/lanca, Z/X movem, RETURN pausa, V sobrepoe, EXT MODE ^(TAB^) sai.
 echo No editor do titulador, SHIFT+TAB ^(SHIFT+EXT MODE^) volta a demo.
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\mame\run_cart.ps1" -Mame "%MAME%" -Cart "%~dp0cartridge\demo\vet3000_demo.bin"

@@ -861,7 +861,7 @@ game		lbsr	screen_off
 		cmpa	#3
 		bne	1B
 		* variáveis
-		lda	#3
+		lda	#4
 		sta	lives
 		clr	level
 		clr	score

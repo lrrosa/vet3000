@@ -75,8 +75,11 @@ cd cartridge/demo && ./build.sh          # ou .\build.ps1 no Windows
 ```
 
 **Rodar no MAME**, sem recompilar: o script Lua simula o cartucho no conector CN1. No Windows,
-basta dar dois cliques em **`jogar_no_mame.bat`**. Ajuste o caminho do MAME na linha
-`set "MAME=..."`, passe-o como argumento ou defina a variável `MAME`. O `.bat` chama:
+basta dar dois cliques em **`jogar_no_mame.bat`**. Ele prefere o build corrigido em
+`../mame-build/vet.exe`, quando disponível, para rodar a aproximadamente 60 Hz.
+Isso reduz os saltos da raquete de 9 para 3 pixels por quadro, mantendo a velocidade.
+Para escolher outro MAME, passe o caminho como argumento ou defina a variável `MAME`.
+Sem o build local, usa o caminho padrão configurado no `.bat`. O `.bat` chama:
 
 ```powershell
 .\tools\mame\run_cart.ps1 -Mame C:\mame\mame.exe -Cart cartridge\demo\vet3000_demo.bin

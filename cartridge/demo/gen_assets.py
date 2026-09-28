@@ -282,7 +282,7 @@ def unrle(data):
 # e cada tema dá as cores dos 4 níveis. A demo passa de um tema ao seguinte
 # trocando uma linha por vez, na ordem de LOGO_ORDER, e percorre os temas em
 # ciclo. O primeiro tema é o que vai gravado na tela.
-LOGO_X, LOGO_Y = 30, 4
+LOGO_X, LOGO_Y = 35, 4           # pixels visíveis em x=37..217: margens de 37/38 px
 LOGO_LINES = 28                 # 7 linhas de glifo x 4 (a 8a linha da fonte é vazia)
 LOGO_SHADE = [3] * 5 + [2] * 7 + [1] * 11 + [0] * 5
 LOGO_THEMES = [                 # cores dos níveis 3, 2, 1 e 0
@@ -319,7 +319,7 @@ def title_top():
         b.hline(x0, x1, 38, LBLUE)
         b.hline(x0, x1, 41, DBLUE)
         b.hline(x0, x1, 42, DBLUE)
-    b.text(128, 47, "VIDEO TITLER", color=LBLUE)
+    b.text(146, 47, "VIDEO TITLER", color=LBLUE)  # termina em x=239: margem de 16 px
     b.text(16, 47, "TMS 1988", color=GRAY)
     b.centered(56, "DEMO DE CARTUCHO", LYELLOW)
     b.color_rows(56, 64, [LYELLOW, LYELLOW, DYELLOW, DYELLOW, LYELLOW, WHITE, DYELLOW, DYELLOW], 0, 256)
@@ -327,7 +327,7 @@ def title_top():
 
 
 SCROLL_ROW = 3        # linha de tiles do scroller dentro do banco 2 (tela: linha 19)
-BLINK_ROW = 0         # linha piscante "ESPACO: JOGAR" (tela: linha 16)
+BLINK_ROW = 1         # linha piscante "ESPACO: JOGAR" (tela: linha 17)
 
 
 def title_bottom():
