@@ -7,7 +7,7 @@
 #   python tools/dis6809.py rom/VET2.1-TMS_VET3000_27128A.BIN --hints disasm/hints.py \
 #          -o disasm/vet3000_v2.1.asm
 #
-# O arquivo gerado remonta byte a byte idêntico com o asm6809 (ver disasm/build.sh).
+# O arquivo gerado remonta byte a byte idêntico com o asm6809 (ver disasm/verify.sh).
 
 import os
 

@@ -265,6 +265,10 @@ class Disassembler:
 
     # ------------------------------------------------------------------ tracing
     def mark_data(self, addr, length, kind):
+        self.check_data_range(addr, length, kind)
+        if kind in ("fdb", "ptr", "jmptab", "selfrel") and length % 2:
+            raise ValueError("%s hint at %s requires an even length, got %d" %
+                             (kind, hexs(addr, 4), length))
         self.data[addr] = (length, kind)
         for a in range(addr, addr + length):
             if self.kind.get(a) in ("code", "codecont"):
@@ -275,12 +279,13 @@ class Disassembler:
                 v = self.word(a)
                 if v:
                     t = (a + v) & 0xFFFF
-                    self.pending.append(t)
-                    self.code_refs.add(t)
+                    if self.inrom(t):
+                        self.pending.append(t)
+                        self.code_refs.add(t)
         if kind in ("ptr", "jmptab"):
             for a in range(addr, addr + length, 2):
                 v = self.word(a)
-                if kind == "jmptab":
+                if kind == "jmptab" and self.inrom(v):
                     self.pending.append(v)
                     self.code_refs.add(v)
                 elif self.inrom(v):
@@ -331,15 +336,24 @@ class Disassembler:
                     break
                 a = nxt
 
+    def check_data_range(self, addr, length, kind):
+        if length <= 0 or not self.inrom(addr) or addr + length > self.end:
+            raise ValueError("%s hint at %s with length %d is outside ROM [%s, %s)" %
+                             (kind, hexs(addr, 4), length,
+                              hexs(self.base, 4), hexs(self.end, 4)))
+
     def inline_len(self, a, spec):
         if spec == "asciz":
             n = 0
-            while self.byte(a + n) != 0:
+            while self.inrom(a + n):
+                if self.byte(a + n) == 0:
+                    return n + 1
                 n += 1
-            return n + 1
-        if spec == "ptr":
-            return 2
-        return int(spec)
+            raise ValueError("asciz inline hint at %s has no terminator before ROM end %s" %
+                             (hexs(a, 4), hexs(self.end, 4)))
+        n = 2 if spec == "ptr" else int(spec)
+        self.check_data_range(a, n, "inline %s" % spec)
+        return n
 
     # ------------------------------------------------------------------ segments / naming
     def build_segments(self):
@@ -460,7 +474,8 @@ class Disassembler:
         if dk == "selfrel":
             for i in range(0, length, 2):
                 v = self.word(a + i)
-                text = "%s-*" % self.name((a + i + v) & 0xFFFF) if v else "0"
+                target = (a + i + v) & 0xFFFF
+                text = "%s-*" % (self.name(target) or hexs(target, 4)) if v else "0"
                 self.line(w, label if i == 0 else None, "fdb", text, a + i,
                           "%02X %02X" % (self.byte(a + i), self.byte(a + i + 1)))
             return
@@ -541,7 +556,7 @@ def main():
     end = args.base + len(rom)
     entries = []
     for v in range(0xFFF2, 0x10000, 2):
-        if args.base <= v < end:
+        if args.base <= v and v + 1 < end:
             t = d.word(v)
             if d.inrom(t):
                 entries.append(t)
@@ -553,7 +568,10 @@ def main():
     if end == 0x10000 and args.base <= 0xFFF0:
         d.mark_data(0xFFF0, 16, "ptr")
         d.labels.setdefault(0xFFF0, "VECTORS")
-    d.trace(entries)
+    try:
+        d.trace(entries)
+    except ValueError as exc:
+        ap.error(str(exc))
     out = open(args.output, "w", newline="\n", encoding="utf-8") if args.output else sys.stdout
     d.emit(out)
     if args.report:

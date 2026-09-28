@@ -4,7 +4,7 @@
 #
 # Monta o cartucho de demonstração do VET 3000 (Windows / PowerShell).
 #   .\build.ps1                 -> build\vet3000_demo.bin (16 KB, EPROM 27128)
-#   .\build.ps1 -Debug          -> build\vet3000_demo_debug.bin (marcas de profiling em $8003)
+#   .\build.ps1 -Debug          -> build\vet3000_demo_debug.bin (profiling em RAM: $009A/$009C)
 #   .\build.ps1 -Asm C:\caminho\asm6809.exe
 param(
     [switch]$Debug,

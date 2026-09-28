@@ -378,6 +378,19 @@ BARS = [
 ]
 SINE = [int(round(127 * math.sin(2 * math.pi * i / 256))) & 0xFF for i in range(256)]
 
+
+def build_bars(phase=0):
+    """64 índices de cor, como build_bars no 6809 (atrás antes da frente)."""
+    colors = [TRANSPARENT] * 64
+    for behind in (True, False):
+        for i, gradient in enumerate(BARS):
+            angle = (phase + i * (256 // len(BARS))) & 0xFF
+            if bool(SINE[(angle + 64) & 0xFF] & 0x80) != behind:
+                continue
+            y = (((SINE[angle] + 128) & 0xFF) * (65 - len(gradient))) >> 8
+            colors[y:y + len(gradient)] = gradient
+    return colors
+
 # ---------------------------------------------------------------------------
 # Sprites (16x16: quadrantes em ordem sup-esq, inf-esq, sup-dir, inf-dir)
 # ---------------------------------------------------------------------------
@@ -616,8 +629,8 @@ def main():
         return
     img = Image.new("RGB", (256, 192), PALETTE[BLACK])
     top.render(img, 0)
-    for y in range(64, 128):          # barras (quadro 0)
-        pass
+    for y, color in enumerate(build_bars(0), 64):
+        img.paste(PALETTE[color], (0, y, 256, y + 1))
     bottom.render(img, 128)
     img.resize((768, 576), Image.NEAREST).save(os.path.join(BUILD, "preview_title.png"))
     fnt = Image.new("RGB", (8 * 16 * 3, 8 * 4 * 3))

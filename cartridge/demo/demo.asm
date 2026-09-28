@@ -914,7 +914,8 @@ game_loop	lbsr	wait_frame
 		lbsr	dbg_done
 		bra	game_loop
 
-level_done	inc	level
+level_done	lbsr	draw_status		; inclui os pontos do último tijolo
+		inc	level
 		ldd	speed			; mais rápido a cada fase
 		cmpd	#$0300
 		bhs	1F
@@ -1019,10 +1020,29 @@ draw_status	clr	dirty
 		sta	VDP_DATA
 		ldd	#NAMES+29
 		lbsr	vdp_wr
-		lda	level
-		inca
+		clra
+		ldb	level
+		addd	#1			; 1..256, sem overflow de 8 bits
+		ldx	#100
+		lbsr	status_digit
+		ldx	#10
+		lbsr	status_digit
+		ldx	#1
+		lbra	status_digit
+
+* D = resto; X = divisor decimal. Sempre escreve três dígitos (001..256).
+status_digit	stx	tmp
+		clr	cnt
+1		cmpd	tmp
+		blo	2F
+		subd	tmp
+		inc	cnt
+		bra	1B
+2		pshs	a
+		lda	cnt
 		adda	#'0-FONT_FIRST
 		sta	VDP_DATA
+		puls	a
 		rts
 
 * load_level: copia o desenho da fase (level mod NUM_LEVELS) e conta os tijolos
@@ -1200,6 +1220,7 @@ ball_move	* --- eixo X
 2		ldd	#0			; inverte dx
 		subd	ball_dx
 		std	ball_dx
+		bra	4F			; parede já resolveu X; evita inverter duas vezes
 3		lbsr	brick_hit
 		bcc	4F
 		ldd	#0

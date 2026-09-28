@@ -5,7 +5,7 @@
 #
 # Monta o cartucho de demonstração do VET 3000.
 #   ./build.sh            -> build/vet3000_demo.bin (imagem de 16 KB para EPROM 27128)
-#   ./build.sh debug      -> build/vet3000_demo_debug.bin (marcas de profiling em $8003)
+#   ./build.sh debug      -> build/vet3000_demo_debug.bin (profiling em RAM: $009A/$009C)
 # Requer python3 e asm6809 (https://www.6809.org.uk/asm6809/) no PATH ou em $ASM6809.
 set -e
 cd "$(dirname "$0")"
