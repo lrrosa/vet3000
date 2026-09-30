@@ -43,8 +43,9 @@ Este repositório reúne tudo o que foi levantado sobre o aparelho:
   (`$0039/$003B/$003D`) e existem só para os cartuchos. Os títulos ficam em `$00A0-$018F` e
   `$0200-$1FFF` (30 páginas); um cartucho pode rodar sem apagá-los.
 - **Sem interrupção de quadro:** o `/INT` do VDP não está ligado ao `/IRQ` do 6809 (medido). Para
-  sincronizar com o quadro, é preciso ler o status do VDP em laço. O MAME liga os dois, então um
-  programa que dependa dessa interrupção roda no emulador e trava no aparelho.
+  sincronizar com o quadro, é preciso ler o status do VDP em laço. O driver do MAME 0.289 liga os
+  dois, então um programa que dependa dessa interrupção roda no emulador e trava no aparelho. O
+  patch em [mame/](mame/) corrige isso.
 - **Código enxuto:** o código ocupa só cerca de 4,5 KB. O resto da ROM são três fontes (16×24, 8×24 e
   8×8), sprites e o logotipo. Há **3,2 KB livres** na EPROM.
 - **Tecla "C" amarela:** não tem função no firmware v2.1 (a coluna dos modificadores só é lida nas

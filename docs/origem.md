@@ -148,8 +148,8 @@ Isso resolve os pinos que estavam em aberto: o **16 de cima** é o E qualificado
 - **/IRQ no lugar de /NMI.** Na revista, o /NMI vai à porta (com R8 de 4,7 kΩ) e o /IRQ fica em +5 V.
   No VET, o /NMI fica em +5 V e o /IRQ vai à porta. O `/INT` do VDP continua sem ligação, como na
   revista, onde o pino 16 do TMS9128 nem aparece no Fig. 10: não há continuidade entre ele e o
-  pino 3 do 6809 (medido). A interrupção de quadro não chega à CPU, ao contrário do que o driver do
-  MAME supõe. O firmware da revista e o do VET esperam o quadro lendo o status do VDP.
+  pino 3 do 6809 (medido). A interrupção de quadro não chega à CPU, ao contrário do que supõe o
+  driver do MAME 0.289 (o patch deste repositório corrige). O firmware da revista e o do VET esperam o quadro lendo o status do VDP.
 - Duas posições livres da revista passaram a levar **−5 V** e **+3 V BAT**, e há uma 18ª posição
   vazia. Uma placa de interface da revista ou da MFJ, se aparecer, deve ser conferida antes de ser
   ligada.
@@ -191,7 +191,9 @@ referência ─► MC4044 ─► MC4024 (VCO) ─► ≈10,7 MHz ─► TMS9128 
 - Isso confirma o clock de **10,738635 MHz** usado no patch do MAME
   ([../mame/](../mame/), [PR 16276](https://github.com/mamedev/mame/pull/16276)). O driver não emula o
   *genlock*, então o valor do modo interno é o correto. Com 3,579545 MHz no VDP, a tela roda a
-  19,97 Hz. Com 10,738635 MHz, a 59,92 Hz.
+  19,97 Hz. Com 10,738635 MHz, a 59,92 Hz. O patch também tira o clock do 6809 do VDP
+  (`VDP_CLOCK / 3`), como na placa. No MAME, o `MC6809` recebe o clock de entrada e divide por 4,
+  como o chip real, então o `-listxml` mostra 3.579.545 Hz e a CPU executa a 894.886 ciclos/s.
 
 ## 5. VDP: mesmos registradores, mesma VRAM
 
@@ -355,7 +357,7 @@ e pino 1 (entrada de croma, pelo filtro com L1).
    Pino 10: diodo até o pino 7 do 74LS139.
 6. **/INT do VDP.** Feito em 29/09/2026: **sem continuidade** entre o pino 16 do TMS9128 e o pino 3
    (/IRQ) do 6809, como na revista (no Fig. 10 o pino 16 nem aparece, e no Fig. 14 o /IRQ vai
-   direto ao +5 V). O MAME supõe essa ligação. A demo, que esperava o quadro com `SYNC`, passou a
+   direto ao +5 V). O driver do MAME 0.289 supõe essa ligação, e o patch a remove. A demo, que esperava o quadro com `SYNC`, passou a
    ler o status (ver [programando-cartuchos.md](programando-cartuchos.md#4-sincronismo-com-o-quadro-sem-vetores)).
 
 ## 12. Um esquema do VET 3000 a partir da revista

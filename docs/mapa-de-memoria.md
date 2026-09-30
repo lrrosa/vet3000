@@ -32,8 +32,8 @@ esquema publicado: o 74LS139 (U15) em blocos de 16 KB (A15/A14), habilitado pelo
 A ROM **nunca habilita interrupções** (não executa `ANDCC`) nem grava esses ponteiros: eles são
 ganchos para programas de cartucho. A linha IRQ vai ao pino 1 da fileira superior do CN1 (medido).
 O **`/INT` do VDP não está ligado ao IRQ**: não há continuidade entre o pino 16 do TMS9128 e o
-pino 3 do 6809, como no esquema da revista. O driver do MAME liga os dois, o que não corresponde ao
-aparelho. A sincronização com o quadro tem de ser feita lendo o status (ver
+pino 3 do 6809, como no esquema da revista. O driver do MAME 0.289 liga os dois, o que não
+corresponde ao aparelho (o patch em [../mame/](../mame/) corrige). A sincronização com o quadro tem de ser feita lendo o status (ver
 [programando-cartuchos.md](programando-cartuchos.md#4-sincronismo-com-o-quadro-sem-vetores)).
 
 Em `$E002` há uma pequena tabela de ponteiros para uso de cartuchos: `$E322` (GETKEY, espera uma

@@ -70,8 +70,9 @@ da demo é feito pelo próprio programa, com o resultado lido na RAM.
 4. **`/INT` do VDP ligado ao IRQ.** O driver faz `vdp.int_callback().set_inputline(m_maincpu,
    INPUT_LINE_IRQ0)`, mas no aparelho não há continuidade entre o pino 16 do TMS9128 e o pino 3 do
    6809 (medido). O firmware não percebe, porque nunca liga o bit IE. Já um cartucho que espere a
-   interrupção do VDP (com `SYNC` ou IRQ) funciona no MAME e trava no aparelho. O patch atual
-   **ainda mantém essa ligação**. A demo não depende mais dela: espera o quadro lendo o status. Ver [programando-cartuchos.md](programando-cartuchos.md#4-sincronismo-com-o-quadro-sem-vetores).
+   interrupção do VDP (com `SYNC` ou IRQ) funciona no MAME e trava no aparelho. O patch **remove
+   essa ligação**. A demo não depende dela: espera o quadro lendo o status. Ver
+   [programando-cartuchos.md](programando-cartuchos.md#4-sincronismo-com-o-quadro-sem-vetores).
 
 ## Patch proposto
 
@@ -81,7 +82,11 @@ completo em [../mame/vet3000.cpp](../mame/vet3000.cpp)):
 - VDP a **10,738635 MHz** (60 Hz);
 - **slot de cartucho** genérico (`generic_plain_slot`, interface `vet3000_cart`, extensões
   `bin,rom`) mapeado em `$4000-$7FFF`, para usar `mame vet3000 -cart vet3000_demo.bin`;
-- comentários do driver atualizados com a descrição do CN1 e do protocolo `"OBJECT"`/`"FONT"`.
+- `/INT` do VDP **sem ligação**, como no aparelho, e o 6809 com clock tirado do VDP
+  (`VDP_CLOCK / 3`, a saída CPUCLK). O `MC6809` do MAME divide esse clock por 4 internamente, como o
+  chip real: E = 894,886 kHz;
+- comentários do driver atualizados com a descrição do CN1, do protocolo `"OBJECT"`/`"FONT"` e da
+  origem do projeto (*Radio-Electronics* e MFJ-1480B).
 
 **Built and tested on September 27–28, 2026**, on Windows x64 with MSYS2 UCRT64
 and GCC 16.2.0, based on MAME commit `02342fb0547a9a9934d63b5e8708126b7b644007`.
@@ -89,3 +94,7 @@ The unchanged patch passed internal validation, native cartridge boot, the
 **59.922738 Hz** refresh check, and **515 regression cases**.
 See the [validation report](../mame/VALIDATION.md) for commands and limitations.
 Submitted as [MAME PR #16276](https://github.com/mamedev/mame/pull/16276).
+
+**Segundo commit do PR (29/09/2026):** `/INT` sem ligação e clock da CPU tirado do VDP. Compilado e
+testado da mesma forma: `-validate`, boot nativo, 675 casos, persistência do top 10 e ciclo de
+demonstração, a 59,922738 Hz. Ver o [relatório](../mame/VALIDATION.md#second-commit-vdp-int-and-cpu-clock).

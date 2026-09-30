@@ -58,3 +58,36 @@ Local artifacts are in `../mame-build` relative to the VET 3000 repository:
 
 Physical hardware clock measurements, FONT cartridges, interactive visual testing,
 and external video input were not tested.
+
+## Second commit: VDP /INT and CPU clock
+
+Commit `05ba7890` (September 29, 2026) on the same PR branch removes the VDP
+`/INT` to MC6809 `/IRQ` connection: on the board, TMS9128 pin 16 has no
+continuity to 6809 pin 3, as in the Radio-Electronics design the VET 3000
+derives from. It also clocks the MC6809 from `VDP_CLOCK / 3`, the VDP CPUCLK
+output. The MC6809 device divides its input clock by 4, like the real chip.
+
+Incremental build in the same environment, with `OS=Windows_NT` exported in the
+MSYS2 shell:
+
+```sh
+make SUBTARGET=vet SOURCES=src/mame/tms/vet3000.cpp -j6
+```
+
+No diagnostics were reported for `vet3000.cpp`.
+
+| Check | Result |
+|---|---|
+| `vet.exe -validate` | Passed |
+| `-listxml` | MC6809 clock 3579545 Hz (E = 894886 Hz), refresh 59.922738 Hz |
+| Native slot boot, with and without cartridge | Passed |
+| Native-slot regressions with `--breakout` | 675 passed |
+| SRAM top-ten persistence | Passed |
+| Attract cycle, CPU and ranking takeover | Passed |
+| Negative control: previous demo image (`SYNC` with VDP IE set) | Stops at PC `$4111` on its first frame, as on the hardware |
+
+The demo cartridge used for these tests waits for the frame by polling the VDP
+status register.
+
+- Executable SHA-256: `45BFAEA2ECE2A17AFF3101EFEEC121ED828FDA6351F1B3922EBA7A6AEBCC9665`.
+- Patch SHA-256: `8F992A3EC0675C5F823862D1C1EB0F0ADC90B02AF038CB96E72BF32F3CB72513`.

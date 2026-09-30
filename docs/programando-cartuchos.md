@@ -149,8 +149,10 @@ o EXTVID e ponha R7 = 0, como faz a tecla V da demo. O MAME mostra a cor 0 como 
 **O `/INT` do VDP não chega à CPU.** Não há continuidade entre o pino 16 do TMS9128 (`/INT`) e o
 pino 3 do 6809 (`/IRQ`), medido no aparelho. O esquema da revista de onde o VET deriva também não
 usa o `/INT`. Por isso a interrupção de fim de quadro não existe, e um `SYNC` que espere por ela
-**trava o programa no aparelho real**. No MAME funciona, porque o driver liga o `/INT` ao IRQ: não
-use o MAME como prova de que um programa com `SYNC` ou IRQ do VDP funciona.
+**trava o programa no aparelho real**. No MAME 0.289 funciona, porque o driver oficial liga o
+`/INT` ao IRQ: não use essa versão como prova de que um programa com `SYNC` ou IRQ do VDP
+funciona. O driver do [patch deste repositório](mame.md#patch-proposto) deixa o `/INT` sem ligação,
+como no aparelho.
 
 Espere o quadro lendo o status em laço, como o firmware (`VDP_WAIT_VBLANK`, `$EA9F`):
 
