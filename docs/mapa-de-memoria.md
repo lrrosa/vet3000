@@ -12,9 +12,13 @@
 | `$8003-$BFFF` | — | Faixa de E/S | Não usada pela ROM. O decodificador pode espelhar `$8000-$8002` |
 | `$C000-$FFFF` | 16 KB | EPROM 27128 (firmware) | Vetores em `$FFF0-$FFFF` |
 
-O mapa acima é o do driver do MAME, confirmado pelos acessos que a ROM faz. A decodificação
-provável usa o 74LS139 (U15) em blocos de 16 KB (A15/A14): `Y0` RAM, `Y1` cartucho, `Y2` E/S, `Y3` ROM.
-Isso bate com o que chega ao CN1: `Y1` (pino 14), `Y2` (pino 11) e o *Chip Enable* da EPROM (pino 10). Ver [conector-cn1.md](conector-cn1.md).
+O mapa acima é o do driver do MAME, confirmado pelos acessos que a ROM faz. É também o mapa do
+Video Titler da *Radio-Electronics* (Fig. 15), do qual o VET deriva, e a decodificação é a do
+esquema publicado: o 74LS139 (U15) em blocos de 16 KB (A15/A14), habilitado pelo E do 6809:
+`Y0` RAM, `Y1` cartucho, `Y2` E/S, `Y3` ROM. A segunda metade usa `R/W` e `A1` para separar
+`$8000`/`$8001` (VDP) de `$8002` (teclado). Isso bate com o que chega ao CN1: `Y1` (pino 14), `Y2`
+(pino 11) e o *Chip Enable* da EPROM (pino 10). Ver [conector-cn1.md](conector-cn1.md) e
+[origem.md](origem.md#2-mapa-de-memória-es-e-decodificação).
 
 ## Vetores
 
@@ -26,8 +30,11 @@ Isso bate com o que chega ao CN1: `Y1` (pino 14), `Y2` (pino 11) e o *Chip Enabl
 | SWI2, SWI3 | `$FFF4`, `$FFF2` | `$E010` | `JMP [$003D]` |
 
 A ROM **nunca habilita interrupções** (não executa `ANDCC`) nem grava esses ponteiros: eles são
-ganchos para programas de cartucho. A linha IRQ recebe o `/INT` do VDP e o pino 1 da fileira superior
-do CN1.
+ganchos para programas de cartucho. A linha IRQ vai ao pino 1 da fileira superior do CN1 (medido).
+O **`/INT` do VDP não está ligado ao IRQ**: não há continuidade entre o pino 16 do TMS9128 e o
+pino 3 do 6809, como no esquema da revista. O driver do MAME liga os dois, o que não corresponde ao
+aparelho. A sincronização com o quadro tem de ser feita lendo o status (ver
+[programando-cartuchos.md](programando-cartuchos.md#4-sincronismo-com-o-quadro-sem-vetores)).
 
 Em `$E002` há uma pequena tabela de ponteiros para uso de cartuchos: `$E322` (GETKEY, espera uma
 tecla), `$E375` (KBD_SCAN, varre o teclado) e `$E231` (MAIN_LOOP, laço de comandos do titulador).

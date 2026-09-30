@@ -6,7 +6,11 @@ barramento da CPU e as seleções do decodificador de endereços. O firmware v2.
 
 Todas as ligações abaixo vêm das medidas de continuidade originais, em
 [medidas-originais/conector CN1 VET3000.txt](medidas-originais/conector%20CN1%20VET3000.txt).
-As faixas de endereço de cada seleção foram deduzidas do firmware.
+
+O CN1 é a **porta de expansão do Video Titler da *Radio-Electronics*** (Fig. 19, março de 1986), o
+projeto do qual o VET 3000 deriva. Lidos do pino 17 para o 1, os contatos seguem a mesma ordem da
+porta da revista. Os nomes dos sinais (XROM, I/O SEL, ROM SEL, /E CLK, CPU DISABLE) e a
+decodificação vêm do esquema publicado. Ver [origem.md](origem.md#3-o-cn1-é-a-porta-de-expansão-da-revista).
 
 ## Pinagem
 
@@ -14,23 +18,25 @@ Contagem da esquerda para a direita, **vista por fora** do aparelho:
 
 ```
          1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18
-cima   [IRQ D0 D1 D2 D3 D4 D5 D6 D7 ROM Y2 RW HLT Y1 +5 1G GND NC]
+cima   [IRQ D0 D1 D2 D3 D4 D5 D6 D7 RS IO RW HLT XR +5 /E GND NC]
 baixo  [BAT A0 A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 -5 GND NC]
+
+RS = ROM SEL, IO = I/O SEL, XR = XROM, /E = /E CLK
 ```
 
 ### Fileira superior
 
 | Pino | Sinal | Ligação medida | Interpretação |
 |---|---|---|---|
-| 1 | **/IRQ** | 6809 pino 3 | Interrupção (compartilhada com o `/INT` do VDP) |
+| 1 | **/IRQ** | 6809 pino 3 | Interrupção. É a única fonte de IRQ: o `/INT` do VDP não está ligado a ela (medido). Na revista, este contato era o /NMI, e o /IRQ ficava em +5 V |
 | 2-9 | **D0-D7** | ROM, RAM, 6809, TMS9128 | Barramento de dados |
-| 10 | **E da ROM** | ROM pino 20 | *Chip Enable* da EPROM interna, ativo em 0. No datasheet da ST M27128A (a EPROM da placa) o pino 20 se chama **E**. É a seleção de `$C000-$FFFF`, provavelmente a saída `Y3` do decodificador |
-| 11 | **Y2** | 74LS139 (U15) pino 6 (`1Y2`) | Seleção provável de `$8000-$BFFF` (E/S), ativa em 0 |
+| 10 | **ROM SEL** | ROM pino 20 | *Chip Enable* da EPROM interna, ativo em 0 (na ST M27128A o pino 20 se chama **E**). Na revista, `Y3` (`$C000-$FFFF`) chega a esse nó por um diodo, com resistor de *pull-up*, para que um computador externo também possa selecionar a ROM |
+| 11 | **I/O SEL** | 74LS139 (U15) pino 6 (`1Y2`) | Seleção de `$8000-$BFFF` (E/S), ativa em 0. Na revista, o contato fica no `/G` da segunda metade do 74LS139, depois de um diodo vindo de `Y2`: um computador externo seleciona o VDP e o teclado por ele |
 | 12 | **R/W** | RAM pino 27, 6809 pino 32 | Leitura (1) / escrita (0) |
-| 13 | **/HALT** | 6809 pino 40 | Permite parar a CPU (DMA externo) |
-| 14 | **Y1** | 74LS139 (U15) pino 5 (`1Y1`) | **Seleção do cartucho, `$4000-$7FFF`**, ativa em 0 |
+| 13 | **/HALT** (*CPU DISABLE*) | 6809 pino 40 | Em 0, para a CPU e desliga a decodificação interna |
+| 14 | **XROM** | 74LS139 (U15) pino 5 (`1Y1`) | **Seleção do cartucho, `$4000-$7FFF`**, ativa em 0 |
 | 15 | **+5 V** | ROM 1/27/28, 6809 2/4/7/33/36, VDP 33 | Alimentação. NMI, FIRQ, DMA e MRDY do 6809 vão ao +5 V |
-| 16 | **1G** | 74LS139 (U15) pino 1 | Habilitação do decodificador. Função exata **a confirmar** |
+| 16 | **/E CLK** | 74LS139 (U15) pino 1 (`1/G`) | Saída: E do 6809 combinado com /HALT por uma porta NAND (74LS00), ativo em 0. Habilita a primeira metade do 74LS139, então XROM, I/O SEL e ROM SEL só ficam ativos com E alto |
 | 17 | **GND** | | Terra |
 | 18 | — | | Sem conexão |
 
@@ -44,8 +50,8 @@ baixo  [BAT A0 A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 -5 GND NC]
 | 17 | **GND** | | Terra |
 | 18 | — | | Sem conexão |
 
-**A14 e A15 não estão no conector.** Por isso o cartucho depende da seleção `Y1` para saber que o
-acesso é na sua janela. Com A0-A13 ele enxerga 16 KB, e o firmware procura assinaturas nas duas
+**A14 e A15 não estão no conector.** Por isso o cartucho depende da seleção XROM (`Y1`) para saber
+que o acesso é na sua janela. Com A0-A13 ele enxerga 16 KB, e o firmware procura assinaturas nas duas
 metades de 8 KB (`$4000` e `$6000`).
 
 ## O que o firmware faz com o cartucho
@@ -89,8 +95,8 @@ O cartucho mais simples é uma única EPROM de 16 KB (27128 / 27C128) ligada dir
 
 Observações:
 
-- **Proteção contra conflito no barramento (opcional, recomendada):** a seleção `Y1` provavelmente
-  fica ativa também em escritas. Se um programa escrever em `$4000-$7FFF`, a EPROM e a CPU
+- **Proteção contra conflito no barramento (opcional, recomendada):** a seleção `Y1` fica ativa
+  também em escritas, porque o primeiro decodificador não usa R/W (esquema da revista). Se um programa escrever em `$4000-$7FFF`, a EPROM e a CPU
   disputariam o barramento. Para evitar, ligue o `/OE` ao inverso de R/W (pino 12 de cima) com uma
   porta de um 74HC00 ou 74HC04, e deixe `/CE` em `Y1`.
 - **Regravável:** uma **W27C512** ou **27C256** serve no lugar da 27C128 (confira a pinagem: na 27C256
@@ -107,6 +113,9 @@ Observações:
 
 - que o pino 14 de cima fica em nível baixo só nos acessos a `$4000-$7FFF`: basta observar com
   osciloscópio ou ponta lógica enquanto um programa lê essa faixa;
-- a função do pino 16 de cima (entrada `1G` do 74LS139): se for a habilitação ligada a E ou a /E,
-  as seleções já saem qualificadas pelo clock. Se tiver só um resistor, um cartucho poderia desligar
-  a decodificação interna (RAM, E/S e ROM) e assumir o barramento.
+- que o pino 16 de cima vem da saída de uma porta do 74LS00 (U23) cujas entradas são o E (pino 34)
+  e o /HALT (pino 40) do 6809, como na revista. É uma **saída**: o cartucho não deve forçá-la. Para
+  assumir o barramento, a revista usa o /HALT (pino 13), que também desliga a decodificação interna;
+- se o pino 11 está ligado direto ao `1Y2` (pino 6) ou, como na revista, ao `/G` da segunda metade
+  (pino 15), com um diodo entre os dois. D10/D11 e R48/R49, ao lado do U15, devem ser esses diodos e
+  resistores.

@@ -31,6 +31,12 @@ Elas batem com o driver do MAME: trilha inferior *n* = bit *n−1* escrito, tril
 Os dois SHIFTs estão no mesmo ponto. As teclas amarelas ↑↓ e ←→ são uma tecla só cada: sem SHIFT
 movem para baixo/esquerda, com SHIFT para cima/direita.
 
+A matriz é a do Video Titler da *Radio-Electronics* (1986), ampliada. A revista tinha 6 linhas (duas
+saídas do 74LS273 ficavam sem ligação) e as mesmas 8 colunas: 38 das 48 posições da revista
+continuam iguais no VET. A TMS acrescentou a linha 7 para Z, X, C, V, B, ←→ e CLEAR e, com
+isso, liberou a coluna do bit 3 para os modificadores. Comparação completa em
+[origem.md](origem.md#6-teclado).
+
 ## Como o firmware lê (KBD_SCAN, `$E375`)
 
 1. Varre as 7 linhas (`$7E`, `$7D`, `$7B`, …), ignorando a coluna do bit 3 (modificadores), exceto
@@ -43,8 +49,11 @@ movem para baixo/esquerda, com SHIFT para cima/direita.
    CURSOR, RETURN e COLOR não repetem.
 
 Consequência: o **"C" amarelo** (linha 6, bit 3) está na coluna ignorada e fora das linhas de
-modificador. **No firmware v2.1 ele não faz nada.** Talvez fosse para ser um terceiro modificador,
-lido por engano na linha 7.
+modificador. **No firmware v2.1 ele não faz nada.** Isso tem explicação: o MFJ-1480B, versão
+americana do mesmo titulador, tem três teclas especiais, **A**, **B** e **C**, além do **CNTL**. O
+manual diz que a A é o AUTO CENTER e que B, C e CNTL ficaram reservadas para cartuchos futuros. O
+VET chamou o A de AUTO CENTER, manteve o C sem função e eliminou o B. A posição sem tecla da linha 6,
+bit 6 (código `$1F`) pode ser a do antigo B.
 
 ## Códigos de tecla (KEYMAP)
 

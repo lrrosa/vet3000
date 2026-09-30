@@ -3,6 +3,11 @@
 EPROM 27128 com etiqueta "VET 2.1". Na tela: *"Sistema Operacional Vr 2.1 — TMS MICROSISTEMAS —
 Copyright 1988,1989"*.
 
+O firmware segue de perto o do **MFJ-1480B** (*"VET OPERATING SYSTEM (3.0)"*, 1986), versão
+comercial do Video Titler da *Radio-Electronics*. Coincidem os registradores do VDP, a ordem das
+16 cores, os comandos, os cartuchos de fonte e de programa, a tela de abertura e a fonte normal.
+Ver [origem.md](origem.md#7-firmware-e-operação).
+
 | Arquivo | CRC32 | SHA1 |
 |---|---|---|
 | `rom/VET2.1-TMS_VET3000_27128A.BIN` (16384 bytes) | `bfdef5fa` | `cd4da3cbda7fa12c9413d052bf69ee758cfe68b3` |
@@ -110,8 +115,8 @@ SHIFT+EXT MODE (ver [programando-cartuchos.md](programando-cartuchos.md#voltar-d
   a **fonte normal** (32 caracteres de 8×24) ou a **grande** (16 caracteres de 16×24).
 - **30 páginas** de 8 × 32 caracteres em `$0200-$1FFF`, mais 1 byte de atributos por linha em
   `$00A0-$018F`. Tudo mantido pela bateria.
-- **Objeto:** 4 sprites 16×16 formam um quadro de 32×32 em 4 formas (cantos, moldura, diagonais),
-  movido pelas setas.
+- **Objeto:** 4 sprites 16×16 formam uma figura de 32×32, movida pelas setas. São 4 formas: seta,
+  moldura retangular, moldura oval e X, as mesmas do titulador da revista e do MFJ-1480B.
 - **Rolagem** (CONTROL+PAGE): as linhas sobem pixel a pixel, página após página. A rotina reescreve
   os padrões com o deslocamento `tmp07` (0-7) dentro de cada tile.
 
@@ -154,5 +159,6 @@ O glifo do código *c* fica em `base + (c − $13) × tamanho`. Imagens em
   lugar, e a `SYSTAB` é auto-relativa.
 - **Espaço livre:** sobram 238 + 3052 bytes em `$FF`, o suficiente para correções ou novos
   comandos numa EPROM modificada.
-- **"C" amarelo:** a tecla não é lida (ver [teclado.md](teclado.md)).
+- **"C" amarelo:** a tecla não é lida. No MFJ-1480B, as teclas B, C e CNTL eram reservadas para
+  cartuchos futuros (ver [teclado.md](teclado.md)).
 - **Vetores em RAM** e a **tabela `ROM_API`** em `$E002` indicam que a TMS previa programas externos.

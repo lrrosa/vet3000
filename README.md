@@ -3,7 +3,9 @@
 O **VET 3000 "The Video Effects Titler"** é um titulador de vídeo brasileiro fabricado pela
 **TMS – Tecnologia em Micro Sistemas** (firmware © 1988, 1989). Por dentro, ele é um microcomputador:
 CPU **Motorola MC6809**, processador de vídeo **Texas TMS9128** (família do TMS9918 usado no MSX 1 e
-no ColecoVision), 16 KB de VRAM, 8 KB de RAM estática com bateria e 16 KB de ROM.
+no ColecoVision), 16 KB de VRAM, 8 KB de RAM estática com bateria e 16 KB de ROM. O projeto deriva
+do **Video Titler** publicado na revista americana *Radio-Electronics* em 1985-1986, vendido nos
+EUA como **MFJ-1480B "Video Effects Titler (VET)"**.
 
 Este repositório reúne tudo o que foi levantado sobre o aparelho:
 
@@ -25,6 +27,12 @@ Este repositório reúne tudo o que foi levantado sobre o aparelho:
 
 ## Principais descobertas
 
+- **Origem:** o VET 3000 é uma versão do "Build This Video Titler", de Jack Flack
+  (*Radio-Electronics*, 11/1985 a 03/1986), que a MFJ vendia como MFJ-1480B. Coincidem os CIs, o
+  mapa de memória, a decodificação, a ordem dos pinos do CN1, o teclado, os registradores do VDP, os
+  comandos, a abertura e a fonte. O esquema da revista explica a parte analógica e o PLL que gera o
+  clock de 10,738635 MHz do VDP. O CI raspado U19 é um processador de croma CA3126 (confirmado pelas ligações). Ver
+  [docs/origem.md](docs/origem.md).
 - **Memória:** RAM em `$0000-$1FFF` (8 KB — a HY6264 tem 64 Kbit), cartucho em `$4000-$7FFF`,
   E/S em `$8000-$8002` e ROM em `$C000-$FFFF`. Detalhes em [docs/mapa-de-memoria.md](docs/mapa-de-memoria.md).
 - **Boot automático de cartucho:** no boot, a ROM compara `"OBJECT"` em `$4000` (e depois em `$6000`)
@@ -34,6 +42,9 @@ Este repositório reúne tudo o que foi levantado sobre o aparelho:
 - **Uso da RAM:** o firmware nunca habilita interrupções. Os vetores de IRQ/SWI apontam para RAM
   (`$0039/$003B/$003D`) e existem só para os cartuchos. Os títulos ficam em `$00A0-$018F` e
   `$0200-$1FFF` (30 páginas); um cartucho pode rodar sem apagá-los.
+- **Sem interrupção de quadro:** o `/INT` do VDP não está ligado ao `/IRQ` do 6809 (medido). Para
+  sincronizar com o quadro, é preciso ler o status do VDP em laço. O MAME liga os dois, então um
+  programa que dependa dessa interrupção roda no emulador e trava no aparelho.
 - **Código enxuto:** o código ocupa só cerca de 4,5 KB. O resto da ROM são três fontes (16×24, 8×24 e
   8×8), sprites e o logotipo. Há **3,2 KB livres** na EPROM.
 - **Tecla "C" amarela:** não tem função no firmware v2.1 (a coluna dos modificadores só é lida nas
@@ -44,7 +55,7 @@ Este repositório reúne tudo o que foi levantado sobre o aparelho:
 ## Estrutura
 
 ```
-docs/                 documentação (hardware, memória, CN1, teclado, firmware, cartuchos, MAME)
+docs/                 documentação (hardware, origem, memória, CN1, teclado, firmware, cartuchos, MAME)
   img/                fotos reduzidas, fontes extraídas da ROM e capturas de tela
   medidas-originais/  anotações originais da pinagem do CN1 e do teclado
 photos/               fotos originais em alta resolução
@@ -92,14 +103,15 @@ Controles da demo: **ESPAÇO** joga, **Z/X** (ou O/P, ou ←→ com e sem SHIFT)
 ## Documentação
 
 1. [Hardware](docs/hardware.md): placa, componentes, clocks, vídeo, fonte
-2. [Mapa de memória](docs/mapa-de-memoria.md): CPU, E/S, VRAM, variáveis de RAM, ROM
-3. [Conector CN1 e cartucho](docs/conector-cn1.md): pinagem e circuito de um cartucho com 27C128
-4. [Teclado](docs/teclado.md): matriz, códigos, modificadores, leitura por software
-5. [Firmware v2.1](docs/firmware.md): boot, laço principal, comandos, conjunto de caracteres, fontes
-6. [Programando cartuchos](docs/programando-cartuchos.md): cabeçalho, regras de RAM, temporização do VDP
-7. [MAME](docs/mame.md): como rodar, script Lua, bugs encontrados e patch do driver
-8. [Cartucho de demonstração](cartridge/demo/README.md): técnicas, orçamento de ciclos, controles
-9. [Placa do cartucho (KiCad)](hardware/cartucho/README.md): circuito, jumpers, montagem, fabricação
+2. [Origem](docs/origem.md): o Video Titler da *Radio-Electronics* e o MFJ-1480B, comparação completa
+3. [Mapa de memória](docs/mapa-de-memoria.md): CPU, E/S, VRAM, variáveis de RAM, ROM
+4. [Conector CN1 e cartucho](docs/conector-cn1.md): pinagem e circuito de um cartucho com 27C128
+5. [Teclado](docs/teclado.md): matriz, códigos, modificadores, leitura por software
+6. [Firmware v2.1](docs/firmware.md): boot, laço principal, comandos, conjunto de caracteres, fontes
+7. [Programando cartuchos](docs/programando-cartuchos.md): cabeçalho, regras de RAM, temporização do VDP
+8. [MAME](docs/mame.md): como rodar, script Lua, bugs encontrados e patch do driver
+9. [Cartucho de demonstração](cartridge/demo/README.md): técnicas, orçamento de ciclos, controles
+10. [Placa do cartucho (KiCad)](hardware/cartucho/README.md): circuito, jumpers, montagem, fabricação
 
 ## Licença
 

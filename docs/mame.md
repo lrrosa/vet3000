@@ -67,6 +67,11 @@ da demo é feito pelo próprio programa, com o resultado lido na RAM.
 2. **Conector CN1 ausente.** O comentário do driver diz que a função do conector "interface" é
    desconhecida. Na verdade ele é a porta de cartucho descrita aqui.
 3. **Entrada de vídeo** (sobreposição EXTVID) não é emulada, como o próprio driver avisa.
+4. **`/INT` do VDP ligado ao IRQ.** O driver faz `vdp.int_callback().set_inputline(m_maincpu,
+   INPUT_LINE_IRQ0)`, mas no aparelho não há continuidade entre o pino 16 do TMS9128 e o pino 3 do
+   6809 (medido). O firmware não percebe, porque nunca liga o bit IE. Já um cartucho que espere a
+   interrupção do VDP (com `SYNC` ou IRQ) funciona no MAME e trava no aparelho. O patch atual
+   **ainda mantém essa ligação**. A demo não depende mais dela: espera o quadro lendo o status. Ver [programando-cartuchos.md](programando-cartuchos.md#4-sincronismo-com-o-quadro-sem-vetores).
 
 ## Patch proposto
 

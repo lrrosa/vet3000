@@ -9,6 +9,10 @@ O aparelho tem duas placas: a **fonte de alimentação** (à esquerda na foto) e
 - **analógica** (esquerda): entrada e saída de vídeo, *genlock*/sincronismo, chaveamento do vídeo
   externo e codificação de cor.
 
+O circuito é o do **"Build This Video Titler"** da revista *Radio-Electronics* (1985-1986), vendido
+nos EUA como **MFJ-1480B**, com outra PCB. O esquema publicado explica a parte analógica, que não
+foi medida no VET. A comparação completa está em [origem.md](origem.md).
+
 Fotos em alta resolução em [../photos/](../photos/).
 
 | Componentes | Lado da solda |
@@ -21,7 +25,7 @@ Fotos em alta resolução em [../photos/](../photos/).
 
 | Ref. | Componente | Função |
 |---|---|---|
-| — | **MC6809** (etiqueta escrita à mão) | CPU. O MAME usa 3,579545 MHz de entrada, ou E = 894,886 kHz, como no TRS Color |
+| — | **MC6809** (etiqueta escrita à mão) | CPU. Na revista, o clock de entrada vem do CPUCLK do VDP (3,579545 MHz): E = 894,886 kHz |
 | — | **M27128AF1** (ST), etiqueta "VET 2.1", código 9240 | EPROM de 16 KB com o firmware, em `$C000-$FFFF` |
 | — | **HY6264LP-10** (Hyundai, 8946) | RAM estática 8K×8 (**64 Kbit = 8 KB**), com bateria, em `$0000-$1FFF` |
 | — | **TMS9128NL** (TI, 8910, Filipinas) | VDP. Saídas Y, R-Y e B-Y, com modos e sprites iguais aos do TMS9918A |
@@ -34,20 +38,23 @@ Fotos em alta resolução em [../photos/](../photos/).
 
 ### Parte analógica e de vídeo
 
+As funções vêm do esquema da revista (Figs. 7, 8, 11 e 13). Os números de CI entre parênteses são os
+da revista.
+
 | Ref. | Componente | Função provável |
 |---|---|---|
-| XTAL1 | Cristal **3,579545 MHz** + trimmer CV2 | Subportadora de cor **NTSC** (315/88 MHz): a referência de todo o sistema |
-| — | **LM1889N** (National) | Modulador de croma e RF: monta o vídeo composto a partir de Y, R-Y e B-Y |
-| — | **MC4044P** + **MC4024P** (Motorola) | Detector de fase/frequência + VCO: PLL do *genlock* (clock do VDP travado no vídeo de entrada) |
-| U13, U20 | **74LS191** ×2 | Contadores/divisores do PLL e da temporização de linha |
-| U4 | **74LS221** | Monoestáveis (janelas de sincronismo) |
-| U3 | **CA339E** | Comparadores (separação de sincronismo, *keying*) |
-| U8 | **SN75108AN** | Receptor de linha rápido, usado como comparador de vídeo |
-| U2, U10, U17 | **4066** ×3 | Chaves analógicas: mistura do vídeo externo com a imagem do VDP |
-| U9 | **74LS05** | Inversores com coletor aberto |
-| U23 | **74LS00** | Portas NAND |
-| U19 | CI de 20 pinos **sem marcação** | Lógica desconhecida (PAL ou identificação removida) |
-| RV1-RV3 | Trimpots | Ajustes de vídeo |
+| XTAL1 | Cristal **3,579545 MHz** + trimmer **CV2** | Cristal do oscilador de croma do U19 (ligado ao pino 6 por R51, de 680 Ω). Subportadora **NTSC** (315/88 MHz) e referência do PLL no modo interno. CV2 = C27 da revista (cores e faixa de captura da croma) |
+| U19 | **CA3126** (RCA) com a **marcação raspada**, 16 pinos | Processador de croma (IC14): regenera os 3,58 MHz travados no *burst* do vídeo externo e fornece o *CHROMA CLOCK* ao PLL. Confirmado pelas ligações dos pinos 5, 6, 9 e 12 (ver [origem.md](origem.md#8-o-ci-raspado-u19-é-um-ca3126)) |
+| — | **LM1889N** (National) (IC16) | Modulador de croma: monta o vídeo composto do VDP a partir de Y, R-Y e B-Y |
+| — | **MC4044P** + **MC4024P** (Motorola) (IC4, IC5) + trimmer **CV1** | PLL que gera o clock mestre do VDP: 3 × 3,579545 MHz no modo interno, 684 × a frequência horizontal externa no *genlock*. CV1 = C12 da revista (frequência do VCO) |
+| U13, U20 | **74LS191** ×2 (IC6, IC7) | Dividem o CPUCLK do VDP por 228 (= mestre ÷ 684): pulso horizontal comparado no *genlock* |
+| U4 | **74LS221** (IC2) | Monoestáveis: pulso horizontal externo (~50 µs, ignora os pulsos de equalização) e *burst gate* (~3 µs) |
+| U3 | **CA339E** (IC1) | Comparadores: sincronismo composto e vertical do vídeo externo e sinais de seleção de modo interno/externo |
+| U8 | **SN75108AN** (IC17) | Comparador rápido no sinal B-Y: escolhe, ponto a ponto, entre a imagem do VDP e o vídeo externo |
+| U2, U10, U17 | **4066** ×3 (IC8, IC9, IC13) | Chaves analógicas: entradas do PLL por modo, polarização da croma e mistura dos dois vídeos |
+| U9 | **74LS05** (IC3) | Inversores com coletor aberto (reset vertical híbrido do VDP, modos) |
+| U23 | **74LS00** (IC15) | Decodificação (E com /HALT) e lógica de modo |
+| RV1-RV3 | Trimpots | Equivalem a R29, R32 e R46 da revista (correspondência não verificada): cor no modo externo, nível do vídeo do VDP e limiar de chaveamento do vídeo externo |
 
 ### Fonte
 
@@ -59,21 +66,33 @@ a RAM (pino 28 da HY6264) e mantém os títulos com o aparelho desligado.
 
 | Sinal | Valor | Observação |
 |---|---|---|
-| Entrada do TMS9128 | **10,738635 MHz** = 3 × 3,579545 | Necessário para 15.734 Hz de linha e 59,94 Hz de quadro. Provavelmente gerado pelo PLL (MC4044 + VCO MC4024), travado no cristal ou no sincronismo do vídeo de entrada (*genlock*) |
+| Entrada do TMS9128 (pino 40) | **10,738635 MHz** = 3 × 3,579545 | Gerada pelo PLL (MC4044 + VCO MC4024). No modo interno, o PLL trava o CPUCLK no *CHROMA CLOCK* do oscilador de croma. No *genlock*, trava o CPUCLK ÷ 228 no sincronismo horizontal do vídeo de entrada, e o clock sobe para ≈ 10,762 MHz |
+| CPUCLK do TMS9128 (pino 37) | 3,579545 MHz | Clock mestre ÷ 3. Na revista, alimenta o `EXTAL` do 6809 e os divisores 74LS191 |
 | Pixel | 5,369 MHz | 342 pixels por linha, 262 linhas |
-| CPU (E) | 894,886 kHz | 3,579545 MHz ÷ 4 (o MC6809 divide o clock de entrada por 4), como no MAME e no TRS Color. Provavelmente vem do mesmo cristal NTSC. **Confirmar** com frequencímetro no pino 34 (E) |
+| CPU (E) | 894,886 kHz | CPUCLK ÷ 4 (o MC6809 divide o clock de entrada por 4), como no MAME e no TRS Color. **Confirmar** com frequencímetro no pino 34 (E) |
 | Quadro | cerca de **14.930 ciclos de CPU** | Orçamento de processamento por quadro a 60 Hz |
 
-Não há cristal perto do 6809 nem do TMS9128: os dois recebem clock de fora. O driver do MAME 0.289
-declara o VDP a 3,58 MHz, o que dá 19,97 Hz de quadro (ver [mame.md](mame.md)).
+Não há cristal perto do 6809 nem do TMS9128: o VDP recebe o clock do PLL, e o 6809 recebe o do VDP.
+O clock da CPU acompanha o PLL, inclusive no *genlock*. O driver do MAME 0.289 declara o VDP a
+3,58 MHz, o que dá 19,97 Hz de quadro (ver [mame.md](mame.md)).
 
 ## Caminho do vídeo
 
 O TMS9128 gera luminância e diferenças de cor (Y, R-Y, B-Y) e o LM1889 as codifica em vídeo composto.
 A imagem do VDP é sobreposta ao vídeo da entrada traseira quando o bit **EXTVID** (registrador 0, bit 0)
 está ligado. Nesse modo a cor 0 (transparente) e o fundo transparente deixam ver o vídeo externo.
-A tecla **EXT MODE** do firmware liga e desliga esse bit. As chaves 4066 e o PLL (MC4044/MC4024)
-fazem a mistura e o travamento do sincronismo.
+A tecla **EXT MODE** do firmware liga e desliga esse bit.
+
+Segundo a revista, no modo externo:
+
+- o CA339 e o 74LS221 extraem do vídeo de entrada o sincronismo horizontal, o vertical e a janela do
+  *burst*;
+- o PLL faz o clock do VDP acompanhar a linha do vídeo externo, e o vertical externo (com pulsos
+  horizontais inseridos) reinicia os contadores do VDP pelo pino RESET/SYNC, elevado a 12 V por um
+  transistor;
+- o CA3126 trava a subportadora do LM1889 no *burst* externo, para as cores do VDP não variarem;
+- nos pontos transparentes, o B-Y do VDP vai a um nível especial. O SN75108 detecta esse nível e as
+  chaves 4066 passam o vídeo externo em vez da imagem do VDP.
 
 O cristal XTAL1 de **3,579545 MHz é a subportadora de cor do NTSC**, então o VET 3000 gera vídeo
 **NTSC** (o PAL-M brasileiro usaria 3,575611 MHz). Tudo deriva desse valor: o VDP roda a 3 × 3,579545
@@ -93,7 +112,12 @@ intervalo.
 
 ## Pontos a confirmar no aparelho real
 
-- clock real do 6809 (pino 34, E) e do TMS9128 (pinos 39/40, entrada de cristal);
-- faixas de endereço de cada saída do 74LS139 que chega ao CN1 (pinos 11, 14 e 16 de cima). As
-  ligações estão todas medidas; falta ver o sinal funcionando (ver [conector-cn1.md](conector-cn1.md));
-- função do CI U19, que está sem marcação.
+- clock real do 6809 (pino 34, E) e do TMS9128 (pino 40, entrada; pino 37, CPUCLK), e se o pino 37
+  do VDP vai ao `EXTAL` (pino 38) do 6809, como na revista;
+- sinais do 74LS139 que chegam ao CN1 (pinos 10, 11, 14 e 16 de cima). As ligações estão medidas e
+  batem com a porta de expansão da revista; falta ver os sinais funcionando (ver
+  [conector-cn1.md](conector-cn1.md)).
+
+Já medido: U19 é um CA3126, e o `/INT` do VDP (pino 16) **não** está ligado ao `/IRQ` do 6809
+(pino 3). A CPU não recebe a interrupção de quadro, e os programas precisam ler o status do VDP
+(ver [programando-cartuchos.md](programando-cartuchos.md#4-sincronismo-com-o-quadro-sem-vetores)).
