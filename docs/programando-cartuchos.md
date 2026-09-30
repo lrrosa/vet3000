@@ -134,8 +134,8 @@ alternados pela tecla CURSOR.
   - `LDA ,X+` / `STA $8000` = 11 ciclos: seguro;
   - `STA $8000` / `STB $8000` seguidos = 5 ciclos: **pode perder bytes** fora do apagamento vertical;
   - `LDA n,X` / `ORA n,Y` / `STA $8000` = 15 ciclos (o scroller da demo).
-- Nos **~4,3 ms após a interrupção** de quadro (cerca de 3.800 ciclos), ou com a imagem desligada,
-  qualquer velocidade funciona.
+- Nos **~4,3 ms após o fim de quadro** (bit F do status; cerca de 3.800 ciclos), ou com a imagem
+  desligada, qualquer velocidade funciona.
 
 ### Sobreposição ao vídeo externo
 
@@ -146,18 +146,28 @@ o EXTVID e ponha R7 = 0, como faz a tecla V da demo. O MAME mostra a cor 0 como 
 
 ## 4. Sincronismo com o quadro sem vetores
 
-Ligue o bit IE (R1 bit 5) e mantenha a IRQ **mascarada** na CPU. A instrução `SYNC` do 6809 espera a
-linha IRQ ser ativada e segue em frente sem desviar para o vetor. A leitura do status apaga a INT:
+**O `/INT` do VDP não chega à CPU.** Não há continuidade entre o pino 16 do TMS9128 (`/INT`) e o
+pino 3 do 6809 (`/IRQ`), medido no aparelho. O esquema da revista de onde o VET deriva também não
+usa o `/INT`. Por isso a interrupção de fim de quadro não existe, e um `SYNC` que espere por ela
+**trava o programa no aparelho real**. No MAME funciona, porque o driver liga o `/INT` ao IRQ: não
+use o MAME como prova de que um programa com `SYNC` ou IRQ do VDP funciona.
+
+Espere o quadro lendo o status em laço, como o firmware (`VDP_WAIT_VBLANK`, `$EA9F`):
 
 ```asm
 wait_frame
-        sync                ; espera o /INT do VDP (fim da área ativa)
-        lda  $8001          ; lê o status: apaga a INT, bit 5 = 5o sprite, bit 7 = F
+1       lda  $8001          ; status: bit 7 = F (fim de quadro), bit 5 = 5º sprite
+        bpl  1B             ; a leitura zera o F
         rts
 ```
 
-Isso evita a corrida conhecida da leitura do status em laço e não precisa de `$0039`. Se preferir
-interrupções de verdade, grave o endereço da rotina em `$0039` antes de executar `ANDCC #$EF`.
+A leitura do status zera o F. Se ela coincidir com o instante em que o VDP liga o F, esse fim de
+quadro se perde (é uma corrida conhecida da família TMS9918), e a espera dura dois quadros. O
+firmware convive com isso. Se o programa conta quadros para medir tempo, compare o resultado com
+outra referência de tempo, como a calibração da demo.
+
+A linha `/IRQ` do 6809 só chega ao pino 1 de cima do CN1. Um cartucho com hardware próprio pode
+gerar interrupções por ali, com a rotina em `$0039` e `ANDCC #$EF`.
 
 ## 5. Orçamento de processamento
 

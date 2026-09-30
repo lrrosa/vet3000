@@ -20,7 +20,9 @@
 *   - Segurar EXT MODE ao ligar pula o cartucho.
 *   - No editor do titulador, SHIFT+EXT MODE volta à demo: o cartucho troca
 *     esse comando (que só repetia o EXT MODE) na tabela em RAM do firmware.
-*   - Sincronismo por SYNC com IRQ mascarada (INT do VDP), sem vetores.
+*   - Sincronismo lendo o bit F do status do VDP, com IRQ e FIRQ mascaradas.
+*     No aparelho o /INT do VDP não está ligado ao IRQ do 6809 (medido), então
+*     SYNC travaria; no MAME o driver liga os dois e esconderia o problema.
 *   - Entre acessos à porta de dados do VDP há sempre >= 8 ciclos
 *     (8,9 us a 0,895 MHz), o pior caso do TMS9128 na área ativa.
 * ===========================================================================
@@ -36,8 +38,8 @@ COL		equ	$2000		; cores: bancos em $2000/$2800/$3000
 NAMES		equ	$3800
 SPRATT		equ	$3B00
 
-R1_ON		equ	$E2		; 16K | imagem | IE | sprites 16x16
-R1_OFF		equ	$A2		; 16K | IE | sprites 16x16 (imagem desligada)
+R1_ON		equ	$C2		; 16K | imagem | sprites 16x16 (sem IE)
+R1_OFF		equ	$82		; 16K | sprites 16x16 (imagem desligada)
 
 * ---- teclas (bits de 'keys')
 K_LEFT		equ	$01
@@ -180,7 +182,7 @@ entry		ldd	EXIT_MAGIC		; voltando da demo por EXT MODE?
 		std	CMD_TABLE+2*CMD_SHIFT_EXT	; passa a trazer a demo de volta
 		rts
 
-start		orcc	#$50			; IRQ e FIRQ mascaradas (usamos SYNC)
+start		orcc	#$50			; IRQ e FIRQ mascaradas (sem interrupções)
 		lds	#STACK_TOP
 		lda	#$02
 		sta	vdp_r0
@@ -278,7 +280,8 @@ vdp_unrle	ldb	,X+
 		bra	vdp_unrle
 3		rts
 
-* wait_frame: espera o fim do quadro (INT do VDP na linha IRQ) e o reconhece
+* wait_frame: espera o fim do quadro lendo o status do VDP até o bit F, como
+* o firmware (VDP_WAIT_VBLANK). Se o F já estava ligado, volta na hora.
 wait_frame
 		if DEBUG
 		tst	dbg_skip		; dbg_done já esperou o quadro
@@ -286,8 +289,8 @@ wait_frame
 		clr	dbg_skip
 		bra	2F
 		endif
-1		sync
-		lda	VDP_CTRL		; ler o status apaga a INT
+1		lda	VDP_CTRL		; bit 7 = F; a leitura zera o F
+		bpl	1B
 2		inc	frame
 		rts
 
@@ -400,7 +403,7 @@ sat_copy
 * ---------------------------------------------------------------------------
 calibrate	lda	#R1_OFF
 		ldb	#1
-		lbsr	vdp_reg			; liga a INT do VDP
+		lbsr	vdp_reg			; R1 sem IE, imagem desligada
 		ldu	#$FFFF			; menor medida
 		lda	#3
 		sta	cnt

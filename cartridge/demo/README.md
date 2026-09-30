@@ -136,7 +136,10 @@ podem usar essa área; a demo antiga usava `$0190` para sprites e pode invalidar
   EXT MODE ser solta (apertada, ela faria o boot pular o cartucho) e reinicia a máquina. O firmware
   recria a tabela a cada boot, então sem o cartucho o titulador volta a ser o original. Na tela de
   abertura do titulador o EXT MODE é tratado direto pela ROM; o atalho vale no editor.
-- Sincroniza por `SYNC` com a IRQ mascarada, sem precisar dos vetores em RAM.
+- Sincroniza lendo o bit F do status do VDP, como o firmware, com IRQ e FIRQ mascaradas. No aparelho,
+  o `/INT` do VDP não está ligado ao IRQ do 6809 (medido), então esperar com `SYNC` travaria. As
+  imagens anteriores a 29/09/2026 usavam `SYNC`. Funcionavam no MAME, cujo driver liga o `/INT` ao
+  IRQ, mas no VET real ficariam paradas na tela preta, no primeiro quadro.
 - Mantém sempre 8 ciclos ou mais entre acessos à porta de dados do VDP.
 - **Calibração:** no início mede os ciclos por quadro e define quantos passos de lógica roda por
   quadro (1 no aparelho a 60 Hz, 3 no MAME 0.289 a 20 Hz). A velocidade fica igual nos dois.
