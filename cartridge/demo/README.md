@@ -1,4 +1,4 @@
-# Cartucho de demonstração: VET 3000 DEMO 1.1
+# Cartucho de demonstração: VET 3000 DEMO 1.4
 
 Copyright © 2026 Leonardo Roman da Rosa, sob a GPL-3.0-or-later.
 
@@ -29,7 +29,8 @@ encontra a assinatura `"OBJECT"` e passa o controle para a demo.
   códigos ASCII que os textos não usam (`#`, `%`, `_`, `&`, `[`, `\`, `^`, `]`). O `gen_assets.py`
   faz a tradução, então os textos são escritos normalmente ("ESPAÇO: LANÇA").
 - **Scroller suave** de 2 pixels por quadro. Cada um dos 256 bytes é `(glifo << s) | (próximo >> 8−s)`,
-  lido de **fontes pré-deslocadas** guardadas na ROM do cartucho (4 KB de tabelas). O custo é de 15
+  lido de **fontes pré-deslocadas** guardadas na ROM do cartucho, contendo apenas os glifos usados
+  no letreiro para liberar espaço para o jogo. O custo é de 15
   ciclos por byte (`LDA n,X` / `ORA n,Y` / `STA`), sem buffer em RAM.
 - **Sprites** 16×16 numa curva de Lissajous. A ordem na tabela de atributos gira a cada quadro para
   contornar o limite de 4 sprites por linha, e os sprites piscam em vez de sumir.
@@ -43,26 +44,90 @@ encontra a assinatura `"OBJECT"` e passa o controle para a demo.
 
 **QUEBRA-TIJOLO**
 
-- Tijolos com relevo em 6 cores (tiles com cor por linha), paredes, placar em BCD, 4 vidas e 4 fases
-  que se repetem, cada vez mais rápidas.
+**Ciclo de demonstração:** a abertura permanece até completar o scroller. Em seguida,
+a CPU joga três fases sorteadas, por até 10 segundos cada; o top 10 aparece por 8 segundos,
+e a abertura retorna. ESPAÇO inicia uma partida nova em qualquer dessas telas. Pontos da CPU
+nunca entram nos recordes. O atalho RETURN para consultar o ranking continua disponível,
+mas não aparece como anúncio na abertura.
+
+- Campanha inspirada em **Arkanoid**, com **32 arenas diferentes e um chefão na fase 33**.
+  Cada arena tem nome próprio e até 10 fileiras de 15 tijolos: escadaria, pirâmide, invasor,
+  castelo, colmeia, labirinto, portais, reator etc. As fases não são apenas espelhamentos.
+- Tijolos coloridos de uma batida; **prateados de duas batidas** distribuídos conforme o desenho;
+  **dourados indestrutíveis** formando obstáculos e passagens. Só os destrutíveis contam para
+  completar a fase. O teste de mapas verifica que nenhum fica selado atrás de ouro.
+- Quatro vidas iniciais e dificuldade crescente, até a velocidade vertical de 3 pixels por passo.
+- Nome da fase e instruções centralizados, fases indicadas com dois dígitos (01–33),
+  moldura metálica segmentada e raquete com corpo claro e terminais vermelhos.
+- A cada quatro tijolos destruídos pode cair uma cápsula (uma por vez). Pegue com a raquete:
+  **E** aumenta a raquete de 32 para 48 pixels; **S** reduz pela metade o movimento da bola;
+  **V** dá uma vida extra, até o limite de 9; **C** prende a bola à raquete no rebote (ESPAÇO relança);
+  **B** abre a saída na parede direita (leve a raquete até ela para avançar);
+  **L** permite disparar laser com ESPAÇO enquanto a bola está em jogo, um tiro por vez.
+  E, S, C e L duram até perder a bola ou mudar de fase. A saída B fica aberta até mudar de fase.
+  Laser também quebra prata em duas batidas; ouro bloqueia o tiro.
+- **GUARDIÃO**, chefão final original: máscara de 64×64, 24 pontos de energia visíveis,
+  movimento lateral, projéteis dirigidos à posição da raquete no momento do disparo e breve
+  invulnerabilidade após cada dano. Cada acerto vale 100 pontos. A fase final fornece laser,
+  inclusive após perder uma vida. Derrotá-lo encerra a campanha e leva ao ranking.
+- Pausa com indicação na tela, pontuação limitada a **999999** e ranking de **10 recordes**
+  com três iniciais A–Z. Empates ficam depois dos registros anteriores; zero não entra.
 - Bola e raquete são sprites. A física usa ponto fixo 8.8, colisão por eixo com os tijolos (mapa de
-  bits de 6 × 16 bits em RAM) e ângulo de rebote pela posição na raquete (8 zonas).
+  bits de 10 × 16 bits em RAM, mais máscaras de prata/ouro) e ângulo de rebote pela posição na
+  raquete (8 zonas).
+- O lançamento parado alterna esquerda/direita. Segurar uma direção ao lançar escolhe o lado;
+  o rebote durante a partida depende do ponto de contato, com a referência no centro da bola.
+
+![Atlas das 32 arenas](../../docs/img/demo_fases.png)
+
+![Chefão Guardião](../../docs/img/demo_chefe.png)
 
 ## Controles
 
 | Tecla | Ação |
 |---|---|
-| ESPAÇO | Começa o jogo e lança a bola |
+| ESPAÇO | Começa o jogo, lança/solta a bola e dispara com o bônus L |
 | Z / X, O / P, ←→ (com SHIFT = direita) | Move a raquete |
-| RETURN | Pausa |
+| RETURN | Pausa no jogo; abre o top 10 na abertura |
+| A–Z, na entrada de iniciais | Digita a letra e avança; na terceira posição, permite substituir a última letra |
+| RETURN, na entrada de iniciais | Confirma o nome |
+| ESPAÇO, na entrada de iniciais | Avança uma posição; na última, confirma |
+| ESPAÇO ou RETURN, no ranking | Volta à abertura |
 | V | Sobrepõe ao vídeo externo |
 | EXT MODE | Volta ao titulador |
 | EXT MODE segurado ao ligar | Pula o cartucho |
 | SHIFT+EXT MODE, no editor do titulador | Volta à demo |
 
+## Recordes na SRAM com bateria
+
+O top 10 ocupa **64 bytes em `$0190-$01CF`**, na parte inferior da antiga área de pilha.
+A pilha continua começando em `$0200`, com 48 bytes em `$01D0-$01FF`. A abertura usa `$0040`
+para barras/sprites alternadamente. No jogo, `$0040-$0067` guarda prata/ouro, `$006B-$0083`
+os sprites e `$0084-$0097` os tijolos. `$0080-$0083` volta a receber `EXIT` antes de retornar
+ao titulador; não é usado como assinatura durante a partida.
+Nenhuma página de texto ou atributo do titulador foi reservada ou reduzida.
+
+Formato: assinatura `B2` (2 bytes), soma de verificação de 16 bits em big-endian (2 bytes),
+seguida por dez registros de 6 bytes: pontuação BCD de 3 bytes, mais três letras ASCII.
+A assinatura é invalidada antes de cada alteração e gravada por último. Dados sem assinatura
+válida ou com soma incorreta são reinicializados. Interromper uma gravação pode zerar o ranking
+no próximo boot; não há cópia redundante. Cada letra escolhida é salva imediatamente.
+
+A alimentação **+3 V BAT** já mantém a HY6264 do VET 3000: com a bateria e seu circuito funcionando,
+os scores permanecem com o aparelho desligado, assim como os títulos. Se a bateria descarregar
+ou for removida, os dados podem se perder.
+
+Testado com o firmware **v2.1** no MAME: entrada de iniciais, retorno ao titulador e à demo,
+preservação de todos os bytes de texto/atributos e retenção entre dois processos usando a mesma
+NVRAM. O desligamento físico ainda precisa ser confirmado no aparelho. Outros firmwares/cartuchos
+podem usar essa área; a demo antiga usava `$0190` para sprites e pode invalidar os recordes.
+
 ## Regras de convivência com o firmware
 
-- Usa só `$0000-$002F`, `$0040-$009F` e `$0190-$01FF`. **Os títulos gravados na RAM ficam intactos**:
+- Usa `$0000-$002F`, `$0035-$003D` (estado de demonstração/teclado), `$0040-$009F`,
+  `$0190-$01CF` (ranking) e `$01D0-$01FF` (pilha). Os vetores em `$0039-$003D`
+  não são usados como vetores durante a demo, que mantém IRQ/FIRQ mascaradas.
+  **Os títulos gravados na RAM ficam intactos**:
   testado no MAME digitando um título, saindo com EXT MODE, voltando à demo com SHIFT+EXT MODE e de
   novo ao titulador.
 - **Volta do titulador para a demo:** sempre que devolve o controle ao firmware (saída por EXT MODE
@@ -76,7 +141,9 @@ encontra a assinatura `"OBJECT"` e passa o controle para a demo.
 - **Calibração:** no início mede os ciclos por quadro e define quantos passos de lógica roda por
   quadro (1 no aparelho a 60 Hz, 3 no MAME 0.289 a 20 Hz). A velocidade fica igual nos dois.
 
-## Orçamento de ciclos (build DEBUG, medido no MAME)
+## Orçamento de ciclos (referência da versão 1.1)
+
+As medidas abaixo são anteriores aos bônus e ao ranking da versão 1.2.
 
 | Cena | Trabalho por quadro | Orçamento a 60 Hz |
 |---|---|---|
@@ -100,6 +167,10 @@ No Windows: `.\build.ps1` ou `.\build.ps1 -Debug`. Use `-Asm C:\caminho\asm6809.
 | Arquivo | Conteúdo |
 |---|---|
 | `demo.asm` | Programa (6809, sintaxe asm6809) |
+| `breakout.inc` | Seis cápsulas, efeitos, ranking e persistência em SRAM |
+| `boss.inc` | Chefão final, energia, movimento, projéteis e dano |
+| `attract.inc` | Ciclo de demonstração, controle da CPU, sorteio de fases e lançamento |
+| `levels.py` | 32 arenas originais (vazio, normal, prata, ouro) |
 | `gen_assets.py` | Fonte 8×8 original (com Ç, Ã, Á, É, Ê, Í, Ó, Ú), textos, logotipo, telas (RLE), fontes pré-deslocadas, seno, tijolos, fases → `assets.inc` |
 | `assets.inc` | Gerado; versionado para montar sem Python |
 | `pad.py` | Completa a imagem até 16 KB |

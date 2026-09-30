@@ -78,7 +78,9 @@ completo em [../mame/vet3000.cpp](../mame/vet3000.cpp)):
   `bin,rom`) mapeado em `$4000-$7FFF`, para usar `mame vet3000 -cart vet3000_demo.bin`;
 - comentários do driver atualizados com a descrição do CN1 e do protocolo `"OBJECT"`/`"FONT"`.
 
-**O patch não foi compilado**: não havia ambiente de compilação do MAME nesta máquina. Ele segue o
-padrão de outros drivers com `GENERIC_CARTSLOT`, mas antes de enviar ao MAME é preciso compilar
-(`make SUBTARGET=vet SOURCES=src/mame/tms/vet3000.cpp`), testar e, de preferência, confirmar o clock no
-aparelho real.
+**Built and tested on September 27–28, 2026**, on Windows x64 with MSYS2 UCRT64
+and GCC 16.2.0, based on MAME commit `02342fb0547a9a9934d63b5e8708126b7b644007`.
+The unchanged patch passed internal validation, native cartridge boot, the
+**59.922738 Hz** refresh check, and **515 regression cases**.
+See the [validation report](../mame/VALIDATION.md) for commands and limitations.
+Submitted as [MAME PR #16276](https://github.com/mamedev/mame/pull/16276).

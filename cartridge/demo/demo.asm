@@ -13,7 +13,8 @@
 *
 *  Regras seguidas para conviver com o firmware v2.1:
 *   - Usa só RAM que o titulador reinicializa ou não usa: $0000-$002F,
-*     $0035-$009F e $0190-$01FF. Os textos ($00A0-$018F, $0200-$1FFF) e a
+*     $0035-$009F e $01D0-$01FF. Reserva $0190-$01CF para o top 10.
+*     Os textos ($00A0-$018F, $0200-$1FFF) e a
 *     assinatura "POWER" ($0030-$0034) ficam intactos.
 *   - EXT MODE volta ao titulador (reset com a marca "EXIT" em $0080).
 *   - Segurar EXT MODE ao ligar pula o cartucho.
@@ -95,16 +96,55 @@ logo_theme	equ	$2D		; tema de cores (0..LOGO_THEMES-1)
 logo_pos	equ	$2E		; linhas já trocadas para o tema
 logo_timer	equ	$2F		; passos até a próxima troca
 * $30-$34: "POWER" do titulador - não tocar
+attract_mode equ $35           ; 0 player, 1 CPU game, 2 timed ranking
+attract_timer equ $36          ; 16-bit logic ticks
+attract_count equ $38
+attract_rng equ $39
+attract_prev equ $3A
+scroll_done equ $3B
+alpha_last equ $3C
+attract_keys equ $3D
 CMD_TABLE	equ	$0040		; tabela de comandos do titulador (recriada no boot)
 CMD_SHIFT_EXT	equ	$15		; código de SHIFT+EXT MODE
 BARBUF		equ	$0040		; 64 bytes: cor de cada linha das barras
 EXIT_MAGIC	equ	$0080		; "EXIT" = voltar ao titulador após o reset
-BRICKS		equ	$0084		; 6 palavras: tijolos de cada linha (bit15 = coluna 0)
+BRICKS		equ	$0084		; 10 palavras: tijolos de cada linha (bit15 = coluna 0)
 dbg_warm	equ	$0098		; build DEBUG: quadros a ignorar no início da cena
 dbg_skip	equ	$0099		; build DEBUG: quadro já sincronizado
 DBG_FRAME	equ	$009A		; build DEBUG: voltas de 13 ciclos num quadro inteiro
 DBG_MINIDLE	equ	$009C		; build DEBUG: menor sobra (voltas) já medida
-SAT		equ	$0190		; cópia da tabela de atributos de sprites (33 bytes)
+SAT		equ	$0040		; cópia da tabela de atributos de sprites (33 bytes)
+* BARBUF and SAT share RAM: title uploads bars before building sprites.
+* Game aliases title-only scratch. Armor/gold live where the title draws bars.
+power_kind equ $0B
+power_x equ $0C
+power_y equ $0D
+power_clock equ $0E
+wide equ $0F
+slow equ $10
+sticky equ $11
+gate equ $12
+laser equ $13
+shot_x equ $14
+shot_y equ $15
+shot_active equ $16
+launch_dir equ $17
+boss_col equ $2D
+boss_dir equ $2E
+boss_flash equ $2F
+boss_tick equ $60              ; boss arena does not use GOLD masks
+boss_bolt_dx equ $5F
+ARMOR equ $40                  ; 10 mutable row masks (two-hit silver)
+GOLD equ $54                   ; 10 immutable row masks (indestructible)
+GAME_SAT equ $6B               ; six sprites + terminator, ends at $83
+brick_color equ $68
+brick_gold equ $69             ; draw-only shifting gold mask
+hs_pos equ $61                 ; ranking aliases game-only masks
+hs_letter equ $62
+hs_row equ $63
+HS equ $0190                   ; 64 battery-backed bytes, outside title storage
+HS_DATA equ HS+4               ; ten entries: 3 BCD bytes, 3 ASCII initials
+HS_END equ HS+64
 STACK_TOP	equ	$0200
 
 		setdp	0
@@ -116,7 +156,7 @@ STACK_TOP	equ	$0200
 		fcc	"OBJECT"		; assinatura
 		fdb	cart_vec		; a ROM faz LDX [$4006]: ponteiro para...
 cart_vec	fdb	entry-$4000		; ...o deslocamento da entrada (JSR $4000,X)
-		fcc	"VET 3000 DEMO 1.1 (C) 2026 LEONARDO ROMAN DA ROSA - GPL-3.0",0
+		fcc	"VET 3000 DEMO 1.4 (C) 2026 LEONARDO ROMAN DA ROSA - GPL-3.0",0
 
 * ===========================================================================
 *  Entrada: chamada pela ROM com JSR durante o boot (VDP já inicializado,
@@ -148,7 +188,12 @@ start		orcc	#$50			; IRQ e FIRQ mascaradas (usamos SYNC)
 		sta	backdrop
 		lbsr	vdp_init
 		lbsr	calibrate
-main_loop	lbsr	title
+		clr	attract_mode
+		lda	frame
+		eora	#$A7
+		sta	attract_rng
+main_loop	lbsr	hs_init
+		lbsr	title
 		lbsr	game
 		bra	main_loop
 
@@ -307,9 +352,35 @@ hide_sprites	ldd	#SPRATT
 		rts
 
 * put_sat: copia a tabela de sprites da RAM (termina no Y = $D0)
+put_game_sat	ldd	#SPRATT
+		lbsr	vdp_wr
+		ldx	#GAME_SAT
+                lbsr sat_copy
+* Append the right red cap directly to VRAM, without expanding the RAM table.
+                tfr x,d
+                subd #GAME_SAT+1
+                addd #SPRATT
+                lbsr vdp_wr
+                lda #PADDLE_Y-2
+                sta VDP_DATA
+                lda paddle_x
+                adda #24
+                adda wide
+                sta VDP_DATA
+                lda #44
+                nop
+                sta VDP_DATA
+                lda #C_LRED
+                nop
+                sta VDP_DATA
+                lda #$D0
+                nop
+                sta VDP_DATA
+                rts
 put_sat		ldd	#SPRATT
 		lbsr	vdp_wr
 		ldx	#SAT
+sat_copy
 1		lda	,X+
 		sta	VDP_DATA
 		cmpa	#$D0
@@ -478,6 +549,7 @@ title		lbsr	screen_off
 		ldd	#SCROLL_TEXT
 		std	scroll_ptr
 		clr	scroll_s
+		clr	scroll_done
 		clr	blink
 		clr	keys
 		clr	logo_theme		; o logotipo começa no tema gravado na tela
@@ -486,17 +558,18 @@ title		lbsr	screen_off
 		lda	#LOGO_HOLD
 		sta	logo_timer
 		lbsr	build_bars
+		lbsr	put_bars
 		lbsr	build_balls
 		lbsr	put_sat
-		lbsr	put_bars
 		lbsr	wait_frame
 		lbsr	screen_on
 		lbsr	dbg_scene
 
 title_loop	lbsr	wait_frame
 		* --- atualizações de VRAM (começam no apagamento vertical)
-		lbsr	put_sat
 		lbsr	put_bars
+		lbsr	build_balls
+		lbsr	put_sat
 		lbsr	put_scroller
 		lda	frame
 		anda	#31
@@ -510,7 +583,6 @@ title_loop	lbsr	wait_frame
 		decb
 		bne	2B
 		lbsr	build_bars
-		lbsr	build_balls
 		lbsr	dbg_done
 		lbsr	read_keys
 		lda	keys_new
@@ -520,9 +592,21 @@ title_loop	lbsr	wait_frame
 		beq	3F
 		lbsr	toggle_video
 3		lda	keys_new
+		bita	#K_PAUSE
+		beq	4F
+		lbsr	game_tiles_init
+		lbsr	hs_show
+		lbra	title
+4		lda	keys_new
 		bita	#K_FIRE
-		beq	title_loop
-		rts
+                bne 5F
+                tst scroll_done
+                lbeq title_loop
+                lda #1
+                sta attract_mode
+                rts
+5               clr attract_mode
+                rts
 
 * names_seq: escreve 0..255 na tabela de nomes (endereço já definido)
 names_seq	clra
@@ -548,6 +632,7 @@ title_step	lda	bar_phase
 		cmpx	#SCROLL_WRAP
 		bne	2F
 		ldx	#SCROLL_TEXT
+		inc	scroll_done
 2		stx	scroll_ptr
 		clra
 1		sta	scroll_s
@@ -835,7 +920,7 @@ FIELD_R		equ	248
 FIELD_T		equ	16
 BRICK_Y		equ	24		; linha de tiles 3
 
-game		lbsr	screen_off
+game_tiles_init	lbsr	screen_off
 		lbsr	hide_sprites
 		* tiles do jogo nos 3 bancos
 		clr	cnt
@@ -860,6 +945,8 @@ game		lbsr	screen_off
 		lda	cnt
 		cmpa	#3
 		bne	1B
+		rts
+game		lbsr	game_tiles_init
 		* variáveis
 		lda	#4
 		sta	lives
@@ -868,22 +955,31 @@ game		lbsr	screen_off
 		clr	score+1
 		clr	score+2
 		clr	paused
+		clr	launch_dir
 		ldd	#$0180
 		std	speed
-new_level	lbsr	screen_off
+                tst attract_mode
+                beq new_level
+                lda #3
+                sta attract_count
+                lda #255
+                sta attract_prev
+                lbsr attract_pick
+new_level	clr	gate
+		lbsr	screen_off
 		lbsr	draw_field
 		lbsr	load_level
 		lbsr	draw_bricks
 		lbsr	draw_status
 		lbsr	serve
 		lbsr	game_sprites
-		lbsr	put_sat
+		lbsr	put_game_sat
 		lbsr	wait_frame
 		lbsr	screen_on
 		lbsr	dbg_scene
 
 game_loop	lbsr	wait_frame
-		lbsr	put_sat
+		lbsr	put_game_sat
 		lda	dirty
 		beq	1F
 		lbsr	draw_status
@@ -894,10 +990,28 @@ game_loop	lbsr	wait_frame
 		bita	#K_VIDEO
 		beq	2F
 		lbsr	toggle_video
-2		lda	keys_new
+2               tst attract_mode
+                beq 6F
+                lda keys
+                bita #K_FIRE
+                lbne attract_start
+                lbsr attract_update
+                tsta
+                lbne attract_next
+                bra 3F
+6		lda	keys_new
 		bita	#K_PAUSE
 		beq	3F
 		com	paused
+		ldx	#msg_pause
+		tst	paused
+		bne	5F
+		ldx	#msg_blank
+		tst	ball_state
+		bne	5F
+		ldx	#msg_serve
+5		ldd	#NAMES+14*32
+		lbsr	print_centered
 3		tst	paused
 		bne	game_loop
 		ldb	ticks
@@ -911,11 +1025,21 @@ game_loop	lbsr	wait_frame
 		decb
 		bne	4B
 		lbsr	game_sprites
+		tst	attract_mode
+		beq	7F
+		lda	attract_keys
+		sta	keys
+7
 		lbsr	dbg_done
 		bra	game_loop
 
-level_done	lbsr	draw_status		; inclui os pontos do último tijolo
+level_done	tst	attract_mode
+		lbne	attract_next
+		lbsr	draw_status		; inclui os pontos do último tijolo
 		inc	level
+		lda	level
+		cmpa	#NUM_LEVELS+1
+		lbeq	campaign_done
 		ldd	speed			; mais rápido a cada fase
 		cmpd	#$0300
 		bhs	1F
@@ -928,14 +1052,16 @@ level_done	lbsr	draw_status		; inclui os pontos do último tijolo
 		lbsr	pause_frames
 		lbra	new_level
 
-game_over	lbsr	draw_status
+game_over	tst	attract_mode
+		lbne	attract_next
+		lbsr	draw_status
 		lbsr	hide_sprites
 		ldx	#msg_over
 		ldd	#NAMES+12*32+10
 		lbsr	print_at
 		ldb	#180
 		lbsr	pause_frames
-		rts
+		lbra	hs_game_over
 
 * pause_frames: espera B passos de 1/60 s (ou ESPAÇO)
 * (as mensagens msg_* ficam em assets.inc, com acentos)
@@ -944,12 +1070,28 @@ pause_frames	pshs	b
 		lbsr	read_keys
 		puls	b
 		lda	keys_new
+		bita	#K_EXIT
+		lbne	exit_to_titler
 		bita	#K_FIRE
 		bne	2F
 		subb	ticks
 		bhi	pause_frames
 2		rts
 
+
+* X = text, D = first cell of row; center on the 32-column display.
+print_centered  pshs d,x
+                ldb #32
+1               lda ,X+
+                beq 2F
+                decb
+                bra 1B
+2               lsrb
+                clra
+                addd ,S
+                ldx 2,S
+                leas 4,S
+                lbra print_at
 
 * print_at: X = texto (ASCII, 0 no fim), D = endereço na tabela de nomes
 print_at	lbsr	vdp_wr
@@ -979,12 +1121,12 @@ draw_field	ldd	#NAMES
 		addd	#NAMES
 		std	tmp
 		lbsr	vdp_wr
-		lda	#T_WALL
+		lbsr	wall_tile
 		sta	VDP_DATA
 		ldd	tmp
 		addd	#31
 		lbsr	vdp_wr
-		lda	#T_WALL
+		lbsr	wall_tile
 		sta	VDP_DATA
 		inc	cnt
 		lda	cnt
@@ -992,7 +1134,33 @@ draw_field	ldd	#NAMES
 		bne	1B
 		ldx	#msg_hud
 		ldd	#NAMES
-		lbra	print_at
+		lbsr	print_at
+		ldx	#power_help
+		tst	attract_mode
+		beq	7F
+		ldx	#attract_help
+7		ldd	#NAMES+23*32
+		lbsr	print_centered
+		lda	level
+		cmpa	#NUM_LEVELS
+		beq	8F
+		anda	#31
+		lsla
+		ldx	#LEVEL_NAMES
+		ldx	A,X
+		bra	9F
+8		ldx	#msg_boss
+9
+		ldd	#NAMES+2*32
+		lbra	print_centered
+
+* Metal rails have a joint every four tiles instead of a rivet every eight pixels.
+wall_tile       lda #T_WALL
+                ldb cnt
+                andb #3
+                bne 1F
+                lda #68
+1               rts
 
 * draw_status: placar (BCD), vidas e fase
 draw_status	clr	dirty
@@ -1021,16 +1189,19 @@ draw_status	clr	dirty
 		ldd	#NAMES+29
 		lbsr	vdp_wr
 		clra
+		sta	VDP_DATA
 		ldb	level
 		addd	#1			; 1..256, sem overflow de 8 bits
-		ldx	#100
-		lbsr	status_digit
+		cmpd	#99
+		bls	2F
+		ldd	#99
+2
 		ldx	#10
 		lbsr	status_digit
 		ldx	#1
 		lbra	status_digit
 
-* D = resto; X = divisor decimal. Sempre escreve três dígitos (001..256).
+* D = resto; X = divisor decimal. Dois dígitos (01..33 no jogo; satura em 99).
 status_digit	stx	tmp
 		clr	cnt
 1		cmpd	tmp
@@ -1046,36 +1217,59 @@ status_digit	stx	tmp
 		rts
 
 * load_level: copia o desenho da fase (level mod NUM_LEVELS) e conta os tijolos
-load_level	lda	level
-1		cmpa	#NUM_LEVELS
-		blo	2F
-		suba	#NUM_LEVELS
-		bra	1B
-2		ldb	#12
-		mul
-		ldx	#LEVELS
-		abx
-		ldu	#BRICKS
-		ldb	#12
-3		lda	,X+
-		sta	,U+
-		decb
-		bne	3B
-		clr	bricks_left		; conta bits
-		ldu	#BRICKS
-		ldb	#12
-4		lda	,U+
-5		lsla
-		bcc	6F
-		inc	bricks_left
-6		tsta
-		bne	5B
-		decb
-		bne	4B
-		rts
+load_level	lda level
+                cmpa #NUM_LEVELS
+                lbeq boss_init
+                anda #31
+                lsla
+                ldx #LEVELS
+                ldx A,X
+                ldu #ARMOR
+                lbsr level_unpack
+                clr hitcnt
+                clr bricks_left
+                ldx #BRICKS
+                ldu #GOLD
+                ldb #20
+1               lda ,U+
+                coma
+                anda ,X+
+2               lsla
+                bcc 3F
+                inc bricks_left
+3               tsta
+                bne 2B
+                decb
+                bne 1B
+                rts
+
+* ROM RLE -> ARMOR[20], GOLD[20], BRICKS[20]; leave all other RAM alone.
+level_unpack    ldb ,X+
+                beq 9F
+                bmi 2F
+1               lda ,X+
+                bsr level_store
+                decb
+                bne 1B
+                bra level_unpack
+2               subb #$7E
+                lda ,X+
+3               bsr level_store
+                decb
+                bne 3B
+                bra level_unpack
+9               rts
+level_store     sta ,U+
+                cmpu #GOLD+20
+                bne 1F
+                ldu #BRICKS
+1               rts
 
 * draw_bricks: desenha as 6 linhas de tijolos (linhas de tela 3..8)
-draw_bricks	clr	cnt			; linha de tijolos 0..5
+draw_bricks	lda	level
+		cmpa	#NUM_LEVELS
+		lbeq	boss_draw
+		clr	cnt
 1		lda	cnt
 		adda	#3
 		ldb	#32
@@ -1087,16 +1281,45 @@ draw_bricks	clr	cnt			; linha de tijolos 0..5
 		lsla
 		ldd	A,X
 		std	tmp			; máscara da linha
+		ldx	#ARMOR
 		lda	cnt
 		lsla
+		ldd	A,X
+		std	tmp2
+		ldx	#GOLD
+		lda	cnt
+		lsla
+		ldd	A,X
+		std	brick_gold
+		lda	cnt
+		cmpa	#6
+		blo	6F
+		suba	#6
+6		lsla
 		adda	#T_BRICK
-		sta	tmp2			; tile esquerdo desta linha
+		sta	brick_color
 		ldb	#15
-2		lsl	tmp+1
+2		lsl	brick_gold+1
+		rol	brick_gold
+		pshs	cc
+		lsl	tmp2+1
+		rol	tmp2
+		pshs	cc
+		lsl	tmp+1
 		rol	tmp
 		bcc	3F
-		lda	tmp2
-		sta	VDP_DATA
+		lda	1,S
+		bita	#1
+		beq	7F
+		lda	#86
+		bra	5F
+7		lda	,S
+		bita	#1
+		beq	6F
+		lda	#84
+		bra	5F
+6		lda	brick_color
+5		sta	VDP_DATA
 		inca
 		nop
 		sta	VDP_DATA
@@ -1106,24 +1329,38 @@ draw_bricks	clr	cnt			; linha de tijolos 0..5
 		nop
 		nop
 		sta	VDP_DATA
-4		decb
+4		leas	2,S
+		decb
 		bne	2B
 		inc	cnt
 		lda	cnt
-		cmpa	#6
-		bne	1B
+		cmpa	#BRICK_ROWS
+		lbne	1B
 		rts
 
 * serve: bola presa no centro da raquete
-serve		lda	#112
+serve		clr	sticky
+		clr	laser
+		lda	level
+		cmpa	#NUM_LEVELS
+		bne	8F
+		inc	laser
+8
+		clr	shot_active
+		clr	power_kind
+		clr	wide
+		clr	slow
+		lda	#112
 		sta	paddle_x
 		clr	ball_state
 		bsr	stick_ball
 		ldx	#msg_serve
-		ldd	#NAMES+14*32+9
-		lbra	print_at
+		ldd	#NAMES+14*32
+		lbra	print_centered
 
-stick_ball	lda	paddle_x
+stick_ball	lda	wide
+		lsra
+		adda	paddle_x
 		adda	#13
 		clrb
 		std	ball_x
@@ -1132,7 +1369,7 @@ stick_ball	lda	paddle_x
 		rts
 
 * game_sprites: bola (sprite 0) e raquete (sprites 1 e 2)
-game_sprites	ldu	#SAT
+game_sprites	ldu	#GAME_SAT
 		lda	ball_y
 		deca
 		sta	,U+
@@ -1148,25 +1385,74 @@ game_sprites	ldu	#SAT
 		sta	,U+
 		lda	#8			; padrão 2 = raquete esquerda
 		sta	,U+
-		lda	#C_LBLUE
+		lda	#C_LRED
 		sta	,U+
 		lda	#PADDLE_Y-1-1
 		sta	,U+
 		lda	paddle_x
-		adda	#16
+		adda	#8
 		sta	,U+
 		lda	#12			; padrão 3 = raquete direita
 		sta	,U+
-		lda	#C_LBLUE
+		lda	#C_WHITE
 		sta	,U+
-		lda	#$D0
+		tst	wide
+		beq	1F
+		lda	#PADDLE_Y-2
+		sta	,U+
+		lda	paddle_x
+		adda	#24
+		sta	,U+
+		lda	#12
+		sta	,U+
+		lda	#C_WHITE
+		sta	,U+
+1		tst	power_kind
+		beq	2F
+		lda	power_y
+		deca
+		sta	,U+
+		lda	power_x
+		sta	,U+
+		lda	power_kind
+		lsla
+		lsla
+		adda	#12
+		sta	,U+
+		lda	#C_LYELLOW
+		ldb	power_kind
+		cmpb	#7
+		bne	4F
+		lda	#C_LRED
+4
+		sta	,U+
+2		tst	shot_active
+		beq	3F
+		lda	shot_y
+		deca
+		sta	,U+
+		lda	shot_x
+		sta	,U+
+		lda	#40
+		sta	,U+
+		lda	#C_LRED
+		sta	,U+
+3		lda	#$D0
 		sta	,U
 		rts
 
 * ---------------------------------------------------------------------------
 *  game_step: um passo de 1/60 s
 * ---------------------------------------------------------------------------
-game_step	lda	keys			; raquete
+game_step	lbsr	power_step
+		lbsr	boss_step
+		lbsr	gate_step
+		tst	bricks_left
+		lbeq	step_done
+		lbsr	laser_step
+		tst	bricks_left
+		lbeq	step_done
+		lda	keys			; raquete
 		bita	#K_LEFT
 		beq	1F
 		ldb	paddle_x
@@ -1180,9 +1466,14 @@ game_step	lda	keys			; raquete
 		beq	1F
 		ldb	paddle_x
 		addb	#3
-		cmpb	#FIELD_R-32
-		bls	2F
+		pshs	b
 		ldb	#FIELD_R-32
+		subb	wide
+		stb	tmp
+		puls	b
+		cmpb	tmp
+		bls	2F
+		ldb	tmp
 2		stb	paddle_x
 1		tst	ball_state
 		bne	ball_move
@@ -1191,20 +1482,22 @@ game_step	lda	keys			; raquete
 		bita	#K_FIRE
 		beq	9F
 		inc	ball_state		; lança
-		ldd	#$00C0
+		lbsr	launch_velocity
 		std	ball_dx
 		ldd	#0
 		subd	speed
 		std	ball_dy
 		ldx	#msg_blank
-		ldd	#NAMES+14*32+9
-		lbsr	print_at
-9		clr	keys_new		; o lançamento só vale num passo
+		ldd	#NAMES+14*32
+		lbsr	print_centered
+9
+step_done	clr	keys_new		; o lançamento só vale num passo
 		rts
 
 ball_move	* --- eixo X
-		ldd	ball_x
-		addd	ball_dx
+		ldd	ball_dx
+		lbsr	slow_delta
+		addd	ball_x
 		std	ball_x
 		cmpa	#FIELD_L
 		bhs	1F
@@ -1226,12 +1519,14 @@ ball_move	* --- eixo X
 		ldd	#0
 		subd	ball_dx
 		std	ball_dx
-		ldd	ball_x			; desfaz o passo (x + dx novo = x - dx antigo)
-		addd	ball_dx
+		ldd	ball_dx
+		lbsr	slow_delta
+		addd	ball_x
 		std	ball_x
 4		* --- eixo Y
-		ldd	ball_y
-		addd	ball_dy
+		ldd	ball_dy
+		lbsr	slow_delta
+		addd	ball_y
 		std	ball_y
 		cmpa	#FIELD_T
 		bhs	5F
@@ -1246,8 +1541,9 @@ ball_move	* --- eixo X
 		ldd	#0
 		subd	ball_dy
 		std	ball_dy
-		ldd	ball_y
-		addd	ball_dy
+		ldd	ball_dy
+		lbsr	slow_delta
+		addd	ball_y
 		std	ball_y
 6		* --- raquete
 		tst	ball_dy
@@ -1264,13 +1560,18 @@ ball_move	* --- eixo X
 		bls	8F
 		lda	paddle_x
 		adda	#32
+		adda	wide
 		cmpa	ball_x
 		bls	8F
 		* rebate: ângulo pela posição (0..37 -> zona 0..7)
 		lda	ball_x
-		adda	#3+3
+		adda	#3
 		suba	paddle_x
-		bcc	1F
+		tst	wide
+		beq	3F
+		suba	#8
+3		cmpa	#128
+		blo	1F
 		clra
 1		lsra
 		lsra
@@ -1287,6 +1588,13 @@ ball_move	* --- eixo X
 		lda	#PADDLE_Y-6
 		clrb
 		std	ball_y
+		tst	sticky
+		beq	8F
+		clr	ball_state
+		lbsr	stick_ball
+		ldx	#msg_serve
+		ldd	#NAMES+14*32
+		lbsr	print_centered
 		rts
 7		lda	ball_y			; caiu?
 		cmpa	#196
@@ -1303,14 +1611,17 @@ ball_move	* --- eixo X
 bounce_dx	fdb	-$01C0,-$0140,-$00C0,-$0040,$0040,$00C0,$0140,$01C0
 
 * brick_hit: testa o centro da bola; se há tijolo, remove, pontua e volta com C=1
-brick_hit	lda	ball_y
+brick_hit	lda	level
+		cmpa	#NUM_LEVELS
+		lbeq	boss_hit
+		lda	ball_y
 		adda	#3
 		suba	#BRICK_Y
 		lblo	9F
 		lsra
 		lsra
 		lsra				; linha 0..
-		cmpa	#6
+		cmpa	#BRICK_ROWS
 		lbhs	9F
 		sta	tmp2			; linha
 		lda	ball_x
@@ -1336,8 +1647,37 @@ brick_hit	lda	ball_y
 		anda	tmp
 		bne	3F
 		andb	tmp+1
-		beq	9F
-3		ldd	tmp			; remove o bit
+		lbeq	9F
+3               lda tmp2
+                lsla
+                ldu #GOLD
+                leau A,U
+                ldd ,U
+                anda tmp
+                bne 7F
+                andb tmp+1
+                bne 7F
+* A was changed by the mask test; calculate the row again.
+                lda tmp2
+                lsla
+                ldu #ARMOR
+                leau A,U
+                ldd ,U
+                anda tmp
+                bne 5F
+                andb tmp+1
+                beq 4F
+5               ldd tmp
+                coma
+                comb
+                anda ,U
+                andb 1,U
+                std ,U
+                lbsr brick_crack
+7               orcc #1
+                rts
+4		lbsr	power_spawn
+		ldd	tmp			; remove o bit
 		coma
 		comb
 		anda	,X
@@ -1360,6 +1700,11 @@ brick_hit	lda	ball_y
 		exg	a,a			; >= 8 ciclos entre escritas
 		sta	VDP_DATA
 		* pontos: 10 x (6 - linha), em BCD
+		lda	tmp2
+		cmpa	#6
+		blo	6F
+		suba	#6
+6		sta	tmp2
 		lda	#6
 		suba	tmp2
 		lsla
@@ -1377,6 +1722,12 @@ brick_hit	lda	ball_y
 		adca	#0
 		daa
 		sta	score
+		bcc	8F
+		lda	#$99
+		sta	score
+		sta	score+1
+		sta	score+2
+8
 		lda	dirty
 		ora	#1
 		sta	dirty
@@ -1391,6 +1742,9 @@ mask_tab	fdb	$8000,$4000,$2000,$1000,$0800,$0400,$0200,$0100
 * ===========================================================================
 *  Dados
 * ===========================================================================
+		include	"breakout.inc"
+		include	"boss.inc"
+		include	"attract.inc"
 		include	"assets.inc"
 
 end_of_code

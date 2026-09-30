@@ -14,6 +14,7 @@ Também grava prévias em PNG (preview_*.png) para conferir a arte sem emulador.
 import math
 import os
 import sys
+from levels import COURTS, LEVELS
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 BUILD = os.path.join(HERE, "build")
@@ -346,23 +347,18 @@ def title_bottom():
 
 SCROLL_TEXT = (
     "      *** VET 3000 - THE VIDEO EFFECTS TITLER ***     "
-    "O TITULADOR DE VÍDEO DA TMS (1988) TAMBÉM É UM MICROCOMPUTADOR:  "
-    "CPU MOTOROLA MC6809 A 0,89 MHZ  -  VDP TEXAS TMS9128 (O MESMO DO MSX)  -  "
-    "16 KB DE VRAM  -  8 KB DE RAM COM BATERIA  -  ROM DE 16 KB.     "
-    "ESTE CARTUCHO RODA PELO CONECTOR TRASEIRO CN1, DETECTADO PELA ASSINATURA "
-    "'OBJECT' EM $4000.     BARRAS DE COR SEM INTERRUPÇÃO DE LINHA, SCROLLER "
-    "COM FONTES PRÉ-DESLOCADAS E SPRITES 16X16...     "
-    "APERTE ESPAÇO PARA JOGAR QUEBRA-TIJOLO!     "
-    "OS SEUS TÍTULOS NA RAM FICAM INTACTOS, E NO TITULADOR "
-    "SHIFT+EXT MODE VOLTA PARA A DEMO.     "
-    "DEMO E JOGO POR LEONARDO ROMAN DA ROSA - SOFTWARE LIVRE (GPL-3).     <<<    ")
+    "MC6809 + TMS9128: 32 FASES, TIJOLOS DE PRATA E OURO, CAPSULAS E TOP 10!     "
+    "ESPACO: JOGAR. V: VIDEO EXTERNO.     "
+    "EXT MODE: TITULADOR. SHIFT+EXT MODE NO EDITOR: VOLTA A DEMO.     "
+    "TITULOS PRESERVADOS. RECORDES NA RAM COM BATERIA.     "
+    "LEONARDO ROMAN DA ROSA - SOFTWARE LIVRE GPL-3.     <<<    ")
 
 # mensagens do jogo (ASCII + códigos dos acentuados, 0 no fim)
 MESSAGES = [
     ("msg_level", "FASE COMPLETA!"),
     ("msg_over", " FIM DE JOGO  "),
     ("msg_serve", "ESPAÇO: LANÇA"),
-    ("msg_blank", "             "),
+    ("msg_blank", "                "),
     ("msg_hud", "PONTOS         VIDAS    FASE"),
 ]
 
@@ -434,19 +430,12 @@ SPR_BALL = sprite([
     "######",
     ".####."])
 SPR_PADDLE_L = sprite([
-    "",
-    ".###############",
-    "################",
-    "################",
-    "################",
-    ".###############"])
+    ".######.", "########", "##...###", "########", "########", ".######."])
 SPR_PADDLE_R = sprite([
-    "",
-    "###############.",
-    "################",
-    "################",
-    "################",
-    "###############."])
+    "################", "................", "################",
+    "################", "................", "################"])
+SPR_PADDLE_CAP_R = sprite([
+    ".######.", "########", "###...##", "########", "########", ".######."])
 SPR_PADDLE_HI = sprite([
     "",
     "",
@@ -456,13 +445,20 @@ SPR_PADDLE_HI = sprite([
     ""])
 
 SPRITES = [SPR_BALL16, SPR_BALL, SPR_PADDLE_L, SPR_PADDLE_R]
+for letter in "ESVCBL":
+    rows = [".########.", "#........#"]
+    rows += ["#." + row.ljust(6, ".") + ".#" for row in _GLYPHS[letter]]
+    rows += ["#........#", ".########."]
+    SPRITES.append(sprite(rows))
+SPRITES.append(sprite(["..##.."] * 8))
+SPRITES.append(SPR_PADDLE_CAP_R)
 
 # ---------------------------------------------------------------------------
 # Jogo: conjunto de tiles (fonte 0-63 + tijolos/paredes 64..), mesmo nos 3 bancos
 # ---------------------------------------------------------------------------
 T_WALL, T_WALL_TOP, T_CORNER_L, T_CORNER_R = 64, 65, 66, 67
 T_BRICK = 72          # 6 linhas de tijolo x (esq, dir) = 72..83
-BRICK_ROWS = 6
+BRICK_ROWS = 10
 BRICK_COLORS = [      # (clara, média, escura) por linha de tijolos
     (LRED, MRED, DRED), (LYELLOW, DYELLOW, DRED), (LGREEN, MGREEN, DGREEN),
     (CYAN, LBLUE, DBLUE), (LRED, MAGENTA, DBLUE), (WHITE, GRAY, DBLUE)]
@@ -476,16 +472,16 @@ def game_tiles():
         pats[g * 8:g * 8 + 8] = bytes(FONT[g])
         for y in range(8):
             cols[g * 8 + y] = (WHITE << 4) | TRANSPARENT
-    # parede lateral: cano vertical (claro no meio, escuro nas bordas)
+    # Segmented metal rails: white bevel, steel body, dark seams and bolts.
     for y in range(8):
-        pats[T_WALL * 8 + y] = 0x7E
-        cols[T_WALL * 8 + y] = (LBLUE << 4) | DBLUE
-    # teto e cantos: cano horizontal com degradê
-    top = [DBLUE, LBLUE, CYAN, WHITE, CYAN, LBLUE, DBLUE]
-    for t in (T_WALL_TOP, T_CORNER_L, T_CORNER_R):
+        pats[T_WALL*8+y] = 0x60
+        cols[T_WALL*8+y] = 0xFE
+        pats[68*8+y] = [255,0,126,90,66,126,0,255][y]
+        cols[68*8+y] = [0xE4,0xE4,0xFE,0x4E,0xFE,0xFE,0xE4,0xE4][y]
+    for t in (T_WALL_TOP,T_CORNER_L,T_CORNER_R):
         for y in range(8):
-            pats[t * 8 + y] = 0xFF if y < 7 else 0x00
-            cols[t * 8 + y] = ((top[y] if y < 7 else TRANSPARENT) << 4) | TRANSPARENT
+            pats[t*8+y] = [0xFF,0xFF,0x81,0xBD,0x81,0xFF,0xFF,0x00][y]
+            cols[t*8+y] = [0xF0,0xE0,0x4E,0x4E,0x4E,0xE0,0x40,0x00][y]
     # tijolos 16x8 com relevo: brilho em cima/à esquerda, sombra embaixo/à direita
     for r, (hi, mid, lo) in enumerate(BRICK_COLORS):
         tl, tr = T_BRICK + r * 2, T_BRICK + r * 2 + 1
@@ -500,27 +496,36 @@ def game_tiles():
                 pl, cl, pr, cr = 0x00, TRANSPARENT, 0x00, TRANSPARENT
             pats[tl * 8 + y], cols[tl * 8 + y] = pl, cl
             pats[tr * 8 + y], cols[tr * 8 + y] = pr, cr
+    # Silver armor: visually distinct from the colored one-hit bricks.
+    for side in range(2):
+        for y in range(8):
+            pats[(84 + side) * 8 + y] = (0xFE if side else 0x7F) if y < 7 else 0
+            cols[(84 + side) * 8 + y] = ([0xF0, 0xEF, 0xEF, 0x4E, 0x4E, 0xEF, 0xE0, 0][y])
+    for side in range(2):
+        pats[(86+side)*8:(87+side)*8] = pats[(84+side)*8:(85+side)*8]
+        cols[(86+side)*8:(87+side)*8] = bytes([0xB0,0xAB,0xAB,0x6A,0x6A,0xAB,0xA0,0])
+    boss_tiles = [
+        ([255]*8, [0x4D]*8),
+        ([1,3,7,15,31,63,127,255], [0xD0]*8),
+        ([128,192,224,240,248,252,254,255], [0xD0]*8),
+        ([0xC3]*8, [0xD4]*8),
+        ([0,126,255,231,231,255,126,0], [0xB4]*8),
+        ([0,255,0,255,0,255,0,0], [0x64]*8),
+        ([0,255,0,255,0,255,0,0], [0x94]*8),
+        ([255]*8, [0xF0]*8),
+    ]
+    for i,(pattern,color) in enumerate(boss_tiles,88):
+        pats[i*8:i*8+8] = bytes(pattern)
+        cols[i*8:i*8+8] = bytes(color)
     return bytes(pats), bytes(cols)
 
 
-# layouts das fases: 6 linhas x 15 tijolos ('#' = tijolo)
-LEVELS = [
-    ["###############"] * 6,
-    ["#.#.#.#.#.#.#.#", ".#.#.#.#.#.#.#.", "#.#.#.#.#.#.#.#",
-     ".#.#.#.#.#.#.#.", "#.#.#.#.#.#.#.#", ".#.#.#.#.#.#.#."],
-    ["......###......", "....#######....", "..###########..",
-     "###############", "..###########..", "....#######...."],
-    ["###.##...##.###", "###.##...##.###", "...............",
-     "###############", "#.#.#.#.#.#.#.#", "###############"],
-]
-
-
-def level_bits(rows):
+def level_bits(rows, chars="#SG"):
     out = bytearray()
     for r in rows:
         v = 0
         for i, c in enumerate(r):
-            if c == "#":
+            if c in chars:
                 v |= 0x8000 >> i
         out += bytes([v >> 8, v & 0xFF])
     return bytes(out)
@@ -568,18 +573,20 @@ def main():
     w("LOGO_COL1\tequ\t%d" % logo_c1)
     w("LOGO_THEMES\tequ\t%d" % len(LOGO_THEMES))
     w("")
-    w("FONT")
-    out.extend(fcb_lines(bytes(b for g in FONT for b in g), 8))
+    # Only glyphs present in the scroller need eight pre-shifted copies in ROM.
+    txt = text_index(SCROLL_TEXT)
+    charset = sorted(set(txt))
+    scroll_font = [FONT[g] for g in charset]
+    txt = [charset.index(g) for g in txt]
     # fontes pré-deslocadas para o scroller: SHL_s = glifo<<s, SHR_s = glifo>>(8-s)
     for s in (0, 2, 4, 6):
         w("SHL%d" % s)
-        out.extend(fcb_lines(bytes(((b << s) & 0xFF) for g in FONT for b in g)))
+        out.extend(fcb_lines(bytes(((b << s) & 0xFF) for g in scroll_font for b in g)))
         w("SHR%d" % s)
-        out.extend(fcb_lines(bytes(((b >> (8 - s)) if s else 0) for g in FONT for b in g)))
+        out.extend(fcb_lines(bytes(((b >> (8 - s)) if s else 0) for g in scroll_font for b in g)))
     w("SCROLL_TABS\tfdb\tSHL0,SHR0,SHL2,SHR2,SHL4,SHR4,SHL6,SHR6")
     # texto do scroller como deslocamentos de glifo (índice*8), repetindo o
     # início no fim para a janela de 33 colunas nunca passar do final
-    txt = text_index(SCROLL_TEXT)
     ext = txt + txt[:34]
     w("SCROLL_TEXT")
     for i in range(0, len(ext), 16):
@@ -615,10 +622,21 @@ def main():
     out.extend(fcb_lines(rle(gc)))
     for label, text in MESSAGES:
         codes = [ord(ACCENTS.get(ch, ch)) for ch in text.upper()]
-        w("%s\tfcb\t%s,0\t; %s" % (label, ",".join("$%02X" % c for c in codes), text))
-    w("LEVELS\t\t; %d fases x 6 linhas x 16 bits" % len(LEVELS))
-    for lv in LEVELS:
-        out.extend(fcb_lines(level_bits(lv)))
+        w(("%s\tfcb\t%s,0\t; %s" % (label, ",".join("$%02X" % c for c in codes), text)).rstrip())
+    w("LEVELS")
+    for i in range(len(LEVELS)):
+        w("\t\tfdb LEVEL_%d" % i)
+    for i, lv in enumerate(LEVELS):
+        data = level_bits(lv, "S") + level_bits(lv, "G") + level_bits(lv)
+        packed = rle(data)
+        assert unrle(packed) == data
+        w("LEVEL_%d" % i)
+        out.extend(fcb_lines(packed))
+    w("LEVEL_NAMES")
+    for i in range(len(LEVELS)):
+        w("\t\tfdb LEVEL_NAME_%d" % i)
+    for i, (name, _) in enumerate(COURTS):
+        w('LEVEL_NAME_%d fcc "%s",0' % (i, name))
     with open(os.path.join(HERE, "assets.inc"), "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(out) + "\n")
 
@@ -643,6 +661,26 @@ def main():
                             fnt.putpixel(((g % 16) * 24 + x * 3 + dx, (g // 16) * 24 + y * 3 + dy),
                                          (255, 255, 255))
     fnt.save(os.path.join(BUILD, "preview_font.png"))
+    # Atlas from the same tile bytes and cell maps used by the cartridge.
+    from PIL import ImageDraw
+    atlas = Image.new("RGB", (4*256, 8*120), (12, 16, 24))
+    labels = ImageDraw.Draw(atlas)
+    for index, (name, rows) in enumerate(COURTS):
+        ox, oy = (index%4)*256, (index//4)*120
+        labels.text((ox+8, oy+4), f"{index+1:02d}  {name}", fill=(230,230,240))
+        for row, cells in enumerate(rows):
+            for col, cell in enumerate(cells):
+                if cell == ".":
+                    continue
+                tile = {"S":84, "G":86}.get(cell, T_BRICK+(row%6)*2)
+                for side in range(2):
+                    for py in range(8):
+                        pattern = gp[(tile+side)*8+py]
+                        color = gc[(tile+side)*8+py]
+                        for px in range(8):
+                            c = color>>4 if pattern & (0x80>>px) else color&15
+                            atlas.putpixel((ox+8+col*16+side*8+px, oy+24+row*8+py),PALETTE[c])
+    atlas.resize((2048,1920),Image.Resampling.NEAREST).save(os.path.join(BUILD,"preview_levels.png"))
     print("assets.inc gerado; prévias em", BUILD)
 
 

@@ -12,8 +12,11 @@ local cart = f:read("*a")
 f:close()
 -- Return from the level transition before waits/redrawing the next level.
 local overrides = {[sym.pause_frames] = 0x39,
+    [sym.hs_game_over] = 0x39,
     [sym.new_level] = 0x7e, [sym.new_level + 1] = 1, [sym.new_level + 2] = 0x19}
-vet_test_tap = mem:install_read_tap(0x4000, 0x7fff, "test_cart", function(a)
+local native = os.getenv("VET_TEST_NATIVE") == "1"
+vet_test_tap = mem:install_read_tap(0x4000, 0x7fff, "test_cart", function(a, data)
+    if native then return overrides[a] or data end
     return overrides[a] or cart:byte(a - 0x4000 + 1)
 end)
 local vram
@@ -31,9 +34,9 @@ for level = 0, 255 do
     tests[#tests + 1] = {"HUD " .. (level + 1), "draw_status", function()
         byte("level", level)
     end, function()
-        local digits = string.format("%03d", level + 1)
-        for i = 1, 3 do
-            eq(vram:read_u8(sym.NAMES + 28 + i), digits:byte(i) - sym.FONT_FIRST, "digit")
+        local digits = string.format("%02d", math.min(level + 1,99))
+        for i = 1, 2 do
+            eq(vram:read_u8(sym.NAMES + 29 + i), digits:byte(i) - sym.FONT_FIRST, "digit")
         end
     end}
 end
@@ -73,10 +76,18 @@ for phase = 0, 255 do
         end
     end}
 end
-local index, active = 0, false
+if os.getenv("VET_TEST_BREAKOUT") == "1" then
+    dofile("tests/breakout_cases.lua")(tests, sym, mem, vram, byte, word, eq)
+end
+local index, active, pending_frames = 0, false, 0
 vet_test_frame = emu.add_machine_frame_notifier(function()
     local ok, err = pcall(function()
         if active then
+            if mem:read_u8(0x1ff) ~= 1 then
+                pending_frames = pending_frames + 1
+                assert(pending_frames < 4, "routine timed out: " .. tests[index][1])
+                return -- full ten-row screen rendering can span a frame
+            end
             eq(mem:read_u8(0x1ff), 1, "routine returned: " .. tests[index][1])
             tests[index][4]()
         end
@@ -102,6 +113,7 @@ vet_test_frame = emu.add_machine_frame_notifier(function()
             cpu.state.PC.value = 0x100
         end
         tests[index][3]()
+        pending_frames = 0
         active = true
     end)
     if not ok then print("FAIL: " .. tostring(err)); machine:exit() end
