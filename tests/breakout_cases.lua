@@ -164,9 +164,21 @@ return function(tests, sym, mem, vram, byte, word, eq)
         end)
     end
     add("gate completes immediately","game_step",function()
-        byte("gate",1); byte("paddle_x",216); byte("bricks_left",1)
+        byte("gate",1); byte("paddle_x",232); byte("bricks_left",1)
         byte("shot_active",1); byte("shot_y",28); byte("shot_x",8); word("BRICKS",0x8000)
     end,function() eq(mem:read_u8(sym.bricks_left),0,"no underflow after exit") end)
+    -- The paddle leaves only with at least 1/6 of its width past the right screen edge.
+    for _,c in ipairs({{0,229,false},{0,230,true},{16,215,false},{16,216,true}}) do
+        add("gate exit wide "..c[1].." x "..c[2],"gate_step",function()
+            byte("gate",1); byte("wide",c[1]); byte("paddle_x",c[2]); byte("bricks_left",5)
+        end,function() eq(mem:read_u8(sym.bricks_left),c[3] and 0 or 5,"exit threshold") end)
+    end
+    for _,c in ipairs({{0,216,216},{1,216,220},{1,228,230}}) do
+        add("paddle right gate "..c[1].." from "..c[2],"game_step",function()
+            byte("gate",c[1]); byte("paddle_x",c[2]); byte("keys",sym.K_RIGHT)
+            byte("bricks_left",5); byte("ball_state",1); word("ball_y",0x4000)
+        end,function() eq(mem:read_u8(sym.paddle_x),c[3],"right limit") end)
+    end
     add("sticky rebound","ball_move",function()
         byte("sticky",1); byte("paddle_x",112); byte("ball_state",1)
         word("ball_x",125*256); word("ball_y",169*256); word("ball_dy",0x180); word("speed",0x180)
@@ -192,12 +204,147 @@ return function(tests, sym, mem, vram, byte, word, eq)
         byte("wide",16); byte("power_kind",6); byte("shot_active",1)
         word("BRICKS",0xa55a)
     end,function()
-        eq(mem:read_u8(sym.GAME_SAT+24),0xd0,"sprite terminator")
+        eq(mem:read_u8(sym.GAME_SAT+8),0xd0,"sprite terminator")
         eq(mem:read_u16(sym.BRICKS),0xa55a,"sprites do not overwrite bricks")
     end)
+    -- Every pixel row of the paddle must stay within the VDP's 4 sprites per line,
+    -- also with the wide paddle, the ball resting on it, a capsule and a shot nearby.
+    local function sprite_rows(pattern)
+        local rows={}
+        for r=0,15 do
+            local a=sym.SPRITE_PATS+pattern*8
+            rows[r]=mem:read_u8(a+r)|mem:read_u8(a+16+r)
+        end
+        return rows
+    end
+    local function check_sat(parts, ball_visible)
+        local sat={}
+        for i=0,31 do
+            local a=sym.SPRATT+i*4
+            local y=vram:read_u8(a)
+            if y==0xd0 then break end
+            sat[#sat+1]={y=y,x=vram:read_u8(a+1),p=vram:read_u8(a+2),c=vram:read_u8(a+3)}
+        end
+        eq(#sat>=parts+1 and 1 or 0,1,"paddle and ball in the table")
+        for line=0,191 do
+            local shown=0
+            for i,sp in ipairs(sat) do
+                local r=line-(sp.y+1)
+                if r>=0 and r<16 then
+                    shown=shown+1
+                    local need=i<=parts or (ball_visible and i==parts+1)
+                    if need and sprite_rows(sp.p)[r]~=0 then
+                        eq(shown<=4 and 1 or 0,1,"sprite "..i.." dropped on line "..line)
+                    end
+                end
+            end
+        end
+        return sat
+    end
+    for _,c in ipairs({{0,170,false,4},{16,170,false,6},{16,170,true,6},{16,183,true,6},{0,183,true,4}}) do
+        add("paddle sprites wide "..c[1].." ball "..c[2]..(c[3] and " crowded" or ""),"put_game_sat",function()
+            byte("wide",c[1]); byte("paddle_x",100)
+            word("ball_x",113*256); word("ball_y",c[2]*256)
+            -- GAME_SAT as game_sprites leaves it: capsule and shot
+            local u=sym.GAME_SAT
+            local function put(y,x,p,col)
+                mem:write_u8(u,y); mem:write_u8(u+1,x); mem:write_u8(u+2,p); mem:write_u8(u+3,col); u=u+4
+            end
+            if c[3] then put(159,140,24,11); put(165,120,sym.PAT_SHOT,9) end
+            mem:write_u8(u,0xd0)
+        end,function()
+            local sat=check_sat(c[4], c[2]==170)
+            eq(sat[2].x,100,"left tip at paddle_x")
+            eq(sat[3].x,116+c[1],"right tip follows width")
+            eq(sat[c[4]+1].p,sym.PAT_BALL,"ball after the paddle")
+        end)
+    end
+    add("ball sprite bottom aligned","put_game_sat",function()
+        word("ball_x",120*256); word("ball_y",170*256); mem:write_u8(sym.GAME_SAT,0xd0)
+    end,function()
+        local a=sym.SPRATT+4*4
+        eq(vram:read_u8(a),159,"ball Y"); eq(vram:read_u8(a+1),120,"ball X")
+        eq(vram:read_u8(a+2),sym.PAT_BALL,"ball pattern"); eq(vram:read_u8(a+4),0xd0,"no extra sprites")
+    end)
+    -- Disruption (D): three balls; a life is lost only with the last one.
+    for _,stuck in ipairs({false,true}) do
+        add("disrupt capsule"..(stuck and " stuck ball" or ""),"power_step",function()
+            byte("power_kind",7); byte("power_clock",1); byte("power_y",165)
+            byte("power_x",120); byte("paddle_x",112); byte("sticky",1)
+            byte("ball_state",stuck and 0 or 1); word("ball_x",0x6480); word("ball_y",0x5000)
+            word("ball_dx",0x100); word("ball_dy",-0x200); word("speed",0x200)
+        end,function()
+            eq(mem:read_u8(sym.power_kind),0,"collected"); eq(mem:read_u8(sym.extra_balls),3,"two extra balls")
+            eq(mem:read_u8(sym.sticky),0,"catch cancelled"); eq(mem:read_u8(sym.ball_state),1,"ball in play")
+            for i,base in ipairs({sym.BALL2,sym.BALL3}) do
+                eq(mem:read_u16(base),mem:read_u16(sym.ball_x),"same X")
+                eq(mem:read_u16(base+2),mem:read_u16(sym.ball_y),"same Y")
+                eq(mem:read_u16(base+4),i==1 and 0xfe55 or 0x01ab,"spread")
+                eq(mem:read_u16(base+6),0xfe00,"upward")
+            end
+        end)
+    end
+    for _,c in ipairs({{3,sym.BALL2,2},{2,sym.BALL3,0}}) do
+        add("primary lost promotes extra "..c[1],"primary_lost",function()
+            byte("extra_balls",c[1]); byte("lives",3)
+            for i=0,7 do mem:write_u8(c[2]+i,0x40+i) end
+        end,function()
+            for i=0,7 do eq(mem:read_u8(sym.ball_x+i),0x40+i,"promoted state") end
+            eq(mem:read_u8(sym.extra_balls),c[3],"slot freed"); eq(mem:read_u8(sym.lives),3,"no life lost")
+        end)
+    end
+    add("last ball loses life","primary_lost",function() byte("lives",3); byte("ball_state",1) end,function()
+        eq(mem:read_u8(sym.lives),2,"life lost"); eq(mem:read_u8(sym.ball_state),0,"new serve")
+    end)
+    add("extra ball moves","multi_step",function()
+        byte("extra_balls",1); word("BALL2",100*256)
+        mem:write_u16(sym.BALL2+2,100*256); mem:write_u16(sym.BALL2+4,0x100); mem:write_u16(sym.BALL2+6,0xfe00)
+        word("ball_x",0x1234); word("ball_y",0x5678); byte("lives",3)
+    end,function()
+        eq(mem:read_u16(sym.BALL2),101*256,"extra X"); eq(mem:read_u16(sym.BALL2+2),98*256,"extra Y")
+        eq(mem:read_u16(sym.ball_x),0x1234,"primary X kept"); eq(mem:read_u16(sym.ball_y),0x5678,"primary Y kept")
+        eq(mem:read_u8(sym.extra_balls),1,"still in play")
+    end)
+    add("extra ball lost","multi_step",function()
+        byte("extra_balls",2); mem:write_u16(sym.BALL3,100*256); mem:write_u16(sym.BALL3+2,197*256)
+        mem:write_u16(sym.BALL3+6,0x200); word("ball_x",0x1234); word("ball_y",0x5678); byte("lives",3)
+    end,function()
+        eq(mem:read_u8(sym.extra_balls),0,"extra gone"); eq(mem:read_u8(sym.lives),3,"no life lost")
+        eq(mem:read_u16(sym.ball_y),0x5678,"primary kept")
+    end)
+    add("no capsule during multiball","power_spawn",function() byte("hitcnt",3); byte("extra_balls",1) end,
+        function() eq(mem:read_u8(sym.power_kind),0,"no capsule") end)
+    add("capsule cycle includes D","power_spawn",function() byte("hitcnt",23) end,
+        function() eq(mem:read_u8(sym.power_kind),7,"disruption") end)
+    for frame=0,1 do
+        add("three ball sprites frame "..frame,"put_game_sat",function()
+            byte("frame",frame); byte("extra_balls",3); byte("paddle_x",100)
+            word("ball_x",50*256); word("ball_y",60*256)
+            mem:write_u16(sym.BALL2,70*256); mem:write_u16(sym.BALL2+2,80*256)
+            mem:write_u16(sym.BALL3,90*256); mem:write_u16(sym.BALL3+2,100*256)
+            mem:write_u8(sym.GAME_SAT,0xd0)
+        end,function()
+            local xs=frame==0 and {50,70,90} or {90,70,50}
+            for i=1,3 do
+                local a=sym.SPRATT+(3+i)*4
+                eq(vram:read_u8(a+1),xs[i],"ball order"); eq(vram:read_u8(a+2),sym.PAT_BALL,"ball pattern")
+            end
+            eq(vram:read_u8(sym.SPRATT+7*4),0xd0,"terminator")
+        end)
+    end
+    add("new record has blank initials","hs_insert",function()
+        for a=sym.HS_DATA,sym.HS_END-1 do mem:write_u8(a,0) end; score(500)
+    end,function()
+        eq(mem:read_u8(sym.hs_pos),0,"top position")
+        for i=3,5 do eq(mem:read_u8(sym.HS_DATA+i),32,"blank initial") end
+    end)
+    add("wide laser centered","laser_step",function()
+        byte("laser",1); byte("ball_state",1); byte("keys",sym.K_FIRE)
+        byte("wide",16); byte("paddle_x",100)
+    end,function() eq(mem:read_u8(sym.shot_x),121,"shot from paddle center") end)
     add("campaign completion","level_done",function() byte("level",32) end,function()
         eq(mem:read_u8(sym.level),33,"finished boss")
-        eq(vram:read_u8(sym.NAMES+15*32+6),string.byte("C")-sym.FONT_FIRST,"victory message")
+        eq(vram:read_u8(sym.NAMES+15*32+7),string.byte("C")-sym.FONT_FIRST,"victory message")
     end)
     add("boss entry","load_level",function() byte("level",32) end,function()
         eq(mem:read_u8(sym.bricks_left),24,"boss energy")
@@ -225,11 +372,12 @@ return function(tests, sym, mem, vram, byte, word, eq)
     end,function()
         eq(mem:read_u8(sym.boss_col),20,"moves")
         eq(mem:read_u8(sym.boss_dir),255,"turns inward")
-        eq(mem:read_u8(sym.power_kind),7,"fires hostile bolt")
+        eq(mem:read_u8(sym.power_kind),8,"fires hostile bolt")
         eq(mem:read_u8(sym.boss_bolt_dx),255,"aimed left")
+        eq(mem:read_u8(sym.boss_mouth),sym.BOSS_MOUTH_TIME,"mouth opens to fire")
     end)
     add("boss projectile hurts","power_step",function()
-        byte("level",32); byte("lives",3); byte("power_kind",7)
+        byte("level",32); byte("lives",3); byte("power_kind",8)
         byte("power_x",120); byte("power_y",167); byte("paddle_x",112)
     end,function()
         eq(mem:read_u8(sym.lives),2,"life lost")
@@ -271,9 +419,141 @@ return function(tests, sym, mem, vram, byte, word, eq)
             byte("launch_dir",direction); byte("keys_new",sym.K_FIRE)
             byte("bricks_left",1); word("speed",0x180); byte("paddle_x",112)
         end,function()
-            eq(mem:read_u16(sym.ball_dx),direction==0 and 0xff40 or 0xc0,"launch side")
+            eq(mem:read_u16(sym.ball_dx),direction==0 and 0xff00 or 0x100,"launch side")
         end)
     end
+    for _,c in ipairs({{sym.AUTO_LAUNCH-2,0},{sym.AUTO_LAUNCH-1,1}}) do
+        add("auto launch after "..c[1],"game_step",function()
+            byte("serve_clock",c[1]); byte("bricks_left",1); word("speed",0x200); byte("paddle_x",112)
+        end,function()
+            eq(mem:read_u8(sym.ball_state),c[2],"ball launched")
+            if c[2]==1 then eq(mem:read_u16(sym.ball_dy),0xfe00,"upward") end
+        end)
+    end
+    local function text_at(addr, s)
+        local accents={["\u{C1}"]="_",["\u{C7}"]="#",["\u{C3}"]="%"}
+        local i=0
+        for _,code in utf8.codes(s) do
+            local ch=utf8.char(code); ch=accents[ch] or ch
+            eq(vram:read_u8(addr+i),ch:byte()-sym.FONT_FIRST,"text "..s.." at "..i)
+            i=i+1
+        end
+    end
+    add("stage shown on serve","serve",function() byte("level",4) end,function()
+        text_at(sym.NAMES+sym.MSG_ROW*32+12,"FASE 05")
+        eq(mem:read_u8(sym.serve_clock),0,"auto-launch clock restarted")
+    end)
+    add("launch clears stage","game_step",function()
+        byte("keys_new",sym.K_FIRE); byte("bricks_left",1); word("speed",0x200); byte("paddle_x",112)
+        for a=sym.NAMES+sym.MSG_ROW*32,sym.NAMES+sym.MSG_ROW*32+31 do vram:write_u8(a,37) end
+    end,function()
+        for col=8,23 do eq(vram:read_u8(sym.NAMES+sym.MSG_ROW*32+col),0,"stage cleared") end
+    end)
+    add("centered score table","hs_draw",function()
+        for i=0,9 do
+            local a=sym.HS_DATA+i*6
+            mem:write_u8(a,0); mem:write_u8(a+1,0x12); mem:write_u8(a+2,0x34)
+            mem:write_u8(a+3,67); mem:write_u8(a+4,68); mem:write_u8(a+5,69)
+        end
+    end,function()
+        text_at(sym.NAMES+3*32+8,"    NOME  PONTOS")
+        for i=0,9 do text_at(sym.NAMES+(5+i)*32+8,string.format("%02d  CDE   001234",i+1)) end
+        text_at(sym.NAMES+32+5,"QUEBRA-TIJOLO: TOP 10")
+    end)
+    for _,c in ipairs({{0,sym.T_CURSOR},{16,string.byte("Q")-sym.FONT_FIRST}}) do
+        add("initial cursor phase "..c[1],"hs_cursor",function()
+            byte("hs_pos",2); byte("hs_letter",1); byte("hs_blink",c[1]); byte("ticks",1)
+            mem:write_u8(sym.HS_DATA+2*6+4,string.byte("Q"))
+        end,function()
+            eq(vram:read_u8(sym.NAMES+7*32+13),c[2],"blinking cell")
+            eq(mem:read_u8(sym.hs_blink),c[1]+1,"blink clock")
+        end)
+    end
+    -- Attract CPU runs to where the ball will reach the paddle (walls reflect it).
+    for i,c in ipairs({{100,100,0,0x200,103},{100,100,0x100,0x200,138},
+                       {230,100,0x200,0x200,187},{100,100,-0x100,-0x200,38}}) do
+        add("cpu landing prediction "..i,"attract_update",function()
+            word("attract_timer",600); byte("ticks",1); byte("ball_state",1); byte("hitcnt",0)
+            word("ball_x",c[1]*256); word("ball_y",c[2]*256); word("ball_dx",c[3]); word("ball_dy",c[4])
+            byte("paddle_x",100)
+        end,function()
+            eq(mem:read_u8(sym.tmp2),c[5]+8,"aim = landing + 8")
+            local dir=(c[5]+8>116+3) and sym.K_RIGHT or ((c[5]+8<116-3) and sym.K_LEFT or 0)
+            eq(mem:read_u8(sym.keys)&(sym.K_LEFT|sym.K_RIGHT),dir,"moves toward the landing point")
+        end)
+    end
+    -- CLEAR erases the letter under the cursor, or goes back and erases the previous one.
+    for _,c in ipairs({{"ABC",2,"AB ",2},{"AB ",2,"A  ",1},{"A  ",1,"   ",0},{"   ",0,"   ",0}}) do
+        add("clear initials "..c[1]:gsub(" ","_").." at "..c[2],"hs_backspace",function()
+            byte("hs_pos",1); byte("hs_letter",c[2])
+            for i=1,3 do mem:write_u8(sym.HS_DATA+6+2+i,c[1]:byte(i)) end
+        end,function()
+            for i=1,3 do eq(mem:read_u8(sym.HS_DATA+6+2+i),c[3]:byte(i),"initial "..i) end
+            eq(mem:read_u8(sym.hs_letter),c[4],"cursor position")
+            if c[1]~=c[3] then eq(mem:read_u16(sym.HS),0x4232,"saved with signature") end
+        end)
+    end
+    -- Leaving through the gate: paddle pieces past x=255 are moved below the screen.
+    add("paddle pieces past the right edge","put_game_sat",function()
+        byte("paddle_x",250); word("ball_y",100*256); mem:write_u8(sym.GAME_SAT,0xd0)
+    end,function()
+        local function y(i) return vram:read_u8(sym.SPRATT+i*4) end
+        eq(y(0),0xc0,"shine hidden"); eq(y(1),sym.PADDLE_Y-1,"left tip visible")
+        eq(y(2),0xc0,"right tip hidden"); eq(y(3),0xc0,"body hidden")
+        eq(vram:read_u8(sym.SPRATT+1*4+1),250,"left tip X")
+    end)
+    -- New boss face: own tiles in banks 0 and 1, map with eye/mouth variants.
+    local function unrle(addr)
+        local out={}
+        while true do
+            local n=mem:read_u8(addr); addr=addr+1
+            if n==0 then return out end
+            if n<0x80 then
+                for i=1,n do out[#out+1]=mem:read_u8(addr); addr=addr+1 end
+            else
+                local b=mem:read_u8(addr); addr=addr+1
+                for i=1,n-0x7e do out[#out+1]=b end
+            end
+        end
+    end
+    add("boss tiles loaded","boss_init",function() end,function()
+        local pat,col=unrle(sym.BOSS_PAT),unrle(sym.BOSS_COL)
+        eq(#pat,(sym.BOSS_N+sym.BOSS_MOUTH_END-sym.BOSS_EYE0)*8,"tile count")
+        for _,bank in ipairs({0,0x800}) do
+            for i=1,#pat do
+                eq(vram:read_u8(sym.PAT+bank+sym.BOSS_T0*8+i-1),pat[i],"pattern byte")
+                eq(vram:read_u8(sym.COL+bank+sym.BOSS_T0*8+i-1),col[i],"color byte")
+            end
+        end
+    end)
+    for _,c in ipairs({{0,0,"normal"},{3,0,"hit eyes"},{0,5,"open mouth"}}) do
+        add("boss face "..c[3],"boss_draw",function()
+            byte("boss_col",12); byte("boss_flash",c[1]); byte("boss_mouth",c[2]); byte("bricks_left",24)
+        end,function()
+            local eyes,mouth=0,0
+            for r=0,7 do
+                eq(vram:read_u8(sym.NAMES+(4+r)*32+11),0,"left trail cleared")
+                eq(vram:read_u8(sym.NAMES+(4+r)*32+20),0,"right trail cleared")
+                for x=0,7 do
+                    local t=mem:read_u8(sym.BOSS_MAP+r*8+x)
+                    local want=t
+                    if c[1]>0 and t>=sym.BOSS_EYE0 and t<sym.BOSS_EYE_END then want=t+sym.BOSS_N; eyes=eyes+1 end
+                    if c[2]>0 and t>=sym.BOSS_MOUTH0 and t<sym.BOSS_MOUTH_END then want=t+sym.BOSS_N; mouth=mouth+1 end
+                    eq(vram:read_u8(sym.NAMES+(4+r)*32+12+x),want,"face tile")
+                end
+            end
+            if c[1]>0 then eq(eyes>0 and 1 or 0,1,"eye cells swapped") end
+            if c[2]>0 then eq(mouth>0 and 1 or 0,1,"mouth cells swapped") end
+            for i=0,23 do eq(vram:read_u8(sym.NAMES+13*32+4+i),sym.T_ENERGY,"full energy") end
+        end)
+    end
+    add("boss energy bar","boss_energy",function() byte("bricks_left",10) end,function()
+        for i=0,23 do eq(vram:read_u8(sym.NAMES+13*32+4+i),i<10 and sym.T_ENERGY or sym.T_ENERGY_OFF,"segment") end
+    end)
+    add("boss mouth closes","boss_step",function()
+        byte("level",32); byte("bricks_left",24); byte("boss_col",12); byte("boss_dir",1)
+        byte("boss_mouth",1); byte("boss_tick",5)
+    end,function() eq(mem:read_u8(sym.boss_mouth),0,"closed again") end)
     for _,offset in ipairs({1,7,21,28}) do
         add("paddle angle "..offset,"ball_move",function()
             byte("paddle_x",112); word("ball_x",(112+offset)*256)

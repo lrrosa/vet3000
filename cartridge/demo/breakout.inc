@@ -28,21 +28,26 @@ slow_delta     tst slow
                rorb
 1              rts
 
-* One capsule every fourth destroyed brick; stage offsets the E/S/V/C/B/L cycle.
+* One capsule every fourth destroyed brick; stage offsets the E/S/V/C/B/L/D cycle.
+* None while extra balls are in play (as in Arkanoid's Disruption).
 * Preserve collision temporaries and X (the brick row pointer).
+P_DISRUPT      equ 7                  ; cápsula D: três bolas
+P_BOLT         equ 8                  ; projétil do chefão (usa a vaga da cápsula)
 power_spawn    inc hitcnt
                lda hitcnt
                anda #3
                bne 9F
                tst power_kind
                bne 9F
+               tst extra_balls
+               bne 9F
                lda hitcnt
                lsra
                lsra
                adda level
-1              cmpa #6
+1              cmpa #7
                blo 2F
-               suba #6
+               suba #7
                bra 1B
 2              inca
                sta power_kind
@@ -65,7 +70,7 @@ power_spawn    inc hitcnt
 power_step     tst power_kind
                beq 9F
                lda power_kind
-               cmpa #7
+               cmpa #P_BOLT
                lbeq boss_bolt
                inc power_clock
                lda power_clock
@@ -105,9 +110,11 @@ power_step     tst power_kind
 2              cmpa #4
                beq power_catch
                cmpa #5
-               beq power_gate
+               lbeq power_gate
                cmpa #6
                beq power_laser
+               cmpa #P_DISRUPT
+               beq power_disrupt
                lda lives
                cmpa #9
                bhs 8F
@@ -124,6 +131,97 @@ power_laser    lda #1
                sta laser
                clr power_kind
                rts
+
+* Cápsula D (Disruption do Arkanoid): a bola vira três. A vida só se perde
+* quando cai a última; com mais de uma bola não caem cápsulas, e o C (prender
+* a bola) é cancelado.
+power_disrupt  clr power_kind
+               clr sticky
+               tst ball_state
+               bne 1F
+               lbsr launch_ball        ; bola presa: sai antes de dividir
+1              ldx #BALL2
+               ldd #-$01AB
+               bsr split_ball
+               ldx #BALL3
+               ldd #$01AB
+               bsr split_ball
+               lda #3
+               sta extra_balls
+               rts
+* split_ball: bola extra em X, na posição da principal, com dx = D, subindo
+split_ball     std 4,X
+               ldd ball_x
+               std ,X
+               ldd ball_y
+               std 2,X
+               ldd #0
+               subd speed
+               std 6,X
+               rts
+
+* multi_step: move as bolas extras com a mesma física da principal, trocando
+* cada uma de lugar com ball_x..ball_dy durante o ball_move
+multi_step     ldx #BALL2
+               lda #1
+               bsr multi_one
+               ldx #BALL3
+               lda #2
+multi_one      bita extra_balls        ; A = bit da bola, X = seus 8 bytes
+               beq 9F
+               pshs a,x
+               bsr ball_swap
+               lbsr ball_move
+               ldx 1,S
+               pshs cc
+               bsr ball_swap
+               puls cc
+               puls a,x
+               bcc 9F
+               coma                    ; caiu: só sai do jogo
+               anda extra_balls
+               sta extra_balls
+9              rts
+* ball_swap: troca os 8 bytes em X com ball_x..ball_dy
+ball_swap      ldu #ball_x
+               ldb #8
+1              lda ,X
+               pshs a
+               lda ,U
+               sta ,X+
+               puls a
+               sta ,U+
+               decb
+               bne 1B
+               rts
+
+* primary_lost: a bola principal caiu. Com uma extra em jogo, ela vira a
+* principal; se era a última, perde-se uma vida.
+primary_lost   lda extra_balls
+               beq 3F
+               ldx #BALL2
+               ldb #$FE
+               bita #1
+               bne 1F
+               ldx #BALL3
+               ldb #$FD
+1              andb extra_balls
+               stb extra_balls
+               ldu #ball_x
+               ldb #8
+2              lda ,X+
+               sta ,U+
+               decb
+               bne 2B
+               rts
+3              dec lives
+               lda dirty
+               ora #2
+               sta dirty
+               tst lives
+               beq 4F
+               lbsr serve
+4              rts
 power_gate     lda #1
                sta gate
                clr power_kind
@@ -136,14 +234,53 @@ power_gate     lda #1
                clra
                sta VDP_DATA
                rts
+* Com a saída aberta o rebatedor atravessa a parede direita e a fase só acaba
+* quando ao menos 1/6 dele já saiu da tela: 6 de 32 pixels (x >= 230) ou 8 de
+* 48 no grande (x >= 216).
 gate_step      tst gate
                beq 1F
-               lda paddle_x
-               adda wide
-               cmpa #FIELD_R-32
-               blo 1F
+               lbsr paddle_limit
+               cmpb paddle_x
+               bhi 1F
                clr bricks_left
 1              rts
+
+* gate_slide: se a fase acabou com o rebatedor na saída, ele continua andando
+* para a direita, sem a bola, até sair da tela por inteiro.
+gate_slide     tst gate
+               beq 9F
+               lbsr paddle_limit
+               cmpb paddle_x
+               bhi 9F
+               lda #200               ; bolas, cápsula e tiro saem de cena
+               sta ball_y
+               clr extra_balls
+               clr power_kind
+               clr shot_active
+               lbsr game_sprites
+1              lbsr wait_frame
+               lbsr put_game_sat
+               ldb ticks
+2              lda paddle_x
+               adda #PADDLE_STEP
+               bcs 3F                 ; passaria de 255: já saiu
+               sta paddle_x
+               decb
+               bne 2B
+               bra 1B
+3              lbra hide_sprites
+9              rts
+
+* paddle_limit: B = maior paddle_x (sem a saída, encostado na parede)
+paddle_limit   ldb #FIELD_R-32
+               tst gate
+               beq 1F
+               ldb #256-32+6          ; normal: 6 pixels fora da tela
+               tst wide
+               beq 2F
+               ldb #256-48+8+16       ; grande: 8 fora (o subb abaixo tira o wide)
+1              subb wide
+2              rts
 
 * One projectile at a time; SPACE fires while the ball is in play.
 laser_step     tst shot_active
@@ -155,7 +292,9 @@ laser_step     tst shot_active
                lda keys
                bita #K_FIRE
                beq 9F
-               lda paddle_x
+               lda wide               ; centro do rebatedor, normal ou grande
+               lsra
+               adda paddle_x
                adda #13
                sta shot_x
                lda #PADDLE_Y-10
@@ -201,11 +340,11 @@ campaign_done  lbsr hide_sprites
                dec cnt
                bne 1B
                ldx #msg_conquered
-               ldd #NAMES+12*32+6
-               lbsr print_at
+               ldd #NAMES+12*32
+               lbsr print_centered
                ldx #msg_victory
-               ldd #NAMES+15*32+6
-               lbsr print_at
+               ldd #NAMES+15*32
+               lbsr print_centered
                ldb #240
                lbsr pause_frames
                lbra hs_game_over
@@ -285,12 +424,14 @@ hs_insert      lda #10
                std ,X
                lda score+2
                sta 2,X
-               lda #'A
+               lda #$20               ; iniciais em branco até serem digitadas
                sta 3,X
                sta 4,X
                sta 5,X
                lbra hs_commit
 
+* Entrada das iniciais: a letra em edição pisca com um bloco amarelo.
+* Digitar avança o cursor; na terceira posição a letra é trocada no lugar.
 hs_game_over   lbsr hs_insert
                lda hs_pos
                cmpa #10
@@ -298,37 +439,103 @@ hs_game_over   lbsr hs_insert
                clr hs_letter
                clr alpha_last
                lbsr hs_draw
-1              lbsr hs_prompt
+               ldx #hs_edit_msg
+               ldd #NAMES+18*32
+               lbsr print_centered
+               ldx #hs_clear_msg
+               ldd #NAMES+20*32
+               lbsr print_centered
+               ldx #hs_confirm_msg
+               ldd #NAMES+22*32
+               lbsr print_centered
+               clr hs_blink            ; cursor aceso
 2              lbsr wait_frame
+               lbsr hs_cursor
                lbsr read_keys
                lda keys_new
                bita #K_EXIT
                lbne exit_to_titler
                lbsr read_alpha
                tsta
-               beq 5F
+               lbeq 5F
                pshs a
                lbsr hs_initial_ptr
                puls a
                clr HS
                sta ,X
                lbsr hs_commit
+               lbsr hs_letter_cell     ; a letra digitada no lugar do cursor
                lda hs_letter
                cmpa #2
                bhs 3F
                inc hs_letter
-3              lbsr hs_draw
-               bra 1B
+               clr hs_blink            ; cursor aceso na próxima posição
+               lbra 2B
+3              lda #16                 ; última posição: a letra aparece primeiro
+               sta hs_blink
+               lbra 2B
 5              lda keys_new
+               bita #K_BACK
+               beq 6F
+               lbsr hs_backspace
+               lbra 2B
+6              lda keys_new
                bita #K_PAUSE
                lbne hs_show
                bita #K_FIRE
-               beq 2B
+               lbeq 2B
                lda hs_letter
                cmpa #2
                lbhs hs_show
+               lbsr hs_letter_cell
                inc hs_letter
-               bra 1B
+               clr hs_blink
+               lbra 2B
+
+* hs_backspace (CLEAR): apaga a letra sob o cursor; se ela já está vazia,
+* volta uma posição e apaga a anterior. Grava na SRAM como a digitação.
+hs_backspace   lbsr hs_initial_ptr
+               lda ,X
+               cmpa #$20
+               bne 1F
+               lda hs_letter
+               beq 9F                 ; primeira posição já vazia
+               lbsr hs_letter_cell    ; a posição deixada fica sem o cursor
+               dec hs_letter
+               lbsr hs_initial_ptr
+1              clr HS
+               lda #$20
+               sta ,X
+               lbsr hs_commit
+               clr hs_blink           ; cursor aceso
+               lbra hs_letter_cell
+9              rts
+
+* hs_cursor: alterna bloco e letra a cada 16 passos (~2 piscadas por segundo)
+hs_cursor      lda hs_blink
+               adda ticks
+               sta hs_blink
+               bita #16
+               bne hs_letter_cell
+               bsr hs_cell_addr
+               lda #T_CURSOR
+               sta VDP_DATA
+               rts
+hs_letter_cell bsr hs_cell_addr
+               lbsr hs_initial_ptr
+               lda ,X
+               suba #FONT_FIRST
+               sta VDP_DATA
+               rts
+* hs_cell_addr: endereço de escrita da inicial hs_letter da linha hs_pos
+hs_cell_addr   lda hs_pos
+               adda #HS_ROW0
+               ldb #32
+               mul
+               addd #NAMES+HS_COL+4
+               addb hs_letter
+               adca #0
+               lbra vdp_wr
 
 * Keyboard letters, physical matrix independent of SHIFT/CAPS. One event per press.
 read_alpha     ldx #alpha_rows
@@ -375,30 +582,10 @@ hs_initial_ptr lda hs_pos
                ldb hs_letter
                abx
                rts
-hs_prompt      ldx #hs_edit_msg
-               ldd #NAMES+19*32+2
-               lbsr print_at
-               ldx #hs_confirm_msg
-               ldd #NAMES+21*32+2
-               lbsr print_at
-               ldd #NAMES+20*32
-               lbsr vdp_wr
-               clra
-               ldy #32
-               lbsr vdp_fill
-               lda hs_letter
-               adda #'1
-               suba #FONT_FIRST
-               pshs a
-               ldd #NAMES+20*32+15
-               lbsr vdp_wr
-               puls a
-               sta VDP_DATA
-               rts
 hs_show        lbsr hs_draw
                ldx #hs_return_msg
-               ldd #NAMES+21*32+4
-               lbsr print_at
+               ldd #NAMES+21*32
+               lbsr print_centered
 1              lbsr wait_frame
                lbsr read_keys
                lda keys_new
@@ -411,6 +598,11 @@ hs_show        lbsr hs_draw
                bita #K_FIRE+K_PAUSE
                beq 1B
                rts
+
+* Tabela centralizada: 16 colunas a partir de HS_COL, "NN  ABC   000000"
+* sob o cabeçalho "    NOME  PONTOS".
+HS_COL         equ 8
+HS_ROW0        equ 5
 hs_draw        lbsr screen_off
                lbsr hide_sprites
                ldd #NAMES
@@ -419,20 +611,20 @@ hs_draw        lbsr screen_off
                ldy #768
                lbsr vdp_fill
                ldx #hs_title
-               ldd #NAMES+32+5
-               lbsr print_at
+               ldd #NAMES+32
+               lbsr print_centered
                ldx #hs_header
-               ldd #NAMES+3*32+5
+               ldd #NAMES+3*32+HS_COL
                lbsr print_at
                clr hs_row
                ldu #HS_DATA
 1              lda hs_row
-               adda #5
+               adda #HS_ROW0
                ldb #32
                mul
-               addd #NAMES+5
+               addd #NAMES+HS_COL
                lbsr vdp_wr
-               lda #'0-FONT_FIRST
+               lda #'0-FONT_FIRST      ; posição 01..10
                ldb hs_row
                cmpb #9
                bne 2F
@@ -445,9 +637,8 @@ hs_draw        lbsr screen_off
                clra
 3              adda #'0-FONT_FIRST
                sta VDP_DATA
-               clra
-               nop
-               sta VDP_DATA
+               ldb #2
+               bsr hs_spaces
                lda 3,U
                suba #FONT_FIRST
                sta VDP_DATA
@@ -457,9 +648,8 @@ hs_draw        lbsr screen_off
                lda 5,U
                suba #FONT_FIRST
                sta VDP_DATA
-               clra
-               nop
-               sta VDP_DATA
+               ldb #3
+               bsr hs_spaces
                ldb #3
 4              lda ,U
                lsra
@@ -480,12 +670,9 @@ hs_draw        lbsr screen_off
                cmpa #10
                blo 1B
                lbra screen_on
-hs_title       fcc "QUEBRA-TIJOLO: TOP 10",0
-hs_header      fcc "   NOME  PONTOS",0
-hs_edit_msg    fcc "A-Z: DIGITE AS 3 INICIAIS",0
-hs_confirm_msg fcc "RETURN: CONFIRMA O NOME",0
-hs_return_msg  fcc "ESPACO: VOLTAR",0
-power_help     fcc "Z/X: MOVE  ESPACO: LANCA/TIRO",0
-msg_pause      fcc "    PAUSA    ",0
-msg_victory    fcc "CAMPANHA COMPLETA!",0
-msg_conquered  fcc "32 FASES + GUARDIAO",0
+* hs_spaces: B espaços (tile 0) na VRAM, 10 ciclos entre escritas
+hs_spaces      clra
+1              sta VDP_DATA
+               decb
+               bne 1B
+               rts

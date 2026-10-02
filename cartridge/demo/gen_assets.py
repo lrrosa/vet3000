@@ -15,6 +15,7 @@ import math
 import os
 import sys
 from levels import COURTS, LEVELS
+import boss_art
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 BUILD = os.path.join(HERE, "build")
@@ -92,15 +93,16 @@ _GLYPHS = {
     "]": [".####", "...##", "...##", "...##", "...##", "...##", ".####"],
     "_": ["", "", "", "", "", "", "", "########"],
     "$": ["..##", ".#####", "##.#", ".####", "...#.##", "#####", "..##"],
-    # acentuados (gravados em códigos ASCII sem uso nos textos; ver ACCENTS)
+    # acentuados (gravados em códigos ASCII sem uso nos textos; ver ACCENTS).
+    # O agudo fica na linha 0, separado da letra por uma linha vazia.
     "Ç": [".####", "##..##", "##", "##", "##..##", ".####", "...##", "..##"],
-    "Ã": [".##.#", "#.##", ".####", "##..##", "######", "##..##", "##..##"],
-    "Á": ["...##", "..##", ".####", "##..##", "######", "##..##", "##..##"],
-    "É": ["...##", "..##", "######", "##", "#####", "##", "######"],
+    "Ã": [".##.#", "#.##.", "", ".####", "##..##", "######", "##..##"],   # til, linha vazia, A de 4 linhas
+    "Á": ["...##", "", ".####", "##..##", "######", "##..##", "##..##"],
+    "É": ["...##", "", "######", "##", "#####", "##", "######"],
     "Ê": ["..##", ".#..#", "######", "##", "#####", "##", "######"],
-    "Í": ["...##", "..##", ".####", "..##", "..##", "..##", ".####"],
-    "Ó": ["...##", "..##", ".####", "##..##", "##..##", "##..##", ".####"],
-    "Ú": ["...##", "..##", "##..##", "##..##", "##..##", "##..##", ".####"],
+    "Í": ["...##", "", ".####", "..##", "..##", "..##", ".####"],
+    "Ó": ["...##", "", ".####", "##..##", "##..##", "##..##", ".####"],
+    "Ú": ["...##", "", "##..##", "##..##", "##..##", "##..##", ".####"],
 }
 # caractere acentuado -> código ASCII (sem uso nos textos) onde o glifo é gravado
 ACCENTS = {"Ç": "#", "Ã": "%", "É": "&", "Í": "\\", "Ó": "^", "Á": "_", "Ê": "[", "Ú": "]"}
@@ -347,19 +349,32 @@ def title_bottom():
 
 SCROLL_TEXT = (
     "      *** VET 3000 - THE VIDEO EFFECTS TITLER ***     "
-    "MC6809 + TMS9128: 32 FASES, TIJOLOS DE PRATA E OURO, CAPSULAS E TOP 10!     "
-    "ESPACO: JOGAR. V: VIDEO EXTERNO.     "
+    "MC6809 + TMS9128: 32 FASES, TIJOLOS DE PRATA E OURO, CÁPSULAS E TOP 10!     "
+    "ESPAÇO: JOGAR. V: VÍDEO EXTERNO.     "
     "EXT MODE: TITULADOR. SHIFT+EXT MODE NO EDITOR: VOLTA A DEMO.     "
-    "TITULOS PRESERVADOS. RECORDES NA RAM COM BATERIA.     "
-    "LEONARDO ROMAN DA ROSA - SOFTWARE LIVRE GPL-3.     <<<    ")
+    "TÍTULOS PRESERVADOS. RECORDES NA RAM COM BATERIA.     "
+    "SOFTWARE LIVRE GPL-3.     <<<    ")
 
-# mensagens do jogo (ASCII + códigos dos acentuados, 0 no fim)
+# mensagens do jogo e do ranking (ASCII + códigos dos acentuados, 0 no fim).
+# As do meio da tela têm 16 caracteres para cobrir a anterior (msg_blank).
 MESSAGES = [
-    ("msg_level", "FASE COMPLETA!"),
-    ("msg_over", " FIM DE JOGO  "),
-    ("msg_serve", "ESPAÇO: LANÇA"),
+    ("msg_level", " FASE COMPLETA! "),
+    ("msg_over", "  FIM DE JOGO   "),
+    ("msg_stage", "FASE "),
+    ("msg_pause", "    PAUSA    "),
     ("msg_blank", "                "),
     ("msg_hud", "PONTOS         VIDAS    FASE"),
+    ("power_help", "Z/X: MOVE   ESPAÇO: AÇÃO"),   # 24 (par): centrada entre as paredes
+    ("attract_help", "DEMONSTRAÇÃO - ESPAÇO: JOGAR"),
+    ("msg_victory", "CAMPANHA COMPLETA!"),
+    ("msg_conquered", "32 FASES + GUARDIÃO"),
+    ("hs_title", "QUEBRA-TIJOLO: TOP 10"),
+    ("hs_header", "    NOME  PONTOS"),
+    ("hs_edit_msg", "A-Z: DIGITE SUAS INICIAIS"),
+    ("hs_clear_msg", "CLEAR: APAGA"),
+    ("hs_confirm_msg", "RETURN: CONFIRMA O NOME"),
+    ("hs_return_msg", "ESPAÇO: VOLTAR"),
+    ("hs_play_msg", "ESPAÇO: JOGAR"),      # ranking no ciclo de demonstração
 ]
 
 # ---------------------------------------------------------------------------
@@ -422,41 +437,50 @@ SPR_BALL16 = sprite([
     "..############..",
     "...##########...",
     ".....######....."])
-SPR_BALL = sprite([
+# A bola do jogo fica nas últimas linhas do sprite: os 16 pixels de altura que
+# o VDP conta no limite de 4 sprites por linha terminam na base da bola, e ela
+# parada sobre o rebatedor não divide nenhuma linha com ele.
+SPR_BALL = sprite([""] * 10 + [
     ".####.",
     "######",
     "######",
     "######",
     "######",
     ".####."])
-SPR_PADDLE_L = sprite([
-    ".######.", "########", "##...###", "########", "########", ".######."])
-SPR_PADDLE_R = sprite([
-    "################", "................", "################",
-    "################", "................", "################"])
-SPR_PADDLE_CAP_R = sprite([
-    ".######.", "########", "###...##", "########", "########", ".######."])
-SPR_PADDLE_HI = sprite([
-    "",
-    "",
-    ".#.############",
-    "",
-    "",
-    ""])
 
-SPRITES = [SPR_BALL16, SPR_BALL, SPR_PADDLE_L, SPR_PADDLE_R]
-for letter in "ESVCBL":
+# Rebatedor prateado (6 linhas): terminais vermelhos, anel escuro de 2 pixels e
+# corpo com brilho branco nas 2 linhas de cima e cinza nas 4 de baixo. Cada
+# sprite tem uma cor só, e o brilho fica num sprite que termina na linha 1 do
+# rebatedor enquanto o cinza começa na linha 2: assim nenhuma linha passa de 4
+# sprites, nem com o rebatedor grande (2 terminais + 2 segmentos de corpo).
+PADDLE_TIP = ["..####", ".#####", "######", "######", ".#####", "..####"]
+SPR_PADDLE_TIP_L = sprite(PADDLE_TIP)
+SPR_PADDLE_TIP_R = sprite([row[::-1].rjust(16, ".") for row in PADDLE_TIP])
+SPR_PADDLE_SHINE = sprite([""] * 14 + ["#" * 16] * 2)
+SPR_PADDLE_BODY = sprite(["#" * 16] * 4)
+
+SPRITES = [SPR_BALL16, SPR_BALL, SPR_PADDLE_TIP_L, SPR_PADDLE_TIP_R]
+# cápsulas 1-7 com as letras do Arkanoid: E aumenta, S lenta, P vida (Player),
+# C prende, B saída (Break), L laser, D três bolas (Disruption). Padrão =
+# tipo*4+12; o tiro vem logo depois e serve também para o projétil (tipo 8).
+for letter in "ESPCBLD":
     rows = [".########.", "#........#"]
     rows += ["#." + row.ljust(6, ".") + ".#" for row in _GLYPHS[letter]]
     rows += ["#........#", ".########."]
     SPRITES.append(sprite(rows))
-SPRITES.append(sprite(["..##.."] * 8))
-SPRITES.append(SPR_PADDLE_CAP_R)
+SPR_SHOT = sprite(["..##.."] * 8)
+SPRITES += [SPR_SHOT, SPR_PADDLE_SHINE, SPR_PADDLE_BODY]
+# números de padrão (índice x 4 nos sprites 16x16) usados pelo demo.asm
+SPRITE_EQUS = [("PAT_BALL", SPR_BALL), ("PAT_TIP_L", SPR_PADDLE_TIP_L),
+               ("PAT_TIP_R", SPR_PADDLE_TIP_R), ("PAT_SHINE", SPR_PADDLE_SHINE), ("PAT_SHOT", SPR_SHOT),
+               ("PAT_BODY", SPR_PADDLE_BODY)]
 
 # ---------------------------------------------------------------------------
 # Jogo: conjunto de tiles (fonte 0-63 + tijolos/paredes 64..), mesmo nos 3 bancos
 # ---------------------------------------------------------------------------
 T_WALL, T_WALL_TOP, T_CORNER_L, T_CORNER_R = 64, 65, 66, 67
+T_CURSOR = 69
+T_ENERGY, T_ENERGY_OFF = 70, 71     # barra de energia do chefão
 T_BRICK = 72          # 6 linhas de tijolo x (esq, dir) = 72..83
 BRICK_ROWS = 10
 BRICK_COLORS = [      # (clara, média, escura) por linha de tijolos
@@ -478,6 +502,10 @@ def game_tiles():
         cols[T_WALL*8+y] = 0xFE
         pats[68*8+y] = [255,0,126,90,66,126,0,255][y]
         cols[68*8+y] = [0xE4,0xE4,0xFE,0x4E,0xFE,0xFE,0xE4,0xE4][y]
+    # cursor da entrada de iniciais: bloco do tamanho de um glifo
+    for y in range(8):
+        pats[T_CURSOR*8+y] = 0xFC if y < 7 else 0
+        cols[T_CURSOR*8+y] = (LYELLOW << 4) | TRANSPARENT
     for t in (T_WALL_TOP,T_CORNER_L,T_CORNER_R):
         for y in range(8):
             pats[t*8+y] = [0xFF,0xFF,0x81,0xBD,0x81,0xFF,0xFF,0x00][y]
@@ -504,20 +532,82 @@ def game_tiles():
     for side in range(2):
         pats[(86+side)*8:(87+side)*8] = pats[(84+side)*8:(85+side)*8]
         cols[(86+side)*8:(87+side)*8] = bytes([0xB0,0xAB,0xAB,0x6A,0x6A,0xAB,0xA0,0])
-    boss_tiles = [
-        ([255]*8, [0x4D]*8),
-        ([1,3,7,15,31,63,127,255], [0xD0]*8),
-        ([128,192,224,240,248,252,254,255], [0xD0]*8),
-        ([0xC3]*8, [0xD4]*8),
-        ([0,126,255,231,231,255,126,0], [0xB4]*8),
-        ([0,255,0,255,0,255,0,0], [0x64]*8),
-        ([0,255,0,255,0,255,0,0], [0x94]*8),
-        ([255]*8, [0xF0]*8),
-    ]
-    for i,(pattern,color) in enumerate(boss_tiles,88):
-        pats[i*8:i*8+8] = bytes(pattern)
-        cols[i*8:i*8+8] = bytes(color)
+    # barra de energia do chefão: segmento aceso (degradê) e apagado
+    lit = [None, LYELLOW, LRED, LRED, MRED, DRED, None, None]
+    for y in range(8):
+        pats[T_ENERGY*8+y] = 0xFE if lit[y] else 0
+        cols[T_ENERGY*8+y] = (lit[y] << 4) if lit[y] else 0
+        pats[T_ENERGY_OFF*8+y] = 0xFE if 2 <= y <= 4 else 0
+        cols[T_ENERGY_OFF*8+y] = DBLUE << 4
     return bytes(pats), bytes(cols)
+
+
+# ---------------------------------------------------------------------------
+# Chefão: o rosto de boss_art.py vira tiles próprios (BOSS_T0 em diante), só
+# carregados nos bancos 0 e 1 na fase 33. Os tiles dos olhos e da boca vêm
+# primeiro, e as versões "dano" e "boca aberta" ficam BOSS_N tiles adiante,
+# na mesma ordem: o 6809 troca uma pela outra somando BOSS_N.
+# ---------------------------------------------------------------------------
+BOSS_T0 = 96
+BOSS_COLORS = {".": TRANSPARENT, "n": MGREEN, "G": LGREEN, "b": DBLUE, "B": LBLUE, "r": DRED,
+               "c": CYAN, "m": MRED, "R": LRED, "y": DYELLOW, "Y": LYELLOW, "d": DGREEN,
+               "M": MAGENTA, "g": GRAY, "w": WHITE}
+
+
+def boss_tile(img, tx, ty):
+    """Tile (tx, ty) da imagem: 8 pares (padrão, cor) em forma canônica."""
+    rows = []
+    for y in range(8):
+        seg = [BOSS_COLORS[c] for c in img[ty * 8 + y][tx * 8:tx * 8 + 8]]
+        colors = set(seg)
+        assert len(colors) <= 2, "3 cores na tira %d,%d linha %d" % (tx, ty, y)
+        if colors == {TRANSPARENT}:
+            rows.append((0, 0))
+            continue
+        fg = max(colors)                       # a transparente (0) nunca é a frente
+        bg = min(colors) if len(colors) == 2 else TRANSPARENT
+        pattern = sum(0x80 >> x for x, c in enumerate(seg) if c == fg)
+        rows.append((pattern, (fg << 4) | bg))
+    return tuple(rows)
+
+
+def boss_tiles():
+    """(tiles, mapa 8x8, BOSS_N, nº de tiles dos olhos, nº de tiles da boca)"""
+    cells = [(tx, ty) for ty in range(8) for tx in range(8)]
+    base, hit, opened = (boss_art.face(), boss_art.face(boss_art.EYES_HIT),
+                         boss_art.face(boss_art.MOUTH_OPEN))
+    tile = {c: boss_tile(base, *c) for c in cells}
+    empty = tuple([(0, 0)] * 8)
+    # células que mudam: um índice por par (normal, alternativo); a grade de
+    # dentes repete tiles normais que abrem de jeitos diferentes
+    pairs = {}
+    for variant, img in (("eye", hit), ("mouth", opened)):
+        for c in cells:
+            alt = boss_tile(img, *c)
+            if alt != tile[c]:
+                assert c not in pairs, "olho e boca na mesma célula"
+                pairs[c] = (variant, tile[c], alt)
+    eye_pairs, mouth_pairs = [], []
+    for c, (variant, normal, alt) in pairs.items():
+        lst = eye_pairs if variant == "eye" else mouth_pairs
+        if (normal, alt) not in lst:
+            lst.append((normal, alt))
+    changed = eye_pairs + mouth_pairs
+    order = [normal for normal, _ in changed]
+    fixed = []                       # tiles que não mudam, sem repetição
+    for c in cells:
+        if c not in pairs and tile[c] != empty and tile[c] not in fixed:
+            fixed.append(tile[c])
+    n = len(order) + len(fixed)
+    tiles = order + fixed + [alt for _, alt in changed]
+    assert BOSS_T0 + len(tiles) <= 256
+
+    def index(c):
+        if c in pairs:
+            _, normal, alt = pairs[c]
+            return BOSS_T0 + changed.index((normal, alt))
+        return 0 if tile[c] == empty else BOSS_T0 + len(order) + fixed.index(tile[c])
+    return tiles, [index(c) for c in cells], n, len(eye_pairs), len(mouth_pairs)
 
 
 def level_bits(rows, chars="#SG"):
@@ -551,6 +641,7 @@ def main():
     # nada de preto opaco (cor 1): com EXTVID ele esconderia o vídeo externo, e
     # com o backdrop preto a cor 0 já aparece preta
     used = (top.colors() + bottom.colors() + game_tiles()[1] + bytes(sum(BARS, []))
+            + bytes(c for t in boss_tiles()[0] for _, c in t)
             + bytes(sum((logo_colors(t) for t in range(len(LOGO_THEMES))), [])))
     assert all(BLACK not in (b >> 4, b & 15) for b in used), "cor preta (1) opaca nos dados"
     out = []
@@ -572,6 +663,10 @@ def main():
     w("LOGO_COL0\tequ\t%d" % logo_c0)
     w("LOGO_COL1\tequ\t%d" % logo_c1)
     w("LOGO_THEMES\tequ\t%d" % len(LOGO_THEMES))
+    w("T_CURSOR\tequ\t%d" % T_CURSOR)
+    for name, spr in SPRITE_EQUS:
+        w("%s\tequ\t%d" % (name, SPRITES.index(spr) * 4))
+    assert SPRITES.index(SPR_SHOT) * 4 == 8 * 4 + 12, "projétil (tipo 8) usa o padrão do tiro"
     w("")
     # Only glyphs present in the scroller need eight pre-shifted copies in ROM.
     txt = text_index(SCROLL_TEXT)
@@ -620,6 +715,24 @@ def main():
     out.extend(fcb_lines(rle(gp)))
     w("GAME_COL")
     out.extend(fcb_lines(rle(gc)))
+    btiles, bmap, bn, beyes, bmouth = boss_tiles()
+    bpat = bytes(p for t in btiles for p, _ in t)
+    bcol = bytes(c for t in btiles for _, c in t)
+    w("T_ENERGY\tequ\t%d" % T_ENERGY)
+    w("T_ENERGY_OFF\tequ\t%d" % T_ENERGY_OFF)
+    w("BOSS_T0\t\tequ\t%d\t; %d tiles do rosto + %d alternativos" % (BOSS_T0, bn, beyes + bmouth))
+    w("BOSS_N\t\tequ\t%d" % bn)
+    w("BOSS_EYE0\tequ\t%d" % BOSS_T0)
+    w("BOSS_EYE_END\tequ\t%d" % (BOSS_T0 + beyes))
+    w("BOSS_MOUTH0\tequ\t%d" % (BOSS_T0 + beyes))
+    w("BOSS_MOUTH_END\tequ\t%d" % (BOSS_T0 + beyes + bmouth))
+    for name, data in (("BOSS_PAT", bpat), ("BOSS_COL", bcol)):
+        packed = rle(data)
+        assert unrle(packed) == data
+        w("%s\t\t; %d -> %d bytes (RLE)" % (name, len(data), len(packed)))
+        out.extend(fcb_lines(packed))
+    w("BOSS_MAP\t; 8x8 tiles do rosto (0 = vazio)")
+    out.extend(fcb_lines(bytes(bmap), 8))
     for label, text in MESSAGES:
         codes = [ord(ACCENTS.get(ch, ch)) for ch in text.upper()]
         w(("%s\tfcb\t%s,0\t; %s" % (label, ",".join("$%02X" % c for c in codes), text)).rstrip())
@@ -632,11 +745,6 @@ def main():
         assert unrle(packed) == data
         w("LEVEL_%d" % i)
         out.extend(fcb_lines(packed))
-    w("LEVEL_NAMES")
-    for i in range(len(LEVELS)):
-        w("\t\tfdb LEVEL_NAME_%d" % i)
-    for i, (name, _) in enumerate(COURTS):
-        w('LEVEL_NAME_%d fcc "%s",0' % (i, name))
     with open(os.path.join(HERE, "assets.inc"), "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(out) + "\n")
 
@@ -661,13 +769,16 @@ def main():
                             fnt.putpixel(((g % 16) * 24 + x * 3 + dx, (g // 16) * 24 + y * 3 + dy),
                                          (255, 255, 255))
     fnt.save(os.path.join(BUILD, "preview_font.png"))
-    # Atlas from the same tile bytes and cell maps used by the cartridge.
-    from PIL import ImageDraw
+    # Atlas from the same tile bytes and cell maps used by the cartridge; the
+    # labels use the cartridge font (with accents), like the game screen.
     atlas = Image.new("RGB", (4*256, 8*120), (12, 16, 24))
-    labels = ImageDraw.Draw(atlas)
     for index, (name, rows) in enumerate(COURTS):
         ox, oy = (index%4)*256, (index//4)*120
-        labels.text((ox+8, oy+4), f"{index+1:02d}  {name}", fill=(230,230,240))
+        for i, g in enumerate(text_index(f"FASE {index+1:02d}")):
+            for py in range(8):
+                for px in range(8):
+                    if FONT[g][py] & (0x80 >> px):
+                        atlas.putpixel((ox+8+i*8+px, oy+8+py), (230,230,240))
         for row, cells in enumerate(rows):
             for col, cell in enumerate(cells):
                 if cell == ".":
@@ -681,6 +792,14 @@ def main():
                             c = color>>4 if pattern & (0x80>>px) else color&15
                             atlas.putpixel((ox+8+col*16+side*8+px, oy+24+row*8+py),PALETTE[c])
     atlas.resize((2048,1920),Image.Resampling.NEAREST).save(os.path.join(BUILD,"preview_levels.png"))
+    # chefão: normal, dano e boca aberta, em 4x
+    faces = [boss_art.face(), boss_art.face(boss_art.EYES_HIT), boss_art.face(boss_art.MOUTH_OPEN)]
+    boss = Image.new("RGB", (3 * 64 + 16, 64), PALETTE[BLACK])
+    for i, rows in enumerate(faces):
+        for y, row in enumerate(rows):
+            for x, c in enumerate(row):
+                boss.putpixel((i * 72 + x, y), PALETTE[BOSS_COLORS[c]])
+    boss.resize((boss.width * 4, boss.height * 4), Image.NEAREST).save(os.path.join(BUILD, "preview_boss.png"))
     print("assets.inc gerado; prévias em", BUILD)
 
 

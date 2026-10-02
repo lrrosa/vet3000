@@ -1,5 +1,11 @@
-* GUARDIAO: final arena after 32 courts. 24 HP, moving mask and aimed bolts.
+* GUARDIAO: final arena after 32 courts. 24 HP, moving face and aimed bolts.
 * Uses title scratch; boss_tick aliases the unused gold mask in this arena.
+* O rosto (boss_art.py) é um bitmap de 8x8 tiles próprios a partir de
+* BOSS_T0, carregados nos bancos 0 e 1 (linhas 4-11 da tela) só nesta fase.
+* Ao levar dano os olhos ficam brancos e, ao atirar, a boca se abre: os tiles
+* dessas versões ficam BOSS_N posições depois dos normais.
+boss_mouth     equ $5E                ; passos que a boca ainda fica aberta
+BOSS_MOUTH_TIME equ 16
 boss_init      ldx #ARMOR
                ldb #40
 1              clr ,X+
@@ -19,7 +25,19 @@ boss_init      ldx #ARMOR
                clr boss_flash
                clr boss_tick
                clr hitcnt
-               rts
+               ldd #PAT+BOSS_T0*8      ; tiles do rosto nos bancos 0 e 1
+               bsr boss_load_pat
+               ldd #PAT+$0800+BOSS_T0*8
+               bsr boss_load_pat
+               ldd #COL+BOSS_T0*8
+               bsr boss_load_col
+               ldd #COL+$0800+BOSS_T0*8
+boss_load_col  lbsr vdp_wr
+               ldx #BOSS_COL
+               lbra vdp_unrle
+boss_load_pat  lbsr vdp_wr
+               ldx #BOSS_PAT
+               lbra vdp_unrle
 
 boss_draw      lda #8
                sta cnt
@@ -27,19 +45,15 @@ boss_draw      lda #8
                ldb boss_col
                addd #NAMES+4*32-1
                std tmp
-               ldx #boss_face
+               ldx #BOSS_MAP
 1              ldd tmp
                lbsr vdp_wr
                clra
-               sta VDP_DATA
+               sta VDP_DATA            ; coluna vazia: apaga o rastro ao andar
                ldb #8
 2              lda ,X+
-               tst boss_flash
-               beq 3F
-               cmpa #92
-               blo 3F
-               lda #95
-3              sta VDP_DATA
+               bsr boss_tile
+               sta VDP_DATA
                decb
                bne 2B
                clra
@@ -52,15 +66,33 @@ boss_draw      lda #8
 boss_energy    ldd #NAMES+13*32+4
                lbsr vdp_wr
                ldb #0
-1              clra
+1              lda #T_ENERGY_OFF
                cmpb bricks_left
                bhs 2F
-               lda #T_BRICK
+               lda #T_ENERGY
 2              sta VDP_DATA
                incb
                cmpb #24
                blo 1B
                rts
+
+* boss_tile: A = tile do mapa; troca pelos olhos de dano ou pela boca aberta
+boss_tile      tst boss_flash
+               beq 1F
+               cmpa #BOSS_EYE0
+               blo 1F
+               cmpa #BOSS_EYE_END
+               bhs 1F
+               adda #BOSS_N
+               rts
+1              tst boss_mouth
+               beq 2F
+               cmpa #BOSS_MOUTH0
+               blo 2F
+               cmpa #BOSS_MOUTH_END
+               bhs 2F
+               adda #BOSS_N
+2              rts
 
 boss_step      lda level
                cmpa #NUM_LEVELS
@@ -72,7 +104,12 @@ boss_step      lda level
                dec boss_flash
                bne 1F
                lbsr boss_draw
-1              inc boss_tick
+1              tst boss_mouth          ; a boca fecha depois do tiro
+               beq 7F
+               dec boss_mouth
+               bne 7F
+               lbsr boss_draw
+7              inc boss_tick
                lda boss_tick
                bita #15
                bne 4F
@@ -92,7 +129,7 @@ boss_step      lda level
                beq 9F
                tst power_kind
                bne 9F
-               lda #7
+               lda #P_BOLT
                sta power_kind
                lda boss_col
                lsla
@@ -112,6 +149,9 @@ boss_step      lda level
 5
                lda #96
                sta power_y
+               lda #BOSS_MOUTH_TIME    ; abre a boca ao atirar
+               sta boss_mouth
+               lbsr boss_draw
 9              rts
 
 boss_bolt      lda power_x
@@ -184,12 +224,3 @@ boss_hit       lda ball_y
 9              andcc #$FE
                rts
 
-boss_face      fcb 0,89,88,88,88,88,90,0
-               fcb 89,88,88,88,88,88,88,90
-               fcb 91,92,92,88,88,92,92,91
-               fcb 91,92,92,88,88,92,92,91
-               fcb 91,88,88,91,91,88,88,91
-               fcb 91,88,93,93,94,94,88,91
-               fcb 0,91,88,88,88,88,91,0
-               fcb 0,0,91,91,91,91,0,0
-msg_boss       fcc "GUARDIAO - ESPACO: LASER",0

@@ -1,4 +1,4 @@
-# Cartucho de demonstração: VET 3000 DEMO 1.4
+# Cartucho de demonstração: VET 3000 DEMO 1.5
 
 Copyright © 2026 Leonardo Roman da Rosa, sob a GPL-3.0-or-later.
 
@@ -45,34 +45,69 @@ encontra a assinatura `"OBJECT"` e passa o controle para a demo.
 **QUEBRA-TIJOLO**
 
 **Ciclo de demonstração:** a abertura permanece até completar o scroller. Em seguida,
-a CPU joga três fases sorteadas, por até 10 segundos cada; o top 10 aparece por 8 segundos,
-e a abertura retorna. ESPAÇO inicia uma partida nova em qualquer dessas telas. Pontos da CPU
+a CPU joga três fases sorteadas, por até 10 segundos cada; o top 10 aparece por 8 segundos, só
+com "ESPAÇO: JOGAR" embaixo, e a abertura retorna. A CPU não segue a bola de lado: calcula onde
+ela vai chegar à altura do rebatedor (com os rebotes nas paredes; subindo, supõe a volta pelo
+teto) e corre até lá, rebatendo 8 pixels fora do centro para variar o ângulo. ESPAÇO inicia uma partida nova em qualquer dessas telas. Pontos da CPU
 nunca entram nos recordes. O atalho RETURN para consultar o ranking continua disponível,
 mas não aparece como anúncio na abertura.
 
 - Campanha inspirada em **Arkanoid**, com **32 arenas diferentes e um chefão na fase 33**.
-  Cada arena tem nome próprio e até 10 fileiras de 15 tijolos: escadaria, pirâmide, invasor,
-  castelo, colmeia, labirinto, portais, reator etc. As fases não são apenas espelhamentos.
+  Cada arena tem até 10 fileiras de 15 tijolos, com desenhos como escadaria, pirâmide, invasor,
+  castelo, colmeia, labirinto, portais e reator. As fases não são apenas espelhamentos.
 - Tijolos coloridos de uma batida; **prateados de duas batidas** distribuídos conforme o desenho;
   **dourados indestrutíveis** formando obstáculos e passagens. Só os destrutíveis contam para
   completar a fase. O teste de mapas verifica que nenhum fica selado atrás de ouro.
-- Quatro vidas iniciais e dificuldade crescente, até a velocidade vertical de 3 pixels por passo.
-- Nome da fase e instruções centralizados, fases indicadas com dois dígitos (01–33),
-  moldura metálica segmentada e raquete com corpo claro e terminais vermelhos.
-- A cada quatro tijolos destruídos pode cair uma cápsula (uma por vez). Pegue com a raquete:
-  **E** aumenta a raquete de 32 para 48 pixels; **S** reduz pela metade o movimento da bola;
-  **V** dá uma vida extra, até o limite de 9; **C** prende a bola à raquete no rebote (ESPAÇO relança);
-  **B** abre a saída na parede direita (leve a raquete até ela para avançar);
-  **L** permite disparar laser com ESPAÇO enquanto a bola está em jogo, um tiro por vez.
+- Quatro vidas iniciais. A bola começa a 2 pixels por passo na vertical (120 por segundo) e
+  acelera a cada fase até 3,25 (na 1.4, de 1,5 a 3). O movimento lateral do lançamento e dos
+  rebotes subiu na mesma proporção, então os ângulos são os mesmos de antes. O rebatedor anda
+  4 pixels por passo (3 na 1.4), acompanhando o aumento da bola.
+- No início de cada fase e depois de perder uma vida, **"FASE 01"** aparece no meio da tela até
+  a bola sair (como lançar já está na linha de baixo). Se ESPAÇO não for apertado, **a bola sai
+  sozinha depois de 4 segundos** (também quando a cápsula C a prende no rebatedor).
+  Instruções centralizadas, fases com dois dígitos (01–33) e moldura metálica segmentada.
+- **Rebatedor prateado**, no estilo do Vaus do Arkanoid 2: terminais vermelhos, um anel escuro e
+  o corpo com brilho branco em cima e cinza embaixo. Cada sprite do TMS9128 tem uma cor só, e o VDP
+  mostra no máximo 4 sprites por linha. O brilho fica num sprite que termina na linha 1 do
+  rebatedor e o cinza começa na linha 2, então mesmo o rebatedor grande (2 terminais + 2 segmentos
+  de corpo) nunca passa de 4 sprites numa linha. Ele vem antes da bola, da cápsula e do tiro na
+  tabela de sprites, e a bola é desenhada nas últimas linhas do seu sprite: parada sobre o
+  rebatedor, ela não divide nenhuma linha com ele. Na versão 1.4 o terminal direito do rebatedor
+  grande era o 5º sprite da linha e sumia, ou aparecia cortado, com a bola por perto.
+- A cada quatro tijolos destruídos pode cair uma cápsula (uma por vez), com as letras e as cores
+  do Arkanoid. Pegue com a raquete:
+  **E** (azul) aumenta a raquete de 32 para 48 pixels; **S** (laranja) reduz pela metade o
+  movimento da bola; **P** (cinza, "Player") dá uma vida extra, até o limite de 9;
+  **C** (verde) prende a bola à raquete no rebote (ESPAÇO relança);
+  **B** (rosa) abre a saída na parede direita: o rebatedor atravessa a parede e, quando ao menos
+  1/6 dele já saiu da tela, termina de passar sozinho até sumir, e a fase acaba;
+  **L** (vermelha) permite disparar laser com ESPAÇO enquanto a bola está em jogo, um tiro por vez;
+  **D** (ciano, "Disruption") divide a bola em três. Com mais de uma bola em jogo não caem
+  cápsulas, e **a vida só se perde quando cai a última**: se a principal cair, uma das outras
+  assume o lugar dela.
   E, S, C e L duram até perder a bola ou mudar de fase. A saída B fica aberta até mudar de fase.
-  Laser também quebra prata em duas batidas; ouro bloqueia o tiro.
-- **GUARDIÃO**, chefão final original: máscara de 64×64, 24 pontos de energia visíveis,
-  movimento lateral, projéteis dirigidos à posição da raquete no momento do disparo e breve
-  invulnerabilidade após cada dano. Cada acerto vale 100 pontos. A fase final fornece laser,
-  inclusive após perder uma vida. Derrotá-lo encerra a campanha e leva ao ranking.
+  O D cancela o C. Laser também quebra prata em duas batidas; ouro bloqueia o tiro.
+- **GUARDIÃO**, chefão final original: uma máscara robótica de 64×64 pixels com coroa, gema,
+  olhos em brasa e grade de dentes (`boss_art.py`), desenhada como bitmap de 8×8 tiles próprios.
+  No modo Graphics II cada tira de 8×1 pixels tem só 2 cores, então o desenho segue a grade de
+  8 pixels na horizontal, enquanto a cor muda livremente de uma linha para a outra; o
+  `gen_assets.py` confere a regra. Os tiles só são carregados nesta fase, nos dois terços de
+  cima da tela (sobram 160 tiles livres por banco). Ao levar dano, os olhos ficam brancos; ao
+  atirar, a boca se abre com brilho vermelho (11 tiles alternativos, trocados somando uma
+  constante ao número do tile). Barra de 24 pontos de energia, movimento lateral, projéteis
+  dirigidos à posição da raquete no momento do disparo e breve invulnerabilidade após cada
+  dano. Cada acerto vale 100 pontos. A fase final fornece laser, inclusive após perder uma
+  vida. Derrotá-lo encerra a campanha e leva ao ranking.
 - Pausa com indicação na tela, pontuação limitada a **999999** e ranking de **10 recordes**
-  com três iniciais A–Z. Empates ficam depois dos registros anteriores; zero não entra.
-- Bola e raquete são sprites. A física usa ponto fixo 8.8, colisão por eixo com os tijolos (mapa de
+  com três iniciais A–Z, numa tabela centralizada. Na entrada das iniciais o nome começa em
+  branco, só com um **cursor amarelo piscando** na posição em edição, e **CLEAR** apaga.
+  Empates ficam depois dos registros anteriores; zero não entra.
+- Todos os textos do jogo e do ranking passam pela tabela de acentos do `gen_assets.py`
+  ("Z/X: MOVE   ESPAÇO: AÇÃO", "DEMONSTRAÇÃO"); um teste em Python impede que voltem sem acento.
+- Bolas e raquete são sprites, gravados direto na VRAM a cada quadro; com três bolas a ordem delas
+  inverte a cada quadro, para que uma bola que passe do limite de 4 sprites por linha pisque em
+  vez de sumir. As bolas extras usam a mesma física da principal, trocando de lugar com ela
+  durante o cálculo. A física usa ponto fixo 8.8, colisão por eixo com os tijolos (mapa de
   bits de 10 × 16 bits em RAM, mais máscaras de prata/ouro) e ângulo de rebote pela posição na
   raquete (8 zonas).
 - O lançamento parado alterna esquerda/direita. Segurar uma direção ao lançar escolhe o lado;
@@ -86,10 +121,11 @@ mas não aparece como anúncio na abertura.
 
 | Tecla | Ação |
 |---|---|
-| ESPAÇO | Começa o jogo, lança/solta a bola e dispara com o bônus L |
+| ESPAÇO | Começa o jogo, lança/solta a bola (ela sai sozinha após 4 s) e dispara com o bônus L |
 | Z / X, O / P, ←→ (com SHIFT = direita) | Move a raquete |
 | RETURN | Pausa no jogo; abre o top 10 na abertura |
 | A–Z, na entrada de iniciais | Digita a letra e avança; na terceira posição, permite substituir a última letra |
+| CLEAR (Backspace no MAME), na entrada de iniciais | Apaga a letra sob o cursor; se ela está vazia, volta e apaga a anterior |
 | RETURN, na entrada de iniciais | Confirma o nome |
 | ESPAÇO, na entrada de iniciais | Avança uma posição; na última, confirma |
 | ESPAÇO ou RETURN, no ranking | Volta à abertura |
@@ -102,8 +138,9 @@ mas não aparece como anúncio na abertura.
 
 O top 10 ocupa **64 bytes em `$0190-$01CF`**, na parte inferior da antiga área de pilha.
 A pilha continua começando em `$0200`, com 48 bytes em `$01D0-$01FF`. A abertura usa `$0040`
-para barras/sprites alternadamente. No jogo, `$0040-$0067` guarda prata/ouro, `$006B-$0083`
-os sprites e `$0084-$0097` os tijolos. `$0080-$0083` volta a receber `EXIT` antes de retornar
+para barras/sprites alternadamente. No jogo, `$0040-$0067` guarda prata/ouro, `$006B-$0073`
+a cápsula e o tiro (rebatedor e bolas são gravados direto na VRAM), `$0074-$0083` as duas bolas
+extras da cápsula D e `$0084-$0097` os tijolos. `$0080-$0083` volta a receber `EXIT` antes de retornar
 ao titulador; não é usado como assinatura durante a partida.
 Nenhuma página de texto ou atributo do titulador foi reservada ou reduzida.
 
@@ -124,7 +161,8 @@ podem usar essa área; a demo antiga usava `$0190` para sprites e pode invalidar
 
 ## Regras de convivência com o firmware
 
-- Usa `$0000-$002F`, `$0035-$003D` (estado de demonstração/teclado), `$0040-$009F`,
+- Usa `$0000-$002F`, `$0035-$003F` (demonstração, teclado, lançamento automático e bolas
+  extras), `$0040-$009F`,
   `$0190-$01CF` (ranking) e `$01D0-$01FF` (pilha). Os vetores em `$0039-$003D`
   não são usados como vetores durante a demo, que mantém IRQ/FIRQ mascaradas.
   **Os títulos gravados na RAM ficam intactos**:
@@ -172,6 +210,7 @@ No Windows: `.\build.ps1` ou `.\build.ps1 -Debug`. Use `-Asm C:\caminho\asm6809.
 | `demo.asm` | Programa (6809, sintaxe asm6809) |
 | `breakout.inc` | Seis cápsulas, efeitos, ranking e persistência em SRAM |
 | `boss.inc` | Chefão final, energia, movimento, projéteis e dano |
+| `boss_art.py` | Rosto do chefão (64×64, metade esquerda espelhada) e as variações de dano e boca aberta |
 | `attract.inc` | Ciclo de demonstração, controle da CPU, sorteio de fases e lançamento |
 | `levels.py` | 32 arenas originais (vazio, normal, prata, ouro) |
 | `gen_assets.py` | Fonte 8×8 original (com Ç, Ã, Á, É, Ê, Í, Ó, Ú), textos, logotipo, telas (RLE), fontes pré-deslocadas, seno, tijolos, fases → `assets.inc` |

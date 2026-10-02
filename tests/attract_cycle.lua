@@ -10,6 +10,13 @@ local frame,cycles,old_mode,cpu_start,rank_start,takeover=0,0,0,0,0,nil
 local baseline,stages={},{}
 local paddle_positions={}
 local space=m.ioport.ports[":ROW3"]:field(128)
+local vram
+for _,dev in pairs(m.devices) do if dev.shortname=="tms9128" then vram=dev.spaces["vram"] end end
+local function row_text(row)
+    local t={}
+    for col=0,31 do t[#t+1]=string.char(vram:read_u8(sym.NAMES+row*32+col)+sym.FONT_FIRST) end
+    return table.concat(t)
+end
 local failed=false
 attract_test_frame=emu.add_machine_frame_notifier(function()
     if failed then return end
@@ -40,6 +47,11 @@ attract_test_frame=emu.add_machine_frame_notifier(function()
                 for a,b in pairs(baseline) do assert(mem:read_u8(a)==b,"CPU changed saved scores") end
             end
             old_mode=mode
+        end
+        if mode==2 and frame==rank_start+10 then
+            -- ranking: only how to play, without the CPU-game caption
+            assert(row_text(21):find("ESPA#O: JOGAR",1,true),"ranking hint missing")
+            assert(not row_text(21):find("DEMONSTRA",1,true),"CPU caption on the ranking")
         end
         if mode==1 and frame-cpu_start>20 then
             stages[mem:read_u8(sym.level)]=true

@@ -48,12 +48,15 @@ K_FIRE		equ	$04
 K_EXIT		equ	$08
 K_VIDEO		equ	$10
 K_PAUSE		equ	$20
+K_BACK		equ	$40		; CLEAR (Backspace no MAME)
 
 * ---- cores do TMS9918
 C_BLACK		equ	1
 C_LBLUE		equ	5
 C_CYAN		equ	7
+C_MRED		equ	8
 C_LRED		equ	9
+C_DYELLOW	equ	10
 C_LYELLOW	equ	11
 C_LGREEN	equ	3
 C_MAGENTA	equ	13
@@ -106,6 +109,8 @@ attract_prev equ $3A
 scroll_done equ $3B
 alpha_last equ $3C
 attract_keys equ $3D
+serve_clock equ $3E            ; passos com a bola presa (lançamento automático)
+extra_balls equ $3F            ; bolas extras em jogo: bit0 = BALL2, bit1 = BALL3
 CMD_TABLE	equ	$0040		; tabela de comandos do titulador (recriada no boot)
 CMD_SHIFT_EXT	equ	$15		; código de SHIFT+EXT MODE
 BARBUF		equ	$0040		; 64 bytes: cor de cada linha das barras
@@ -138,12 +143,15 @@ boss_tick equ $60              ; boss arena does not use GOLD masks
 boss_bolt_dx equ $5F
 ARMOR equ $40                  ; 10 mutable row masks (two-hit silver)
 GOLD equ $54                   ; 10 immutable row masks (indestructible)
-GAME_SAT equ $6B               ; six sprites + terminator, ends at $83
+GAME_SAT equ $6B               ; cápsula e tiro + terminador, até $73
+BALL2 equ $74                  ; bolas extras (cápsula D): x, y, dx, dy em 8.8,
+BALL3 equ $7C                  ; como ball_x..ball_dy; $80-$83 só guarda EXIT na saída
 brick_color equ $68
 brick_gold equ $69             ; draw-only shifting gold mask
 hs_pos equ $61                 ; ranking aliases game-only masks
 hs_letter equ $62
 hs_row equ $63
+hs_blink equ $64               ; relógio do cursor das iniciais
 HS equ $0190                   ; 64 battery-backed bytes, outside title storage
 HS_DATA equ HS+4               ; ten entries: 3 BCD bytes, 3 ASCII initials
 HS_END equ HS+64
@@ -158,7 +166,7 @@ STACK_TOP	equ	$0200
 		fcc	"OBJECT"		; assinatura
 		fdb	cart_vec		; a ROM faz LDX [$4006]: ponteiro para...
 cart_vec	fdb	entry-$4000		; ...o deslocamento da entrada (JSR $4000,X)
-		fcc	"VET 3000 DEMO 1.4 (C) 2026 LEONARDO ROMAN DA ROSA - GPL-3.0",0
+		fcc	"VET 3000 DEMO 1.5 (C) 2026 LEONARDO ROMAN DA ROSA - GPL-3.0",0
 
 * ===========================================================================
 *  Entrada: chamada pela ROM com JSR durante o boot (VDP já inicializado,
@@ -354,32 +362,91 @@ hide_sprites	ldd	#SPRATT
 		sta	SAT
 		rts
 
-* put_sat: copia a tabela de sprites da RAM (termina no Y = $D0)
+* put_game_sat: rebatedor (4 sprites, 6 no grande) gravado direto na VRAM a
+* partir de paddle_x, seguido da bola, da cápsula e do tiro da tabela em RAM.
+* O rebatedor vem primeiro: com 4 sprites numa linha o VDP descarta os de
+* número maior, então quem some é uma cápsula ou a bola já perdida ao lado
+* dele, nunca um pedaço do rebatedor. Os terminais e o corpo cinza começam nas
+* linhas 0 e 2; o brilho branco termina na linha 1 (ver gen_assets.py).
 put_game_sat	ldd	#SPRATT
 		lbsr	vdp_wr
+		ldx	#paddle_parts
+		ldb	#4			; normal: brilho, 2 terminais, corpo
+		tst	wide
+		beq	1F
+		ldb	#6			; grande: mais um segmento de corpo
+1		lda	1,X			; deslocamento X
+		cmpx	#paddle_parts+8		; terminal direito: anda com o wide
+		bne	2F
+		adda	wide
+2		adda	paddle_x
+		sta	tmp+1
+		lda	,X			; Y
+		bcc	3F
+		lda	#$C0			; passou de x=255 (saída): fora da tela
+3		sta	VDP_DATA
+		lda	tmp+1
+		leax	2,X
+		sta	VDP_DATA
+		lda	,X+			; padrão
+		sta	VDP_DATA
+		lda	,X+			; cor
+		sta	VDP_DATA
+		decb
+		bne	1B
+		bsr	put_balls
 		ldx	#GAME_SAT
-                lbsr sat_copy
-* Append the right red cap directly to VRAM, without expanding the RAM table.
-                tfr x,d
-                subd #GAME_SAT+1
-                addd #SPRATT
-                lbsr vdp_wr
-                lda #PADDLE_Y-2
-                sta VDP_DATA
-                lda paddle_x
-                adda #24
-                adda wide
-                sta VDP_DATA
-                lda #44
-                nop
-                sta VDP_DATA
-                lda #C_LRED
-                nop
-                sta VDP_DATA
-                lda #$D0
-                nop
-                sta VDP_DATA
-                rts
+		bra	sat_copy
+paddle_parts	fcb	PADDLE_Y-15,8,PAT_SHINE,C_WHITE		; linhas 0-1 do corpo
+		fcb	PADDLE_Y-1,0,PAT_TIP_L,C_MRED
+		fcb	PADDLE_Y-1,16,PAT_TIP_R,C_MRED		; + wide
+		fcb	PADDLE_Y+1,8,PAT_BODY,C_GRAY		; linhas 2-5 do corpo
+		fcb	PADDLE_Y-15,24,PAT_SHINE,C_WHITE	; só no grande
+		fcb	PADDLE_Y+1,24,PAT_BODY,C_GRAY
+
+* put_balls: a bola principal e as extras ativas. A ordem inverte a cada
+* quadro: se 5 sprites caírem numa linha, a bola descartada pisca em vez de
+* sumir. O desenho fica nas linhas 10-15 do sprite (Y = y - 11).
+put_balls	ldx	#ball_order
+		lda	frame
+		bita	#1
+		beq	1F
+		ldx	#ball_order+9
+1		ldb	#3
+2		lda	2,X			; bit em extra_balls (0 = principal)
+		beq	3F
+		bita	extra_balls
+		beq	4F
+3		ldu	,X
+		lda	2,U			; y (parte inteira)
+		suba	#11
+		sta	VDP_DATA
+		lda	,U			; x
+		sta	VDP_DATA
+		lda	#PAT_BALL
+		nop
+		sta	VDP_DATA
+		lda	#C_WHITE
+		nop
+		sta	VDP_DATA
+4		leax	3,X
+		decb
+		bne	2B
+		rts
+ball_order	fdb	ball_x
+		fcb	0
+		fdb	BALL2
+		fcb	1
+		fdb	BALL3
+		fcb	2
+		fdb	BALL3			; quadros ímpares: ordem invertida
+		fcb	2
+		fdb	BALL2
+		fcb	1
+		fdb	ball_x
+		fcb	0
+
+* put_sat: copia a tabela de sprites da RAM (termina no Y = $D0)
 put_sat		ldd	#SPRATT
 		lbsr	vdp_wr
 		ldx	#SAT
@@ -447,11 +514,14 @@ calibrate	lda	#R1_OFF
 *    ESPAÇO = ação    EXT MODE = sair    V = sobrepor vídeo    RETURN = pausa
 * ---------------------------------------------------------------------------
 read_keys	clrb
-		lda	#$BF			; linha 7: Z(0) X(1) ESQ/DIR(4) V(6)
+		lda	#$BF			; linha 7: Z(0) X(1) ESQ/DIR(4) CLEAR(5) V(6)
 		sta	KEYBOARD
 		lda	KEYBOARD
 		coma
-		bita	#$01
+		bita	#$20
+		beq	1F
+		orb	#K_BACK
+1		bita	#$01
 		beq	1F
 		orb	#K_LEFT
 1		bita	#$02
@@ -922,6 +992,13 @@ FIELD_L		equ	8
 FIELD_R		equ	248
 FIELD_T		equ	16
 BRICK_Y		equ	24		; linha de tiles 3
+SPEED_START	equ	$0200		; velocidade vertical inicial (8.8, pixels por passo)
+SPEED_STEP	equ	$0040		; aumento a cada fase
+SPEED_MAX	equ	$0340
+PADDLE_STEP	equ	4		; pixels por passo do rebatedor (3 até a versão 1.4)
+AUTO_LAUNCH	equ	240		; passos com a bola presa até ela sair sozinha (4 s)
+MSG_ROW		equ	14		; linha do meio da tela: estágio, fim de fase/jogo
+HINT_ROW	equ	16		; PAUSA
 
 game_tiles_init	lbsr	screen_off
 		lbsr	hide_sprites
@@ -959,7 +1036,7 @@ game		lbsr	game_tiles_init
 		clr	score+2
 		clr	paused
 		clr	launch_dir
-		ldd	#$0180
+		ldd	#SPEED_START
 		std	speed
                 tst attract_mode
                 beq new_level
@@ -1010,10 +1087,7 @@ game_loop	lbsr	wait_frame
 		tst	paused
 		bne	5F
 		ldx	#msg_blank
-		tst	ball_state
-		bne	5F
-		ldx	#msg_serve
-5		ldd	#NAMES+14*32
+5		ldd	#NAMES+HINT_ROW*32
 		lbsr	print_centered
 3		tst	paused
 		bne	game_loop
@@ -1039,18 +1113,18 @@ game_loop	lbsr	wait_frame
 level_done	tst	attract_mode
 		lbne	attract_next
 		lbsr	draw_status		; inclui os pontos do último tijolo
+		lbsr	gate_slide		; saiu pela parede: termina de passar
 		inc	level
 		lda	level
 		cmpa	#NUM_LEVELS+1
 		lbeq	campaign_done
 		ldd	speed			; mais rápido a cada fase
-		cmpd	#$0300
+		cmpd	#SPEED_MAX
 		bhs	1F
-		addd	#$0040
+		addd	#SPEED_STEP
 		std	speed
 1		ldx	#msg_level
-		ldd	#NAMES+12*32+10
-		lbsr	print_at
+		lbsr	center_msg
 		ldb	#90
 		lbsr	pause_frames
 		lbra	new_level
@@ -1060,11 +1134,18 @@ game_over	tst	attract_mode
 		lbsr	draw_status
 		lbsr	hide_sprites
 		ldx	#msg_over
-		ldd	#NAMES+12*32+10
-		lbsr	print_at
+		lbsr	center_msg
 		ldb	#180
 		lbsr	pause_frames
 		lbra	hs_game_over
+
+* center_msg: mensagem X no meio da tela (16 caracteres, cobre "FASE 01") e
+* apaga a linha de baixo (PAUSA)
+center_msg	ldd	#NAMES+MSG_ROW*32
+		lbsr	print_centered
+		ldx	#msg_blank
+		ldd	#NAMES+HINT_ROW*32
+		lbra	print_centered
 
 * pause_frames: espera B passos de 1/60 s (ou ESPAÇO)
 * (as mensagens msg_* ficam em assets.inc, com acentos)
@@ -1143,18 +1224,6 @@ draw_field	ldd	#NAMES
 		beq	7F
 		ldx	#attract_help
 7		ldd	#NAMES+23*32
-		lbsr	print_centered
-		lda	level
-		cmpa	#NUM_LEVELS
-		beq	8F
-		anda	#31
-		lsla
-		ldx	#LEVEL_NAMES
-		ldx	A,X
-		bra	9F
-8		ldx	#msg_boss
-9
-		ldd	#NAMES+2*32
 		lbra	print_centered
 
 * Metal rails have a joint every four tiles instead of a rivet every eight pixels.
@@ -1193,6 +1262,11 @@ draw_status	clr	dirty
 		lbsr	vdp_wr
 		clra
 		sta	VDP_DATA
+*		(segue em put_level)
+
+* put_level: escreve o número da fase (level+1) com dois dígitos na VRAM, no
+* endereço já definido
+put_level	clra
 		ldb	level
 		addd	#1			; 1..256, sem overflow de 8 bits
 		cmpd	#99
@@ -1356,10 +1430,13 @@ serve		clr	sticky
 		lda	#112
 		sta	paddle_x
 		clr	ball_state
+		clr	serve_clock
+		clr	extra_balls
 		bsr	stick_ball
-		ldx	#msg_serve
-		ldd	#NAMES+14*32
-		lbra	print_centered
+		ldx	#msg_stage		; "FASE 01" no meio da tela; como lançar já
+		ldd	#NAMES+MSG_ROW*32+12	; aparece na linha de baixo
+		lbsr	print_at
+		lbra	put_level
 
 stick_ball	lda	wide
 		lsra
@@ -1371,46 +1448,9 @@ stick_ball	lda	wide
 		std	ball_y
 		rts
 
-* game_sprites: bola (sprite 0) e raquete (sprites 1 e 2)
+* game_sprites: cápsula e tiro (rebatedor e bolas são gravados por put_game_sat)
 game_sprites	ldu	#GAME_SAT
-		lda	ball_y
-		deca
-		sta	,U+
-		lda	ball_x
-		sta	,U+
-		lda	#4			; padrão 1 = bola 6x6
-		sta	,U+
-		lda	#C_WHITE
-		sta	,U+
-		lda	#PADDLE_Y-1-1
-		sta	,U+
-		lda	paddle_x
-		sta	,U+
-		lda	#8			; padrão 2 = raquete esquerda
-		sta	,U+
-		lda	#C_LRED
-		sta	,U+
-		lda	#PADDLE_Y-1-1
-		sta	,U+
-		lda	paddle_x
-		adda	#8
-		sta	,U+
-		lda	#12			; padrão 3 = raquete direita
-		sta	,U+
-		lda	#C_WHITE
-		sta	,U+
-		tst	wide
-		beq	1F
-		lda	#PADDLE_Y-2
-		sta	,U+
-		lda	paddle_x
-		adda	#24
-		sta	,U+
-		lda	#12
-		sta	,U+
-		lda	#C_WHITE
-		sta	,U+
-1		tst	power_kind
+		tst	power_kind
 		beq	2F
 		lda	power_y
 		deca
@@ -1422,12 +1462,9 @@ game_sprites	ldu	#GAME_SAT
 		lsla
 		adda	#12
 		sta	,U+
-		lda	#C_LYELLOW
+		ldx	#capsule_colors-1
 		ldb	power_kind
-		cmpb	#7
-		bne	4F
-		lda	#C_LRED
-4
+		lda	B,X
 		sta	,U+
 2		tst	shot_active
 		beq	3F
@@ -1436,13 +1473,15 @@ game_sprites	ldu	#GAME_SAT
 		sta	,U+
 		lda	shot_x
 		sta	,U+
-		lda	#40
+		lda	#PAT_SHOT
 		sta	,U+
 		lda	#C_LRED
 		sta	,U+
 3		lda	#$D0
 		sta	,U
 		rts
+* cores das cápsulas E S P C B L D, como no Arkanoid, e do projétil do chefão
+capsule_colors	fcb	C_LBLUE,C_DYELLOW,C_GRAY,C_LGREEN,C_MAGENTA,C_MRED,C_CYAN,C_LRED
 
 * ---------------------------------------------------------------------------
 *  game_step: um passo de 1/60 s
@@ -1459,7 +1498,7 @@ game_step	lbsr	power_step
 		bita	#K_LEFT
 		beq	1F
 		ldb	paddle_x
-		subb	#3
+		subb	#PADDLE_STEP
 		cmpb	#FIELD_L
 		bhs	2F
 		ldb	#FIELD_L
@@ -1467,35 +1506,43 @@ game_step	lbsr	power_step
 1		lda	keys
 		bita	#K_RIGHT
 		beq	1F
-		ldb	paddle_x
-		addb	#3
-		pshs	b
-		ldb	#FIELD_R-32
-		subb	wide
+		lbsr	paddle_limit
 		stb	tmp
-		puls	b
+		ldb	paddle_x
+		addb	#PADDLE_STEP
 		cmpb	tmp
 		bls	2F
 		ldb	tmp
 2		stb	paddle_x
 1		tst	ball_state
-		bne	ball_move
-		lbsr	stick_ball
+		beq	4F
+		lbsr	ball_move		; bola principal; C = 1 se caiu
+		bcc	3F
+		lbsr	primary_lost
+3		lbra	multi_step		; bolas extras da cápsula D
+4		lbsr	stick_ball
 		lda	keys_new
 		bita	#K_FIRE
-		beq	9F
-		inc	ball_state		; lança
+		bne	8F
+		inc	serve_clock		; sem ESPAÇO, a bola sai sozinha
+		lda	serve_clock
+		cmpa	#AUTO_LAUNCH
+		blo	9F
+8		lbsr	launch_ball
+9
+step_done	clr	keys_new		; o lançamento só vale num passo
+		rts
+
+* launch_ball: solta a bola presa (ESPAÇO, tempo esgotado ou cápsula D)
+launch_ball	inc	ball_state
 		lbsr	launch_velocity
 		std	ball_dx
 		ldd	#0
 		subd	speed
 		std	ball_dy
-		ldx	#msg_blank
-		ldd	#NAMES+14*32
-		lbsr	print_centered
-9
-step_done	clr	keys_new		; o lançamento só vale num passo
-		rts
+		ldx	#msg_blank		; apaga "FASE 01"
+		ldd	#NAMES+MSG_ROW*32
+		lbra	print_centered
 
 ball_move	* --- eixo X
 		ldd	ball_dx
@@ -1594,24 +1641,21 @@ ball_move	* --- eixo X
 		tst	sticky
 		beq	8F
 		clr	ball_state
+		clr	serve_clock
 		lbsr	stick_ball
-		ldx	#msg_serve
-		ldd	#NAMES+14*32
-		lbsr	print_centered
+		andcc	#$FE
 		rts
-7		lda	ball_y			; caiu?
+7		lda	ball_y			; caiu? (quem chamou decide: vida ou bola extra)
 		cmpa	#196
 		blo	8F
-		dec	lives
-		lda	dirty
-		ora	#2
-		sta	dirty
-		tst	lives
-		beq	8F
-		lbsr	serve
-8		rts
+		orcc	#$01
+		rts
+8		andcc	#$FE
+		rts
 
-bounce_dx	fdb	-$01C0,-$0140,-$00C0,-$0040,$0040,$00C0,$0140,$01C0
+* ângulos do rebote (dx 8.8 por zona); com SPEED_START = $0200 a proporção
+* dx/dy é a mesma da versão 1.4, que começava em $0180
+bounce_dx	fdb	-$0255,-$01AB,-$0100,-$0055,$0055,$0100,$01AB,$0255
 
 * brick_hit: testa o centro da bola; se há tijolo, remove, pontua e volta com C=1
 brick_hit	lda	level
