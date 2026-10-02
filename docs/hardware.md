@@ -13,7 +13,8 @@ O circuito é o do **"Build This Video Titler"** da revista *Radio-Electronics* 
 nos EUA como **MFJ-1480B**, com outra PCB. O esquema publicado explica a parte analógica, que não
 foi medida no VET. A comparação completa está em [origem.md](origem.md).
 
-Fotos em alta resolução em [../photos/](../photos/).
+Fotos em alta resolução em [../photos/](../photos/). O esquema aproximado da placa (parte digital) está
+em [../hardware/placa-principal/](../hardware/placa-principal/README.md), com um roteiro de continuidade.
 
 | Componentes | Lado da solda |
 |---|---|
@@ -34,6 +35,9 @@ Fotos em alta resolução em [../photos/](../photos/).
 | U16 | **74LS273** | Latch de escrita da linha do teclado (`$8002`) |
 | U22 | **74LS244** + R52-R59 | Buffer de leitura das colunas do teclado (`$8002`), com *pull-ups* |
 | — | Conector 2×8 | Membrana do teclado: 8 trilhas em cada camada |
+| D10, D11 + R48, R49 (3k3) | 1N914 | OU com diodos da seleção da ROM (ROM SEL) e da E/S (I/O SEL), como D5/D6 e R41/R42 da revista |
+| R28 (5k1), R29, R30 (4k7) | Resistores | *Pull-up* do /RESET e de /HALT e /IRQ |
+| D8, R26, R27 (2k2) | Zener e resistores | Nível de 3 estados do RESET/SYNC do VDP (revista: D2, R17, R18) |
 | CN1 | Borda de placa 2×18 | Conector traseiro "interface": barramento da CPU. Ver [conector-cn1.md](conector-cn1.md) |
 
 ### Parte analógica e de vídeo
@@ -46,7 +50,7 @@ da revista.
 | XTAL1 | Cristal **3,579545 MHz** + trimmer **CV2** | Cristal do oscilador de croma do U19 (ligado ao pino 6 por R51, de 680 Ω). Subportadora **NTSC** (315/88 MHz) e referência do PLL no modo interno. CV2 = C27 da revista (cores e faixa de captura da croma) |
 | U19 | **CA3126** (RCA) com a **marcação raspada**, 16 pinos | Processador de croma (IC14): regenera os 3,58 MHz travados no *burst* do vídeo externo e fornece o *CHROMA CLOCK* ao PLL. Confirmado pelas ligações dos pinos 5, 6, 9 e 12 (ver [origem.md](origem.md#8-o-ci-raspado-u19-é-um-ca3126)) |
 | — | **LM1889N** (National) (IC16) | Modulador de croma: monta o vídeo composto do VDP a partir de Y, R-Y e B-Y |
-| — | **MC4044P** + **MC4024P** (Motorola) (IC4, IC5) + trimmer **CV1** | PLL que gera o clock mestre do VDP: 3 × 3,579545 MHz no modo interno, 684 × a frequência horizontal externa no *genlock*. CV1 = C12 da revista (frequência do VCO) |
+| U7, U1, T4 | **MC4044P** + **MC4024P** (Motorola) (IC4, IC5) + transistor T4 + trimmer **CV1** | PLL que gera o clock mestre do VDP: 3 × 3,579545 MHz no modo interno, 684 × a frequência horizontal externa no *genlock*. CV1 = C12 da revista (frequência do VCO) |
 | U13, U20 | **74LS191** ×2 (IC6, IC7) | Dividem o CPUCLK do VDP por 228 (= mestre ÷ 684): pulso horizontal comparado no *genlock* |
 | U4 | **74LS221** (IC2) | Monoestáveis: pulso horizontal externo (~50 µs, ignora os pulsos de equalização) e *burst gate* (~3 µs) |
 | U3 | **CA339E** (IC1) | Comparadores: sincronismo composto e vertical do vídeo externo e sinais de seleção de modo interno/externo |

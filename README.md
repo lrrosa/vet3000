@@ -18,6 +18,8 @@ Este repositório reúne tudo o que foi levantado sobre o aparelho:
 - **Cartucho de demonstração**, com abertura animada e o jogo **QUEBRA-TIJOLO**, testado no MAME.
 - **Placa do cartucho** em KiCad 10 (esquemático, placa roteada com Freerouting, Gerbers prontos),
   com EPROM 27C128 e soquete de borda para o CN1.
+- **Esquema aproximado da placa principal** em KiCad 10: a parte digital, com cada ligação marcada
+  como medida no aparelho ou tirada da revista, e um roteiro de continuidade.
 - **Ferramentas:** disassembler 6809 com rastreamento, script Lua que simula o cartucho no MAME sem
   recompilá-lo, e um patch para o driver do MAME.
 
@@ -67,6 +69,7 @@ tools/                dis6809.py, m6809.py, render_rom_gfx.py, show.py; mame/ (s
 cartridge/demo/       fonte do cartucho de demonstração (asm6809) e imagem pronta para a EPROM
 mame/                 patch do driver vet3000 (slot de cartucho + clock correto do VDP)
 hardware/cartucho/    projeto KiCad do cartucho (EPROM 27C128), Gerbers e scripts geradores
+hardware/placa-principal/  esquema aproximado da placa principal (KiCad), roteiro de continuidade
 ```
 
 ## Uso rápido
@@ -113,6 +116,7 @@ Controles da demo: **ESPAÇO** joga, **Z/X** (ou O/P, ou ←→ com e sem SHIFT)
 8. [MAME](docs/mame.md): como rodar, script Lua, bugs encontrados e patch do driver
 9. [Cartucho de demonstração](cartridge/demo/README.md): técnicas, orçamento de ciclos, controles
 10. [Placa do cartucho (KiCad)](hardware/cartucho/README.md): circuito, jumpers, montagem, fabricação
+11. [Esquema da placa principal (KiCad)](hardware/placa-principal/README.md): parte digital e roteiro de continuidade
 
 ## Licença
 

@@ -1,0 +1,285 @@
+(kicad_sch
+	(version 20260101)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "5e7a3000-0c4a-4e0c-9a11-00000000b0a1")
+	(paper "A3")
+	(title_block
+		(title "VET 3000 - placa principal: visão geral")
+		(date "2026-09-30")
+		(rev "0.1")
+		(company "Leonardo Roman da Rosa")
+		(comment 1 "Copyright (C) 2026 Leonardo Roman da Rosa - CERN-OHL-S-2.0")
+		(comment 2 "Source location: https://github.com/lrrosa/vet3000")
+		(comment 3 "Esquema aproximado: medidas no aparelho + Radio-Electronics 1985-86")
+		(comment 4 "Gerado por hardware/placa-principal/gen/gen_esquema.py")
+	)
+	(lib_symbols
+	)
+	(text "VET 3000 - placa principal (VET 30 VS1 REV. 2): esquema aproximado"
+		(exclude_from_sim no)
+		(at 25.4 20.32 0)
+		(effects
+			(font
+				(size 2.5 2.5)
+			)
+			(justify left top)
+		)
+		(uuid "32a19804-d371-56e4-859c-e5c4dec30444")
+	)
+	(text "Primeira versão: parte digital. A parte analógica (PLL, sincronismo, croma, mixer) ainda é um bloco.\nO circuito junta as medidas de continuidade feitas no aparelho com o \"Build This Video Titler\"\n(Radio-Electronics, nov./1985 a mar./1986), de onde o VET deriva (docs/origem.md)."
+		(exclude_from_sim no)
+		(at 25.4 29.21 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left top)
+		)
+		(uuid "8f10db96-2d2c-5a21-9bd1-42caaf58990b")
+	)
+	(text "Cores das redes (classes de rede do projeto, com fios mais grossos):\n  azul = todas as ligações da rede foram medidas no aparelho;\n  roxo = parte das ligações medida, o resto segue a revista;\n  cor padrão (rótulo vermelho-escuro, fio fino) = segundo a revista, ainda a medir.\nO roteiro ligação a ligação está em continuidade.md."
+		(exclude_from_sim no)
+		(at 25.4 45.72 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left top)
+		)
+		(uuid "bcb0d228-2de9-5870-ab7a-d35c8db0b01a")
+	)
+	(text "Referências: U14, U15, U16, U21, U22, U23, D8, D10, D11, R26-R30, R48, R49 e R52-R59 foram lidas na\nplaca (fotos). U101-U104, T101, C101-C114, R103-R105, CN2 e #BLK1 são provisórias: as da placa\nnão aparecem nas fotos. O campo \"rev.\" de cada peça dá o equivalente na revista."
+		(exclude_from_sim no)
+		(at 25.4 71.12 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left top)
+		)
+		(uuid "e909d743-e4a9-507e-8d03-b5d5417037ed")
+	)
+	(text "Diferenças já conhecidas em relação à revista: EPROM 27128 (16 KB em $C000); /IRQ no CN1 e /NMI\nem +5 V; CN1 de 2x18 com -5 V e +3 V BAT; teclado de membrana com 7 linhas; fonte em placa\nseparada; U19 = CA3126 com a marcação raspada; /INT do VDP sem ligação (como na revista)."
+		(exclude_from_sim no)
+		(at 25.4 91.44 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left top)
+		)
+		(uuid "8c4f14a4-5dd7-5233-9103-7fd21701f7cb")
+	)
+	(sheet
+		(at 228.6 40.64)
+		(size 71.12 22.86)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "7d3c07de-abe6-5236-ad16-573e6bab94dd")
+		(property "Sheetname" "CPU e memória"
+			(at 228.6 39.88 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "cpu.kicad_sch"
+			(at 228.6 64.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "vet3000_placa"
+				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 317.5 40.64)
+		(size 71.12 22.86)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "c249e328-e554-5115-9836-355c77444dee")
+		(property "Sheetname" "Vídeo"
+			(at 317.5 39.88 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "video.kicad_sch"
+			(at 317.5 64.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "vet3000_placa"
+				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 228.6 83.82)
+		(size 71.12 22.86)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "2a314a65-e57f-5617-ab61-892f59128c5b")
+		(property "Sheetname" "Teclado"
+			(at 228.6 83.06 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "teclado.kicad_sch"
+			(at 228.6 107.44 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "vet3000_placa"
+				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 317.5 83.82)
+		(size 71.12 22.86)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "6356bf42-75c5-540c-8193-c8410135d5d2")
+		(property "Sheetname" "CN1 e alimentação"
+			(at 317.5 83.06 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "conectores.kicad_sch"
+			(at 317.5 107.44 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "vet3000_placa"
+				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1"
+					(page "5")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 228.6 127)
+		(size 71.12 22.86)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "74fbbede-e63f-54c8-9d5e-663d794bb3f0")
+		(property "Sheetname" "Parte analógica (a desenhar)"
+			(at 228.6 126.24 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "analogico.kicad_sch"
+			(at 228.6 150.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "vet3000_placa"
+				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1"
+					(page "6")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)

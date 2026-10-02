@@ -7,3 +7,8 @@ hardware/cartucho/*.kicad_prl
 hardware/cartucho/*-backups/
 hardware/cartucho/fp-info-cache
 hardware/cartucho/*.rpt
+hardware/placa-principal/*.kicad_prl
+hardware/placa-principal/*-backups/
+hardware/placa-principal/fp-info-cache
+hardware/placa-principal/*.rpt
+hardware/placa-principal/*.net

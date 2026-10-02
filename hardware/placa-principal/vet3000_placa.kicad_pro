@@ -1,0 +1,242 @@
+{
+  "board": {
+    "design_settings": {
+      "defaults": {},
+      "diff_pair_dimensions": [],
+      "drc_exclusions": [],
+      "rules": {},
+      "track_widths": [],
+      "via_dimensions": []
+    }
+  },
+  "boards": [],
+  "libraries": {
+    "pinned_footprint_libs": [],
+    "pinned_symbol_libs": []
+  },
+  "meta": {
+    "filename": "vet3000_placa.kicad_pro",
+    "version": 1
+  },
+  "net_settings": {
+    "classes": [
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "Default",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 2147483647,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.25,
+        "tuning_profile": "",
+        "via_diameter": 0.8,
+        "via_drill": 0.4,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "Medido",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 0,
+        "schematic_color": "rgba(0, 80, 230, 1.000)",
+        "track_width": 0.25,
+        "tuning_profile": "",
+        "via_diameter": 0.8,
+        "via_drill": 0.4,
+        "wire_width": 12
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "Parcial",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 1,
+        "schematic_color": "rgba(170, 0, 170, 1.000)",
+        "track_width": 0.25,
+        "tuning_profile": "",
+        "via_diameter": 0.8,
+        "via_drill": 0.4,
+        "wire_width": 12
+      }
+    ],
+    "meta": {
+      "version": 5
+    },
+    "net_colors": null,
+    "netclass_assignments": null,
+    "netclass_patterns": [
+      {
+        "netclass": "Medido",
+        "pattern": "A0"
+      },
+      {
+        "netclass": "Parcial",
+        "pattern": "A1"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "A10"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "A11"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "A12"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "A13"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "A2"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "A3"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "A4"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "A5"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "A6"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "A7"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "A8"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "A9"
+      },
+      {
+        "netclass": "Parcial",
+        "pattern": "D0"
+      },
+      {
+        "netclass": "Parcial",
+        "pattern": "D1"
+      },
+      {
+        "netclass": "Parcial",
+        "pattern": "D2"
+      },
+      {
+        "netclass": "Parcial",
+        "pattern": "D3"
+      },
+      {
+        "netclass": "Parcial",
+        "pattern": "D4"
+      },
+      {
+        "netclass": "Parcial",
+        "pattern": "D5"
+      },
+      {
+        "netclass": "Parcial",
+        "pattern": "D6"
+      },
+      {
+        "netclass": "Parcial",
+        "pattern": "D7"
+      },
+      {
+        "netclass": "Parcial",
+        "pattern": "E_CLK_N"
+      },
+      {
+        "netclass": "Parcial",
+        "pattern": "HALT_N"
+      },
+      {
+        "netclass": "Parcial",
+        "pattern": "IO_SEL_N"
+      },
+      {
+        "netclass": "Parcial",
+        "pattern": "IRQ_N"
+      },
+      {
+        "netclass": "Parcial",
+        "pattern": "ROM_SEL_N"
+      },
+      {
+        "netclass": "Parcial",
+        "pattern": "R_W"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "XROM_N"
+      }
+    ]
+  },
+  "pcbnew": {
+    "page_layout_descr_file": ""
+  },
+  "sheets": [
+    [
+      "5e7a3000-0c4a-4e0c-9a11-00000000b0a1",
+      "Root"
+    ],
+    [
+      "7d3c07de-abe6-5236-ad16-573e6bab94dd",
+      "CPU e mem\u00f3ria"
+    ],
+    [
+      "c249e328-e554-5115-9836-355c77444dee",
+      "V\u00eddeo"
+    ],
+    [
+      "2a314a65-e57f-5617-ab61-892f59128c5b",
+      "Teclado"
+    ],
+    [
+      "6356bf42-75c5-540c-8193-c8410135d5d2",
+      "CN1 e alimenta\u00e7\u00e3o"
+    ],
+    [
+      "74fbbede-e63f-54c8-9d5e-663d794bb3f0",
+      "Parte anal\u00f3gica (a desenhar)"
+    ]
+  ],
+  "text_variables": {},
+  "schematic": {},
+  "erc": {
+    "rule_severities": {
+      "missing_unit": "ignore",
+      "missing_input_pin": "ignore"
+    }
+  }
+}

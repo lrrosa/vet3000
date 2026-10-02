@@ -1,0 +1,250 @@
+(kicad_symbol_lib
+	(version 20251024)
+	(generator "gen_esquema.py")
+	(generator_version "10.0")
+	(symbol "TMS9128"
+		(pin_names (offset 1.016))
+		(exclude_from_sim no) (in_bom yes) (on_board yes) (in_pos_files yes) (duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "U" (at -12.7 34.29 0) (show_name no) (do_not_autoplace no) (effects (font (size 1.27 1.27))))
+		(property "Value" "TMS9128" (at -12.7 -34.29 0) (show_name no) (do_not_autoplace no) (effects (font (size 1.27 1.27))))
+		(property "Footprint" "Package_DIP:DIP-40_W15.24mm" (at 0 0 0) (show_name no) (do_not_autoplace no) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Datasheet" "" (at 0 0 0) (show_name no) (do_not_autoplace no) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Description" "Video Display Processor, saídas Y/R-Y/B-Y, VRAM 16K x 4 (TMS9118/9128/9129)" (at 0 0 0) (show_name no) (do_not_autoplace no) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "ki_keywords" "VDP TMS9918 TMS9928 video" (at 0 0 0) (show_name no) (do_not_autoplace no) (hide yes) (effects (font (size 1.27 1.27))))
+		(symbol "TMS9128_0_1" (rectangle (start -12.7 33.02) (end 12.7 -33.02) (stroke (width 0.254) (type default)) (fill (type background))))
+		(symbol "TMS9128_1_1"
+			(pin input line (at -17.78 30.48 0) (length 5.08) (name "XTAL1" (effects (font (size 1.27 1.27)))) (number "40" (effects (font (size 1.27 1.27)))))
+			(pin passive line (at -17.78 27.94 0) (length 5.08) (name "XTAL2" (effects (font (size 1.27 1.27)))) (number "39" (effects (font (size 1.27 1.27)))))
+			(pin output line (at -17.78 22.86 0) (length 5.08) (name "CPUCLK" (effects (font (size 1.27 1.27)))) (number "37" (effects (font (size 1.27 1.27)))))
+			(pin input line (at -17.78 17.78 0) (length 5.08) (name "~{RESET}/SYNC" (effects (font (size 1.27 1.27)))) (number "34" (effects (font (size 1.27 1.27)))))
+			(pin input line (at -17.78 12.7 0) (length 5.08) (name "MODE" (effects (font (size 1.27 1.27)))) (number "13" (effects (font (size 1.27 1.27)))))
+			(pin input line (at -17.78 10.16 0) (length 5.08) (name "~{CSW}" (effects (font (size 1.27 1.27)))) (number "14" (effects (font (size 1.27 1.27)))))
+			(pin input line (at -17.78 7.62 0) (length 5.08) (name "~{CSR}" (effects (font (size 1.27 1.27)))) (number "15" (effects (font (size 1.27 1.27)))))
+			(pin open_collector line (at -17.78 5.08 0) (length 5.08) (name "~{INT}" (effects (font (size 1.27 1.27)))) (number "16" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at -17.78 0 0) (length 5.08) (name "CD0" (effects (font (size 1.27 1.27)))) (number "24" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at -17.78 -2.54 0) (length 5.08) (name "CD1" (effects (font (size 1.27 1.27)))) (number "23" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at -17.78 -5.08 0) (length 5.08) (name "CD2" (effects (font (size 1.27 1.27)))) (number "22" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at -17.78 -7.62 0) (length 5.08) (name "CD3" (effects (font (size 1.27 1.27)))) (number "21" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at -17.78 -10.16 0) (length 5.08) (name "CD4" (effects (font (size 1.27 1.27)))) (number "20" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at -17.78 -12.7 0) (length 5.08) (name "CD5" (effects (font (size 1.27 1.27)))) (number "19" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at -17.78 -15.24 0) (length 5.08) (name "CD6" (effects (font (size 1.27 1.27)))) (number "18" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at -17.78 -17.78 0) (length 5.08) (name "CD7" (effects (font (size 1.27 1.27)))) (number "17" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at 17.78 30.48 180) (length 5.08) (name "RD0" (effects (font (size 1.27 1.27)))) (number "32" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at 17.78 27.94 180) (length 5.08) (name "RD1" (effects (font (size 1.27 1.27)))) (number "31" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at 17.78 25.4 180) (length 5.08) (name "RD2" (effects (font (size 1.27 1.27)))) (number "30" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at 17.78 22.86 180) (length 5.08) (name "RD3" (effects (font (size 1.27 1.27)))) (number "29" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at 17.78 20.32 180) (length 5.08) (name "RD4" (effects (font (size 1.27 1.27)))) (number "28" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at 17.78 17.78 180) (length 5.08) (name "RD5" (effects (font (size 1.27 1.27)))) (number "27" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at 17.78 15.24 180) (length 5.08) (name "RD6" (effects (font (size 1.27 1.27)))) (number "26" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at 17.78 12.7 180) (length 5.08) (name "RD7" (effects (font (size 1.27 1.27)))) (number "25" (effects (font (size 1.27 1.27)))))
+			(pin output line (at 17.78 7.62 180) (length 5.08) (name "AD0" (effects (font (size 1.27 1.27)))) (number "10" (effects (font (size 1.27 1.27)))))
+			(pin output line (at 17.78 5.08 180) (length 5.08) (name "AD1" (effects (font (size 1.27 1.27)))) (number "9" (effects (font (size 1.27 1.27)))))
+			(pin output line (at 17.78 2.54 180) (length 5.08) (name "AD2" (effects (font (size 1.27 1.27)))) (number "8" (effects (font (size 1.27 1.27)))))
+			(pin output line (at 17.78 0 180) (length 5.08) (name "AD3" (effects (font (size 1.27 1.27)))) (number "7" (effects (font (size 1.27 1.27)))))
+			(pin output line (at 17.78 -2.54 180) (length 5.08) (name "AD4" (effects (font (size 1.27 1.27)))) (number "6" (effects (font (size 1.27 1.27)))))
+			(pin output line (at 17.78 -5.08 180) (length 5.08) (name "AD5" (effects (font (size 1.27 1.27)))) (number "5" (effects (font (size 1.27 1.27)))))
+			(pin output line (at 17.78 -7.62 180) (length 5.08) (name "AD6" (effects (font (size 1.27 1.27)))) (number "4" (effects (font (size 1.27 1.27)))))
+			(pin output line (at 17.78 -10.16 180) (length 5.08) (name "AD7" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27)))))
+			(pin output line (at 17.78 -15.24 180) (length 5.08) (name "~{RAS}" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
+			(pin output line (at 17.78 -17.78 180) (length 5.08) (name "~{CAS}" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))
+			(pin output line (at 17.78 -20.32 180) (length 5.08) (name "R/~{W}" (effects (font (size 1.27 1.27)))) (number "11" (effects (font (size 1.27 1.27)))))
+			(pin output line (at 17.78 -25.4 180) (length 5.08) (name "Y" (effects (font (size 1.27 1.27)))) (number "36" (effects (font (size 1.27 1.27)))))
+			(pin output line (at 17.78 -27.94 180) (length 5.08) (name "R-Y" (effects (font (size 1.27 1.27)))) (number "38" (effects (font (size 1.27 1.27)))))
+			(pin output line (at 17.78 -30.48 180) (length 5.08) (name "B-Y" (effects (font (size 1.27 1.27)))) (number "35" (effects (font (size 1.27 1.27)))))
+			(pin power_in line (at 0 38.1 270) (length 5.08) (name "VCC" (effects (font (size 1.27 1.27)))) (number "33" (effects (font (size 1.27 1.27)))))
+			(pin power_in line (at 0 -38.1 90) (length 5.08) (name "VSS" (effects (font (size 1.27 1.27)))) (number "12" (effects (font (size 1.27 1.27)))))
+		)
+		(embedded_fonts no)
+	)
+	(symbol "uPD41416"
+		(pin_names (offset 1.016))
+		(exclude_from_sim no) (in_bom yes) (on_board yes) (in_pos_files yes) (duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "U" (at -10.16 19.05 0) (show_name no) (do_not_autoplace no) (effects (font (size 1.27 1.27))))
+		(property "Value" "uPD41416" (at -10.16 -19.05 0) (show_name no) (do_not_autoplace no) (effects (font (size 1.27 1.27))))
+		(property "Footprint" "Package_DIP:DIP-18_W7.62mm" (at 0 0 0) (show_name no) (do_not_autoplace no) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Datasheet" "" (at 0 0 0) (show_name no) (do_not_autoplace no) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Description" "DRAM 16K x 4 (NEC µPD41416, equivalente à TMS4416)" (at 0 0 0) (show_name no) (do_not_autoplace no) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "ki_keywords" "DRAM 4416" (at 0 0 0) (show_name no) (do_not_autoplace no) (hide yes) (effects (font (size 1.27 1.27))))
+		(symbol "uPD41416_0_1" (rectangle (start -10.16 17.78) (end 10.16 -17.78) (stroke (width 0.254) (type default)) (fill (type background))))
+		(symbol "uPD41416_1_1"
+			(pin input line (at -15.24 15.24 0) (length 5.08) (name "A0" (effects (font (size 1.27 1.27)))) (number "14" (effects (font (size 1.27 1.27)))))
+			(pin input line (at -15.24 12.7 0) (length 5.08) (name "A1" (effects (font (size 1.27 1.27)))) (number "13" (effects (font (size 1.27 1.27)))))
+			(pin input line (at -15.24 10.16 0) (length 5.08) (name "A2" (effects (font (size 1.27 1.27)))) (number "12" (effects (font (size 1.27 1.27)))))
+			(pin input line (at -15.24 7.62 0) (length 5.08) (name "A3" (effects (font (size 1.27 1.27)))) (number "11" (effects (font (size 1.27 1.27)))))
+			(pin input line (at -15.24 5.08 0) (length 5.08) (name "A4" (effects (font (size 1.27 1.27)))) (number "8" (effects (font (size 1.27 1.27)))))
+			(pin input line (at -15.24 2.54 0) (length 5.08) (name "A5" (effects (font (size 1.27 1.27)))) (number "7" (effects (font (size 1.27 1.27)))))
+			(pin input line (at -15.24 0 0) (length 5.08) (name "A6" (effects (font (size 1.27 1.27)))) (number "6" (effects (font (size 1.27 1.27)))))
+			(pin input line (at -15.24 -2.54 0) (length 5.08) (name "A7" (effects (font (size 1.27 1.27)))) (number "10" (effects (font (size 1.27 1.27)))))
+			(pin input line (at -15.24 -7.62 0) (length 5.08) (name "~{RAS}" (effects (font (size 1.27 1.27)))) (number "5" (effects (font (size 1.27 1.27)))))
+			(pin input line (at -15.24 -10.16 0) (length 5.08) (name "~{CAS}" (effects (font (size 1.27 1.27)))) (number "16" (effects (font (size 1.27 1.27)))))
+			(pin input line (at -15.24 -12.7 0) (length 5.08) (name "~{WE}" (effects (font (size 1.27 1.27)))) (number "4" (effects (font (size 1.27 1.27)))))
+			(pin input line (at -15.24 -15.24 0) (length 5.08) (name "~{OE}" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at 15.24 15.24 180) (length 5.08) (name "I/O1" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at 15.24 12.7 180) (length 5.08) (name "I/O2" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at 15.24 10.16 180) (length 5.08) (name "I/O3" (effects (font (size 1.27 1.27)))) (number "15" (effects (font (size 1.27 1.27)))))
+			(pin bidirectional line (at 15.24 7.62 180) (length 5.08) (name "I/O4" (effects (font (size 1.27 1.27)))) (number "17" (effects (font (size 1.27 1.27)))))
+			(pin power_in line (at 0 22.86 270) (length 5.08) (name "VCC" (effects (font (size 1.27 1.27)))) (number "9" (effects (font (size 1.27 1.27)))))
+			(pin power_in line (at 0 -22.86 90) (length 5.08) (name "GND" (effects (font (size 1.27 1.27)))) (number "18" (effects (font (size 1.27 1.27)))))
+		)
+		(embedded_fonts no)
+	)
+	(symbol "PARTE_ANALOGICA"
+		(pin_names (offset 1.016))
+		(exclude_from_sim no) (in_bom no) (on_board no) (in_pos_files yes) (duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "#BLK" (at -22.86 13.97 0) (show_name no) (do_not_autoplace no) (effects (font (size 1.27 1.27))))
+		(property "Value" "PARTE_ANALOGICA" (at -22.86 -11.43 0) (show_name no) (do_not_autoplace no) (effects (font (size 1.27 1.27))))
+		(property "Footprint" "" (at 0 0 0) (show_name no) (do_not_autoplace no) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Datasheet" "" (at 0 0 0) (show_name no) (do_not_autoplace no) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Description" "Parte analógica ainda não desenhada (PLL, sincronismo, croma, mixer)" (at 0 0 0) (show_name no) (do_not_autoplace no) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "ki_keywords" "" (at 0 0 0) (show_name no) (do_not_autoplace no) (hide yes) (effects (font (size 1.27 1.27))))
+		(symbol "PARTE_ANALOGICA_0_1" (rectangle (start -22.86 12.7) (end 22.86 -10.16) (stroke (width 0.254) (type default)) (fill (type background))))
+		(symbol "PARTE_ANALOGICA_1_1"
+			(pin output line (at 27.94 10.16 180) (length 5.08) (name "VDP_CLK" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
+			(pin output line (at 27.94 7.62 180) (length 5.08) (name "VRESET_HIB" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))
+			(pin input line (at 27.94 2.54 180) (length 5.08) (name "CPUCLK" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27)))))
+			(pin input line (at 27.94 -2.54 180) (length 5.08) (name "VDP_Y" (effects (font (size 1.27 1.27)))) (number "4" (effects (font (size 1.27 1.27)))))
+			(pin input line (at 27.94 -5.08 180) (length 5.08) (name "VDP_RY" (effects (font (size 1.27 1.27)))) (number "5" (effects (font (size 1.27 1.27)))))
+			(pin input line (at 27.94 -7.62 180) (length 5.08) (name "VDP_BY" (effects (font (size 1.27 1.27)))) (number "6" (effects (font (size 1.27 1.27)))))
+		)
+		(embedded_fonts no)
+	)
+	(symbol "+3V_BAT"
+		(power global)
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "#PWR"
+			(at 0 -3.81 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3V_BAT"
+			(at 0 3.556 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3V_BAT\""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "global power"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "+3V_BAT_0_1"
+			(polyline
+				(pts
+					(xy -0.762 1.27) (xy 0 2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 2.54) (xy 0.762 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 0) (xy 0 2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "+3V_BAT_1_1"
+			(pin power_in line
+				(at 0 0 90)
+				(length 0)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+)

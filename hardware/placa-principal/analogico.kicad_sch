@@ -1,0 +1,355 @@
+(kicad_sch
+	(version 20260101)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "2d5477d8-8cd2-51ea-9b6b-e68c2ae0941f")
+	(paper "A3")
+	(title_block
+		(title "VET 3000 - placa principal: Parte analógica (a desenhar)")
+		(date "2026-09-30")
+		(rev "0.1")
+		(company "Leonardo Roman da Rosa")
+		(comment 1 "Copyright (C) 2026 Leonardo Roman da Rosa - CERN-OHL-S-2.0")
+		(comment 2 "Source location: https://github.com/lrrosa/vet3000")
+		(comment 3 "Esquema aproximado: medidas no aparelho + Radio-Electronics 1985-86")
+		(comment 4 "Gerado por hardware/placa-principal/gen/gen_esquema.py")
+	)
+	(lib_symbols
+		(symbol "vet3000_placa:PARTE_ANALOGICA"
+				(pin_names (offset 1.016))
+				(exclude_from_sim no) (in_bom no) (on_board no) (in_pos_files yes) (duplicate_pin_numbers_are_jumpers no)
+				(property "Reference" "#BLK" (at -22.86 13.97 0) (show_name no) (do_not_autoplace no) (effects (font (size 1.27 1.27))))
+				(property "Value" "PARTE_ANALOGICA" (at -22.86 -11.43 0) (show_name no) (do_not_autoplace no) (effects (font (size 1.27 1.27))))
+				(property "Footprint" "" (at 0 0 0) (show_name no) (do_not_autoplace no) (hide yes) (effects (font (size 1.27 1.27))))
+				(property "Datasheet" "" (at 0 0 0) (show_name no) (do_not_autoplace no) (hide yes) (effects (font (size 1.27 1.27))))
+				(property "Description" "Parte analógica ainda não desenhada (PLL, sincronismo, croma, mixer)" (at 0 0 0) (show_name no) (do_not_autoplace no) (hide yes) (effects (font (size 1.27 1.27))))
+				(property "ki_keywords" "" (at 0 0 0) (show_name no) (do_not_autoplace no) (hide yes) (effects (font (size 1.27 1.27))))
+				(symbol "PARTE_ANALOGICA_0_1" (rectangle (start -22.86 12.7) (end 22.86 -10.16) (stroke (width 0.254) (type default)) (fill (type background))))
+				(symbol "PARTE_ANALOGICA_1_1"
+					(pin output line (at 27.94 10.16 180) (length 5.08) (name "VDP_CLK" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
+					(pin output line (at 27.94 7.62 180) (length 5.08) (name "VRESET_HIB" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))
+					(pin input line (at 27.94 2.54 180) (length 5.08) (name "CPUCLK" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27)))))
+					(pin input line (at 27.94 -2.54 180) (length 5.08) (name "VDP_Y" (effects (font (size 1.27 1.27)))) (number "4" (effects (font (size 1.27 1.27)))))
+					(pin input line (at 27.94 -5.08 180) (length 5.08) (name "VDP_RY" (effects (font (size 1.27 1.27)))) (number "5" (effects (font (size 1.27 1.27)))))
+					(pin input line (at 27.94 -7.62 180) (length 5.08) (name "VDP_BY" (effects (font (size 1.27 1.27)))) (number "6" (effects (font (size 1.27 1.27)))))
+				)
+				(embedded_fonts no)
+			)
+	)
+	(text "Parte analógica: ainda não desenhada"
+		(exclude_from_sim no)
+		(at 25.4 20.32 0)
+		(effects
+			(font
+				(size 2 2)
+			)
+			(justify left top)
+		)
+		(uuid "2f9a32e1-6822-5817-a9c2-f5cfe394c285")
+	)
+	(text "Este bloco só marca os sinais que atravessam a fronteira com a parte digital.\nNa placa: U1 MC4024 e U7 MC4044 (PLL do clock do VDP), U13/U20 74LS191 (CPUCLK / 228),\nU2/U10/U17 4066, U3 CA339E, U4 74LS221, U8 SN75108, U9 74LS05, U19 CA3126 (raspado),\nLM1889, portas b e c de U23, XTAL1, CV1, CV2, RV1-RV3 e L1.\nEsquemas de referência: Radio-Electronics, dez./1985, Figs. 7, 8, 11 e 13."
+		(exclude_from_sim no)
+		(at 25.4 26.67 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left top)
+		)
+		(uuid "3e3a844e-8297-5ea7-a4ef-d871ea662a57")
+	)
+	(wire
+		(pts
+			(xy 193.04 106.68) (xy 195.58 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3a3643fb-1363-505c-96c2-33a943f3ed6d")
+	)
+	(wire
+		(pts
+			(xy 193.04 109.22) (xy 195.58 109.22)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5bb9c94c-35fe-5711-a61b-f4bed8d9e798")
+	)
+	(wire
+		(pts
+			(xy 193.04 114.3) (xy 195.58 114.3)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0da654bd-cf74-5d02-bbd5-496667340ece")
+	)
+	(wire
+		(pts
+			(xy 193.04 119.38) (xy 195.58 119.38)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7efd8f2b-7d8f-5ec2-8bb9-5cfa90ca6635")
+	)
+	(wire
+		(pts
+			(xy 193.04 121.92) (xy 195.58 121.92)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8499c0bc-1d18-531d-8b71-06e0fcd0c8ca")
+	)
+	(wire
+		(pts
+			(xy 193.04 124.46) (xy 195.58 124.46)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5d002059-5a8e-5d76-89c5-74b0c4cc4271")
+	)
+	(global_label "VDP_CLK"
+		(shape passive)
+		(at 195.58 106.68 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "75800e61-6fd3-5f91-bf84-5726a65dceba")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 195.58 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "VRESET_HIB"
+		(shape passive)
+		(at 195.58 109.22 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "60093f3b-f61c-5420-845d-b931c0cff750")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 195.58 109.22 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "CPUCLK"
+		(shape passive)
+		(at 195.58 114.3 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "656dda7d-9b19-5a5c-b7b2-bffc32123d22")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 195.58 114.3 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "VDP_Y"
+		(shape passive)
+		(at 195.58 119.38 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "1abd17c7-d3f6-50e4-a397-1d61ac471111")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 195.58 119.38 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "VDP_RY"
+		(shape passive)
+		(at 195.58 121.92 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "9b8acf18-4d43-5be1-9ef9-b99555cac29c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 195.58 121.92 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "VDP_BY"
+		(shape passive)
+		(at 195.58 124.46 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "de8de530-97bf-5012-8d33-1383f780e9b8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 195.58 124.46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(symbol
+		(lib_id "vet3000_placa:PARTE_ANALOGICA")
+		(at 165.1 116.84 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board no)
+		(in_pos_files no)
+		(dnp no)
+		(uuid "8eaf6ef3-2c90-5295-933f-dd500ddbc909")
+		(property "Reference" "#BLK1"
+			(at 142.24 102.87 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Parte analógica (a desenhar)"
+			(at 142.24 128.27 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 165.1 116.84 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 165.1 116.84 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 165.1 116.84 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Revista" "rev. Figs. 7, 8, 11 e 13"
+			(at 142.24 130.81 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "848e6733-4579-569e-a5d5-44f666b6d352")
+		)
+		(pin "2"
+			(uuid "6ed6adb2-190e-506f-a88f-2aa76b176cbc")
+		)
+		(pin "3"
+			(uuid "36b41dc5-b679-59ed-9ea1-9e7f2c3140eb")
+		)
+		(pin "4"
+			(uuid "99c7dae5-7a39-5773-9618-e47c1479e33e")
+		)
+		(pin "5"
+			(uuid "ae523740-986c-5a2d-8351-21035b34ae8a")
+		)
+		(pin "6"
+			(uuid "67850f8b-6748-51e3-8b8a-0f128b2ca3a8")
+		)
+		(instances
+			(project "vet3000_placa"
+				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/74fbbede-e63f-54c8-9d5e-663d794bb3f0"
+					(reference "#BLK1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(embedded_fonts no)
+)

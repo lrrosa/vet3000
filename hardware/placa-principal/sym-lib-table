@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "vet3000_placa")(type "KiCad")(uri "${KIPRJMOD}/vet3000_placa.kicad_sym")(options "")(descr "Símbolos da placa principal do VET 3000"))
+)

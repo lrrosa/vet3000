@@ -375,3 +375,7 @@ Todos têm números de pino e valores de componentes. Como a lista de CIs do VET
   de continuidade para validar a placa aos poucos;
 - a parte digital (CPU, memórias, decodificação, VDP, teclado, CN1) já está quase toda confirmada.
   As partes analógicas começariam como "segundo a revista".
+
+A parte digital já está desenhada em
+[hardware/placa-principal](../hardware/placa-principal/README.md), com as redes coloridas pelo grau
+de confirmação e um [roteiro de continuidade](../hardware/placa-principal/continuidade.md).
