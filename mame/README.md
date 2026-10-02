@@ -1,8 +1,9 @@
 # MAME VET 3000 driver patch
 
 - `vet3000.cpp.orig`: original driver from mamedev/mame commit `774a180` (2026-08-02).
-- `vet3000.cpp`: patched driver.
-- `vet3000-cart-and-vdp-clock.patch`: apply with `git apply` from the MAME root.
+- `vet3000.cpp`: driver as merged into MAME master (`f43d44e3`, plus the clock
+  declaration fix in `272ed7c2`).
+- `vet3000-cart-and-vdp-clock.patch`: the patch as submitted; apply with `git apply` from the MAME root.
 
 Fixes the TMS9128 clock to 10.738635 MHz and adds a cartridge slot at
 `$4000-$7FFF` (`mame vet3000 -cart image.bin`). It also leaves the VDP `/INT`

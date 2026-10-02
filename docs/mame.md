@@ -76,10 +76,11 @@ da demo é feito pelo próprio programa, com o resultado lido na RAM.
 
 ## Patch proposto
 
-[../mame/vet3000-cart-and-vdp-clock.patch](../mame/vet3000-cart-and-vdp-clock.patch) (arquivo
-completo em [../mame/vet3000.cpp](../mame/vet3000.cpp)):
+[../mame/vet3000-cart-and-vdp-clock.patch](../mame/vet3000-cart-and-vdp-clock.patch), como foi
+enviado ao MAME. O [../mame/vet3000.cpp](../mame/vet3000.cpp) é o driver como ficou no master do MAME
+(ver [Incorporação ao MAME](#incorporação-ao-mame)):
 
-- VDP a **10,738635 MHz** (60 Hz);
+- VDP a **10,738635 MHz** (60 Hz), o cristal de 3,579545 MHz multiplicado por 3 pelo PLL;
 - **slot de cartucho** genérico (`generic_plain_slot`, interface `vet3000_cart`, extensões
   `bin,rom`) mapeado em `$4000-$7FFF`, para usar `mame vet3000 -cart vet3000_demo.bin`;
 - `/INT` do VDP **sem ligação**, como no aparelho, e o 6809 com clock tirado do VDP
@@ -98,3 +99,21 @@ Submitted as [MAME PR #16276](https://github.com/mamedev/mame/pull/16276).
 **Segundo commit do PR (29/09/2026):** `/INT` sem ligação e clock da CPU tirado do VDP. Compilado e
 testado da mesma forma: `-validate`, boot nativo, 675 casos, persistência do top 10 e ciclo de
 demonstração, a 59,922738 Hz. Ver o [relatório](../mame/VALIDATION.md#second-commit-vdp-int-and-cpu-clock).
+
+## Incorporação ao MAME
+
+O PR foi incorporado em **30/09/2026** (commit
+[f43d44e3](https://github.com/mamedev/mame/commit/f43d44e3b4d59a015ca333c50294f9c74b11da2a), merge de
+R. Belmont) e deve sair no MAME 0.290. Até lá, no 0.289, o cartucho continua dependendo do script Lua.
+
+Em **01/10/2026**, Vas Crabb (cuavas) ajustou a declaração do clock no commit
+[272ed7c2](https://github.com/mamedev/mame/commit/272ed7c2767e74ecdb40b74b782e5764e3da8f4d). No MAME,
+`XTAL` representa só cristais que existem na placa. O VET não tem cristal de 10,738635 MHz: essa
+frequência sai do PLL. O patch declarava `10.738635_MHz_XTAL`, e o master agora declara:
+
+```cpp
+constexpr XTAL VDP_CLOCK = 3.579545_MHz_XTAL * 3; // chroma clock multiplied with a PLL
+```
+
+Ele também trocou os comentários novos de `/* */` para `//`. As frequências continuam idênticas
+(VDP a 10.738.635 Hz, CPU a 3.579.545 Hz), então os testes acima continuam valendo.
