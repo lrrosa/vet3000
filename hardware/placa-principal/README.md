@@ -1,4 +1,4 @@
-# Placa principal do VET 3000: esquema aproximado (KiCad)
+# Placa principal e fonte do VET 3000: esquema aproximado (KiCad)
 
 Esquema da placa principal `VET 30 VS1 REV. 2` em KiCad 10. O circuito junta duas fontes:
 
@@ -10,7 +10,8 @@ Esquema da placa principal `VET 30 VS1 REV. 2` em KiCad 10. O circuito junta dua
 
 Esta primeira versão cobre a **parte digital**: CPU, memórias, decodificação, VDP e VRAM, teclado e
 CN1. A parte analógica (PLL do clock, sincronismo, croma e mixer) aparece como um bloco com os sinais
-que cruzam a fronteira.
+que cruzam a fronteira. A folha **Fonte** traz a placa da fonte, que não está na revista: as ligações
+dela foram levantadas das fotos dos dois lados da placa (ver [Fonte](#fonte)).
 
 Copyright © 2026 Leonardo Roman da Rosa. Hardware aberto sob a **CERN-OHL-S-2.0** (ver
 [Licença](#licença)).
@@ -29,6 +30,7 @@ Copyright © 2026 Leonardo Roman da Rosa. Hardware aberto sob a **CERN-OHL-S-2.0
 | `teclado.kicad_sch` | 74LS273, 74LS244, pull-ups e conector das membranas |
 | `conectores.kicad_sch` | CN1, alimentação e desacoplamento |
 | `analogico.kicad_sch` | Bloco provisório da parte analógica |
+| `fonte.kicad_sch` | Placa da fonte: ponte, 7805, 7812, 7905 com bomba de carga, backup da RAM, conector de saída |
 | `vet3000_placa.kicad_sym` | Símbolos próprios: TMS9128, µPD41416, `+3V_BAT` e o bloco analógico |
 | `vet3000_placa.pdf` | O esquema em PDF |
 | [`continuidade.md`](continuidade.md) | Roteiro de continuidade: cada rede, pino a pino, marcada como medida ou a medir |
@@ -41,41 +43,89 @@ unidades não posicionadas e pinos de entrada em unidades não posicionadas (por
 
 - **Cores das redes.** Azul: todas as ligações da rede foram medidas no aparelho. Roxo: parte delas
   foi medida, o resto segue a revista. Cor padrão do KiCad (rótulo vermelho-escuro, fio fino): só
-  segundo a revista, ainda a medir. As cores vêm das classes de rede `Medido` e `Parcial` do projeto.
+  segundo a revista (na fonte, segundo as fotos), ainda a medir. As cores vêm das classes de rede
+  `Medido` e `Parcial` do projeto.
 - **Rótulos.** Toda rede é ligada por rótulos globais, inclusive as internas a uma folha. A
   alimentação usa símbolos nos pinos de cima e de baixo e rótulos (`+5V`, `GND`) nos pinos laterais.
-- **Referências.** U14, U15, U16, U21, U22, U23, D8, D10, D11, R26-R30, R48, R49 e R52-R59 foram
-  lidas na placa. **U101-U104** (6809, EPROM, RAM, VDP), **T101**, **C101-C114**, **R103-R105**,
-  **CN2** e **#BLK1** são provisórias: as referências da placa não aparecem nas fotos. Na placa ainda
+- **Referências.** U14, U15, U16, U21, U22, U23, D8, D10, D11, R26-R30, R48, R49, R52-R59 e os
+  conectores CN1 (traseiro), CN2 (entrada da fonte) e CN3 (teclado) são os da placa. **U101-U104**
+  (6809, EPROM, RAM, VDP), **T101**, **C101-C114**, **R103-R105** e **#BLK1** são provisórias: as
+  referências da placa não aparecem nas fotos. Na placa ainda
   não foram localizados U5, U6, U11, U12 e U18, e entre eles devem estar esses quatro CIs e o LM1889.
-  Já identificados na parte analógica: U1 = MC4024, U7 = MC4044, T4 = transistor do PLL.
+  Já identificados na parte analógica: U1 = MC4024, U7 = MC4044, T4 = transistor do PLL. Na fonte,
+  todas as referências (U201-U203, D201-D210, C201-C214, R201, R203, T201, BT201 e CN201) são
+  provisórias: a placa não tem serigrafia de componentes.
 - **Campo "rev."** Cada peça mostra o equivalente na revista (por exemplo, U15 = IC18).
 
 ## Medido e a verificar
 
-O roteiro completo está em [continuidade.md](continuidade.md): 14 redes totalmente medidas, 15
-parcialmente e 54 só da revista. Pontos que mais pedem conferência:
+O roteiro completo está em [continuidade.md](continuidade.md): 38 redes totalmente medidas, 6
+parcialmente e 39 só da revista, mais 9 redes internas da fonte, levantadas das fotos. Pontos que
+mais pedem conferência:
 
-1. **Pinos de U16 (74LS273) e U22 (74LS244).** O esquema usa a pinagem da revista. A ordem dos bits
-   vista pelo software foi medida pelo lado do teclado, mas a placa foi redesenhada e pode trocar os
-   pinos.
-2. **Conector do teclado (CN2).** Qual fileira é de qual membrana, e a ordem de R52-R59.
-3. **R29 e R30 (4k7).** Um é o pull-up do `/HALT` e o outro o do `/IRQ`, mas não se sabe qual é qual.
-4. **D10/R48 e D11/R49.** A atribuição à ROM (D10/R48) e à E/S (D11/R49) segue a posição na placa.
+1. **Seleção do teclado.** O clock do U16 (pino 11) e os enables do U22 (pinos 1 e 19) até o U15
+   (pinos 10 e 9).
+2. **D10/R48 e D11/R49.** A atribuição à ROM (D10/R48) e à E/S (D11/R49) segue a posição na placa.
    O CN1 a11 foi medido no pino 6 do U15, antes do diodo; na revista a porta usava o pino 15.
-5. **`/OE` da EPROM** no GND e **`/OE` da RAM** pela porta NAND do U23 (`/HALT` com `R/W`).
-6. **U14 e U21.** Qual DRAM recebe RD0-RD3 e qual recebe RD4-RD7.
-7. **Reset.** R28 (5k1) com um eletrolítico de 22 µF (C102, provavelmente o "C2?" ao lado do D8);
+3. **`/OE` da RAM** pela porta NAND do U23 (`/HALT` com `R/W`), segundo a revista.
+4. **U14 e U21.** Qual DRAM recebe RD0-RD3 e qual recebe RD4-RD7.
+5. **Reset.** R28 (5k1) com um eletrolítico de 22 µF (C102, provavelmente o "C2?" ao lado do D8);
    T101 e C101 do RESET/SYNC do VDP.
-8. **Desacoplamento.** Valores e posições da revista.
+6. **Desacoplamento.** Valores e posições da revista.
 
-Já confirmados: todo o barramento de endereços e de dados entre CPU, EPROM, RAM, VDP e CN1, as
-seleções do 74LS139 que chegam ao CN1 e a ausência de ligação entre o `/INT` do VDP e o `/IRQ` do
-6809.
+Já confirmados: todo o barramento de endereços e de dados entre CPU, EPROM, RAM, VDP, CN1 e os CIs
+do teclado (U16 e U22, com os mesmos pinos da revista), as seleções do 74LS139 que chegam ao CN1 e a
+ausência de ligação entre o `/INT` do VDP e o `/IRQ` do 6809. Também medidos: R30 é o pull-up do
+`/HALT` e R29 o do `/IRQ`; o `/OE` da EPROM (pino 22) e os das duas µPD41416 (pino 1) vão ao GND; o
+`/CLR` do U16 vai ao +5 V; e o conector do teclado, CN3, liga cada trilha ao U16, ao U22 e aos
+pull-ups R52-R59. No CN3, o pino 1 fica embaixo à esquerda: os ímpares (fileira de baixo) são a
+membrana inferior (linhas) e os pares (fileira de cima), a superior (colunas).
+
+O CN2, entrada da fonte na placa principal, está desenhado com a mesma ordem de pinos do CN201 da
+fonte (a da etiqueta do gabinete), ainda não conferida no CN2.
+
+## Fonte
+
+A fonte fica numa placa separada, sem serigrafia de componentes, ligada ao CN2 da placa principal por
+um conector de 5 vias: −5 V, +5 V, +3 V BAT, +12 V e GND (fio preto), na ordem da etiqueta do gabinete.
+A folha `fonte.kicad_sch` foi levantada das fotos dos dois lados da placa e ainda não tem ligações
+medidas.
+
+![](img/fonte.png)
+
+- **Retificação.** O transformador LIDER tem secundário com derivação central (CT), com 19,75 VAC
+  medidos entre as pontas. A ponte D201-D204 usa o próprio negativo como GND, então o CT fica em
+  cerca de +12 V (`BRUTO_12V`, com C201 de 3300 µF, fora da placa, e C202 de 2200 µF) e o positivo
+  da ponte em cerca de +24 V (`BRUTO_24V`, com C203 de 2200 µF). Sem carga, as contas dão uns
+  13 V e 26,5 V.
+- **+5 V.** U201, um LM340T-5 (7805), fica fora da placa num dissipador e é alimentado pelo
+  `BRUTO_12V`. Fios: amarelo = entrada, azul = GND, laranja = saída. Ele está montado com as pernas
+  para cima, e nessa posição o pino da esquerda é a saída.
+- **+12 V.** U202 (7812), alimentado pelo `BRUTO_24V`.
+- **−5 V.** U203 (7905), alimentado por uma bomba de carga numa das pontas do secundário (C204, D205
+  e D206), que deixa cerca de −26 V em C205 sem carga.
+- **+3 V BAT.** OU com diodos 1N4148. Desligado, vem das duas pilhas AA (BT201) por D208. Ligado,
+  vem de `BKP_ALIM` por D207: R201 (100 Ω) leva corrente do `BRUTO_12V` a `BKP_ALIM`, e o diodo D210
+  a segura uma queda de diodo acima do +5 V (cerca de 5,6 V). Assim a RAM recebe uns 5 V, a mesma
+  tensão da lógica.
+- **LED do painel.** Provavelmente alimentado pelo `BRUTO_24V`, com R203 (2k4) para o GND.
+
+A tabela [Peças da fonte](continuidade.md#peças-da-fonte) do roteiro diz onde fica cada peça na placa
+e o valor lido. Falta a marcação do D210 (só se lê "1N") e a medição das ligações.
+
+**Ao testar a fonte sozinha, ponha uma carga no +5 V.** A corrente de R201, cerca de 60 mA, passa por
+D210 e entra na linha de +5 V. Com a placa principal ligada, ela some no consumo da placa. Sem carga,
+não tem para onde ir, porque o 7805 só fornece corrente (não absorve), e a linha de +5 V sobe para uns
+11 V. Um resistor de 100 Ω (½ W) entre +5 V e GND basta para ver a tensão regulada. Se D210 abrir,
+acontece o contrário: o +5 V fica normal, mas o +3 V BAT sobe para uns 12 V e queima a RAM.
+
+Pontos fracos do projeto: sem carga, C203 e C205 (25 V) trabalham acima do limite e deveriam ser de
+35 V; R201 dissipa cerca de 0,5 W e precisa ser de pelo menos 1 W.
 
 ## Próximos passos
 
 - medir as ligações marcadas com `·` no roteiro e atualizar `MEASURED` em `gen/gen_esquema.py`;
+- ler os valores da fonte marcados com `?` e medir as ligações dela;
 - desenhar a parte analógica a partir das Figs. 7, 8, 11 e 13 da revista, com U1, U7, T4, U19
   (CA3126) e os demais já identificados;
 - localizar as referências que faltam (U5, U6, U11, U12, U18 e os passivos do reset e do vídeo).

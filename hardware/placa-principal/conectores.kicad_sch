@@ -1159,6 +1159,251 @@
 				)
 				(embedded_fonts no)
 			)
+		(symbol "Connector_Generic:Conn_01x05"
+				(pin_names
+					(offset 1.016)
+					(hide yes)
+				)
+				(exclude_from_sim no)
+				(in_bom yes)
+				(on_board yes)
+				(in_pos_files yes)
+				(duplicate_pin_numbers_are_jumpers no)
+				(property "Reference" "J"
+					(at 0 7.62 0)
+					(show_name no)
+					(do_not_autoplace no)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(property "Value" "Conn_01x05"
+					(at 0 -7.62 0)
+					(show_name no)
+					(do_not_autoplace no)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(property "Footprint" ""
+					(at 0 0 0)
+					(show_name no)
+					(do_not_autoplace no)
+					(hide yes)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(property "Datasheet" ""
+					(at 0 0 0)
+					(show_name no)
+					(do_not_autoplace no)
+					(hide yes)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(property "Description" "Generic connector, single row, 01x05, script generated (kicad-library-utils/schlib/autogen/connector/)"
+					(at 0 0 0)
+					(show_name no)
+					(do_not_autoplace no)
+					(hide yes)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(property "ki_keywords" "connector"
+					(at 0 0 0)
+					(show_name no)
+					(do_not_autoplace no)
+					(hide yes)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(property "ki_fp_filters" "Connector*:*_1x??_*"
+					(at 0 0 0)
+					(show_name no)
+					(do_not_autoplace no)
+					(hide yes)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(symbol "Conn_01x05_1_1"
+					(rectangle
+						(start -1.27 6.35)
+						(end 1.27 -6.35)
+						(stroke
+							(width 0.254)
+							(type default)
+						)
+						(fill
+							(type background)
+						)
+					)
+					(rectangle
+						(start -1.27 5.207)
+						(end 0 4.953)
+						(stroke
+							(width 0.1524)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+					(rectangle
+						(start -1.27 2.667)
+						(end 0 2.413)
+						(stroke
+							(width 0.1524)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+					(rectangle
+						(start -1.27 0.127)
+						(end 0 -0.127)
+						(stroke
+							(width 0.1524)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+					(rectangle
+						(start -1.27 -2.413)
+						(end 0 -2.667)
+						(stroke
+							(width 0.1524)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+					(rectangle
+						(start -1.27 -4.953)
+						(end 0 -5.207)
+						(stroke
+							(width 0.1524)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+					(pin passive line
+						(at -5.08 5.08 0)
+						(length 3.81)
+						(name "Pin_1"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+						(number "1"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+					)
+					(pin passive line
+						(at -5.08 2.54 0)
+						(length 3.81)
+						(name "Pin_2"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+						(number "2"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+					)
+					(pin passive line
+						(at -5.08 0 0)
+						(length 3.81)
+						(name "Pin_3"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+						(number "3"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+					)
+					(pin passive line
+						(at -5.08 -2.54 0)
+						(length 3.81)
+						(name "Pin_4"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+						(number "4"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+					)
+					(pin passive line
+						(at -5.08 -5.08 0)
+						(length 3.81)
+						(name "Pin_5"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+						(number "5"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+					)
+				)
+				(embedded_fonts no)
+			)
 		(symbol "Device:C_Polarized"
 				(pin_numbers
 					(hide yes)
@@ -1860,121 +2105,6 @@
 				)
 				(embedded_fonts no)
 			)
-		(symbol "power:-5V"
-				(power global)
-				(pin_numbers
-					(hide yes)
-				)
-				(pin_names
-					(offset 0)
-					(hide yes)
-				)
-				(exclude_from_sim no)
-				(in_bom yes)
-				(on_board yes)
-				(in_pos_files yes)
-				(duplicate_pin_numbers_are_jumpers no)
-				(property "Reference" "#PWR"
-					(at 0 -3.81 0)
-					(show_name no)
-					(do_not_autoplace no)
-					(hide yes)
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(property "Value" "-5V"
-					(at 0 3.556 0)
-					(show_name no)
-					(do_not_autoplace no)
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(property "Footprint" ""
-					(at 0 0 0)
-					(show_name no)
-					(do_not_autoplace no)
-					(hide yes)
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(property "Datasheet" ""
-					(at 0 0 0)
-					(show_name no)
-					(do_not_autoplace no)
-					(hide yes)
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(property "Description" "Power symbol creates a global label with name \"-5V\""
-					(at 0 0 0)
-					(show_name no)
-					(do_not_autoplace no)
-					(hide yes)
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(property "ki_keywords" "global power"
-					(at 0 0 0)
-					(show_name no)
-					(do_not_autoplace no)
-					(hide yes)
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(symbol "-5V_0_0"
-					(pin power_in line
-						(at 0 0 90)
-						(length 0)
-						(name ""
-							(effects
-								(font
-									(size 1.27 1.27)
-								)
-							)
-						)
-						(number "1"
-							(effects
-								(font
-									(size 1.27 1.27)
-								)
-							)
-						)
-					)
-				)
-				(symbol "-5V_0_1"
-					(polyline
-						(pts
-							(xy 0 0) (xy 0 1.27) (xy 0.762 1.27) (xy 0 2.54) (xy -0.762 1.27) (xy 0 1.27)
-						)
-						(stroke
-							(width 0)
-							(type default)
-						)
-						(fill
-							(type outline)
-						)
-					)
-				)
-				(embedded_fonts no)
-			)
 		(symbol "vet3000_placa:+3V_BAT"
 				(power global)
 				(pin_numbers
@@ -2137,7 +2267,7 @@
 		)
 		(uuid "3e13cbc2-faf0-5b50-821f-1f342b83cb9d")
 	)
-	(text "Alimentação: vem da placa da fonte (7805 e reguladores) por um conector\nde pinagem não levantada: +5V, +12V, -5V, +3V_BAT e GND.\n+3V_BAT alimenta a RAM (pino 28): +5 V com o aparelho ligado,\n3 V da bateria desligado (OU com diodos na fonte, como na revista).\n+12 V e -5 V servem sobretudo à parte analógica."
+	(text "Alimentação: vem da placa da fonte (CN201, folha Fonte) pelo CN2, de 5 vias:\n-5V, +5V, +3V_BAT, +12V e GND, na ordem da etiqueta (não medida no CN2).\n+3V_BAT alimenta a RAM (pino 28): cerca de 5 V com o aparelho ligado,\n3 V da bateria desligado (OU com os diodos D207 e D208 da fonte).\n+12 V e -5 V servem sobretudo à parte analógica."
 		(exclude_from_sim no)
 		(at 203.2 101.6 0)
 		(effects
@@ -2501,6 +2631,56 @@
 	)
 	(wire
 		(pts
+			(xy 337.82 101.6) (xy 335.28 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4cbb2f32-a201-5333-b149-bd48b76498ff")
+	)
+	(wire
+		(pts
+			(xy 337.82 104.14) (xy 335.28 104.14)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5ffa33de-1e7e-5e10-8347-4904ae00e8e3")
+	)
+	(wire
+		(pts
+			(xy 337.82 106.68) (xy 335.28 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b0604207-14e8-5fc3-9afb-94e2d3cd43d5")
+	)
+	(wire
+		(pts
+			(xy 337.82 109.22) (xy 335.28 109.22)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4d3b468b-0330-5de4-8482-dd61d5a1a42d")
+	)
+	(wire
+		(pts
+			(xy 337.82 111.76) (xy 335.28 111.76)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fdec845a-b2e5-5509-bab5-252bc7849d22")
+	)
+	(wire
+		(pts
 			(xy 203.2 186.69) (xy 203.2 184.15)
 		)
 		(stroke
@@ -2681,16 +2861,6 @@
 	)
 	(wire
 		(pts
-			(xy 223.52 50.8) (xy 223.52 55.88)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "46b4b737-bb50-5eae-adb2-bc1c184b58eb")
-	)
-	(wire
-		(pts
 			(xy 248.92 50.8) (xy 248.92 55.88)
 		)
 		(stroke
@@ -2698,16 +2868,6 @@
 			(type default)
 		)
 		(uuid "af6fab93-999c-5626-8005-a6d61807a6d3")
-	)
-	(wire
-		(pts
-			(xy 274.32 50.8) (xy 274.32 55.88)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f3f7dd62-09a6-558a-8eba-feee56538d6c")
 	)
 	(wire
 		(pts
@@ -3467,6 +3627,116 @@
 			)
 		)
 	)
+	(global_label "-5V"
+		(shape passive)
+		(at 335.28 101.6 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "31785a71-8ed5-5b85-9e30-7b05379bc1cf")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 335.28 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 335.28 104.14 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "c4e94f9a-c720-5279-8a7b-889b5e8cda75")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 335.28 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "+3V_BAT"
+		(shape passive)
+		(at 335.28 106.68 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "5753b538-4b53-53b0-8737-cc4d64d9f0ad")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 335.28 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 335.28 109.22 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "580835f7-1584-5d1e-b37d-c44537373da3")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 335.28 109.22 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 335.28 111.76 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "fc4a66f2-22c1-53f8-b1f9-2b0b8117ef02")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 335.28 111.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
 	(no_connect
 		(at 96.52 147.32)
 		(uuid "97e7bf10-4a33-5a9a-9636-76731c2e8c2e")
@@ -3661,6 +3931,104 @@
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
 					(reference "CN1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x05")
+		(at 342.9 106.68 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "bec616f6-2ea8-59c9-b58f-df1f6fea82ac")
+		(property "Reference" "CN2"
+			(at 342.9 99.06 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Alimentação (da fonte)"
+			(at 342.9 114.3 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical"
+			(at 342.9 106.68 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 342.9 106.68 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 342.9 106.68 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Revista" "rev. fonte na placa (Fig. 6)"
+			(at 342.9 116.84 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "a678e1b0-f41f-5df9-ad9b-438fd829ec44")
+		)
+		(pin "2"
+			(uuid "d022ca9d-a02c-5900-aad5-c3657eafcd17")
+		)
+		(pin "3"
+			(uuid "f5950e77-d064-56b8-9394-9a9a95c51d68")
+		)
+		(pin "4"
+			(uuid "1feb81b9-2310-5bbd-aaaf-570f151f64be")
+		)
+		(pin "5"
+			(uuid "c3801ab9-9e19-5542-8f3f-3b274b9e76a3")
+		)
+		(instances
+			(project "vet3000_placa"
+				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
+					(reference "CN2")
 					(unit 1)
 				)
 			)
@@ -4504,8 +4872,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "4d596323-6c6b-5a51-8f7a-647e9d71193b")
-		(property "Reference" "#PWR044"
+		(uuid "ae059a84-763f-5d24-9aa8-582f8b4cc021")
+		(property "Reference" "#PWR043"
 			(at 203.2 184.15 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4560,12 +4928,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "26a88927-6b7e-535e-8148-4e0355049a33")
+			(uuid "e1539221-7f79-5aa7-a65c-b39958ef5e05")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR044")
+					(reference "#PWR043")
 					(unit 1)
 				)
 			)
@@ -4581,8 +4949,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "369d7850-917f-5e89-979b-4dc62041ad6a")
-		(property "Reference" "#PWR045"
+		(uuid "4d596323-6c6b-5a51-8f7a-647e9d71193b")
+		(property "Reference" "#PWR044"
 			(at 203.2 196.85 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4637,12 +5005,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "38536fe9-8ba0-596d-8389-eb26d78c1470")
+			(uuid "26a88927-6b7e-535e-8148-4e0355049a33")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR045")
+					(reference "#PWR044")
 					(unit 1)
 				)
 			)
@@ -4658,8 +5026,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "f5bb5078-b6a2-5d07-8f41-49a2b265ed69")
-		(property "Reference" "#PWR046"
+		(uuid "369d7850-917f-5e89-979b-4dc62041ad6a")
+		(property "Reference" "#PWR045"
 			(at 223.52 184.15 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4714,12 +5082,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "3aa8b07a-4e9c-5e84-9fea-7f5bc0fe40c6")
+			(uuid "38536fe9-8ba0-596d-8389-eb26d78c1470")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR046")
+					(reference "#PWR045")
 					(unit 1)
 				)
 			)
@@ -4735,8 +5103,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "44cf2b5e-4ee1-570e-88c8-73b681841e0f")
-		(property "Reference" "#PWR047"
+		(uuid "f5bb5078-b6a2-5d07-8f41-49a2b265ed69")
+		(property "Reference" "#PWR046"
 			(at 223.52 196.85 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4791,12 +5159,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "0271f5b5-2329-5332-984f-3b31be7dc8f3")
+			(uuid "3aa8b07a-4e9c-5e84-9fea-7f5bc0fe40c6")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR047")
+					(reference "#PWR046")
 					(unit 1)
 				)
 			)
@@ -4812,8 +5180,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "d6514fbb-631f-51a2-8363-ea6a35a22807")
-		(property "Reference" "#PWR048"
+		(uuid "44cf2b5e-4ee1-570e-88c8-73b681841e0f")
+		(property "Reference" "#PWR047"
 			(at 243.84 184.15 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4868,12 +5236,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "7946a80c-004a-5f83-9e78-b8af2f14e11e")
+			(uuid "0271f5b5-2329-5332-984f-3b31be7dc8f3")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR048")
+					(reference "#PWR047")
 					(unit 1)
 				)
 			)
@@ -4889,8 +5257,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "f1f05682-1b4b-5189-8f0b-eb190ef0eb6a")
-		(property "Reference" "#PWR049"
+		(uuid "d6514fbb-631f-51a2-8363-ea6a35a22807")
+		(property "Reference" "#PWR048"
 			(at 243.84 196.85 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4945,12 +5313,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "ff9f564d-469d-5b9b-bc1c-2c33e24da5f3")
+			(uuid "7946a80c-004a-5f83-9e78-b8af2f14e11e")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR049")
+					(reference "#PWR048")
 					(unit 1)
 				)
 			)
@@ -4966,8 +5334,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "5502bf06-533a-5773-af74-095920cfc018")
-		(property "Reference" "#PWR050"
+		(uuid "f1f05682-1b4b-5189-8f0b-eb190ef0eb6a")
+		(property "Reference" "#PWR049"
 			(at 264.16 184.15 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5022,12 +5390,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "2eb52882-7ed7-5076-b8db-e1549764f24d")
+			(uuid "ff9f564d-469d-5b9b-bc1c-2c33e24da5f3")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR050")
+					(reference "#PWR049")
 					(unit 1)
 				)
 			)
@@ -5043,8 +5411,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "6139df4f-3717-5fba-8f8a-15b088db7a78")
-		(property "Reference" "#PWR051"
+		(uuid "5502bf06-533a-5773-af74-095920cfc018")
+		(property "Reference" "#PWR050"
 			(at 264.16 196.85 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5099,12 +5467,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "67e3f61f-d750-5515-b533-6fc2669e8ab2")
+			(uuid "2eb52882-7ed7-5076-b8db-e1549764f24d")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR051")
+					(reference "#PWR050")
 					(unit 1)
 				)
 			)
@@ -5120,8 +5488,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "13f4f03a-d689-5098-b792-c4fac1245094")
-		(property "Reference" "#PWR052"
+		(uuid "6139df4f-3717-5fba-8f8a-15b088db7a78")
+		(property "Reference" "#PWR051"
 			(at 284.48 184.15 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5176,12 +5544,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "91331800-024a-5c37-9200-bf361cdf0f7d")
+			(uuid "67e3f61f-d750-5515-b533-6fc2669e8ab2")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR052")
+					(reference "#PWR051")
 					(unit 1)
 				)
 			)
@@ -5197,8 +5565,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "b6438e19-e534-5295-bb13-78206ea509a7")
-		(property "Reference" "#PWR053"
+		(uuid "13f4f03a-d689-5098-b792-c4fac1245094")
+		(property "Reference" "#PWR052"
 			(at 284.48 196.85 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5253,12 +5621,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "66ad6fa4-8d10-5ede-95de-0ae1fd0ebb29")
+			(uuid "91331800-024a-5c37-9200-bf361cdf0f7d")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR053")
+					(reference "#PWR052")
 					(unit 1)
 				)
 			)
@@ -5274,8 +5642,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "5428f34f-77da-57a4-9408-f10e874ccb85")
-		(property "Reference" "#PWR054"
+		(uuid "b6438e19-e534-5295-bb13-78206ea509a7")
+		(property "Reference" "#PWR053"
 			(at 304.8 184.15 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5330,12 +5698,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "a79ac644-2839-5f9f-aad9-1348a865a43d")
+			(uuid "66ad6fa4-8d10-5ede-95de-0ae1fd0ebb29")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR054")
+					(reference "#PWR053")
 					(unit 1)
 				)
 			)
@@ -5351,8 +5719,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "123c9ee9-91d7-5a8f-9b25-127a045891e8")
-		(property "Reference" "#PWR055"
+		(uuid "5428f34f-77da-57a4-9408-f10e874ccb85")
+		(property "Reference" "#PWR054"
 			(at 304.8 196.85 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5407,12 +5775,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "f1159e2c-21da-5190-9d49-3943c14da0aa")
+			(uuid "a79ac644-2839-5f9f-aad9-1348a865a43d")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR055")
+					(reference "#PWR054")
 					(unit 1)
 				)
 			)
@@ -5428,8 +5796,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "a1f3c0f1-3af7-52b5-8e41-73d28425cb4a")
-		(property "Reference" "#PWR056"
+		(uuid "123c9ee9-91d7-5a8f-9b25-127a045891e8")
+		(property "Reference" "#PWR055"
 			(at 325.12 184.15 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5484,12 +5852,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "81c0a6ad-2f5c-5cbb-b893-aef1000213ac")
+			(uuid "f1159e2c-21da-5190-9d49-3943c14da0aa")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR056")
+					(reference "#PWR055")
 					(unit 1)
 				)
 			)
@@ -5505,8 +5873,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "34881a63-d300-5584-b79c-759541aa7c0d")
-		(property "Reference" "#PWR057"
+		(uuid "a1f3c0f1-3af7-52b5-8e41-73d28425cb4a")
+		(property "Reference" "#PWR056"
 			(at 325.12 196.85 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5561,12 +5929,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "a4c3a6be-5f16-58da-8371-ad9a12268fc0")
+			(uuid "81c0a6ad-2f5c-5cbb-b893-aef1000213ac")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR057")
+					(reference "#PWR056")
 					(unit 1)
 				)
 			)
@@ -5582,8 +5950,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "f005f81e-2c50-5746-bd2e-6fec12beaeb5")
-		(property "Reference" "#PWR058"
+		(uuid "34881a63-d300-5584-b79c-759541aa7c0d")
+		(property "Reference" "#PWR057"
 			(at 345.44 184.15 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5638,12 +6006,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "ea972422-11c7-5880-9c80-cd3cc1e5ad03")
+			(uuid "a4c3a6be-5f16-58da-8371-ad9a12268fc0")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR058")
+					(reference "#PWR057")
 					(unit 1)
 				)
 			)
@@ -5659,8 +6027,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "b3dc8894-5b15-5f62-829f-573d36a3e8b9")
-		(property "Reference" "#PWR059"
+		(uuid "f005f81e-2c50-5746-bd2e-6fec12beaeb5")
+		(property "Reference" "#PWR058"
 			(at 345.44 196.85 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5715,12 +6083,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "cd765000-6489-589c-9c92-74ae842ba00e")
+			(uuid "ea972422-11c7-5880-9c80-cd3cc1e5ad03")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR059")
+					(reference "#PWR058")
 					(unit 1)
 				)
 			)
@@ -5736,8 +6104,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "ae84fe34-88b4-5125-8cc5-ce0bdd026513")
-		(property "Reference" "#PWR060"
+		(uuid "b3dc8894-5b15-5f62-829f-573d36a3e8b9")
+		(property "Reference" "#PWR059"
 			(at 365.76 184.15 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5792,12 +6160,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "1e2d33d5-3d01-5421-accf-4420db6f35d1")
+			(uuid "cd765000-6489-589c-9c92-74ae842ba00e")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR060")
+					(reference "#PWR059")
 					(unit 1)
 				)
 			)
@@ -5813,8 +6181,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "f64228b8-a223-5df1-abfb-6440663ebb83")
-		(property "Reference" "#PWR061"
+		(uuid "ae84fe34-88b4-5125-8cc5-ce0bdd026513")
+		(property "Reference" "#PWR060"
 			(at 365.76 196.85 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5869,166 +6237,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "658a70e2-a9bd-554f-b5ae-a60638b575c9")
+			(uuid "1e2d33d5-3d01-5421-accf-4420db6f35d1")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR061")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:PWR_FLAG")
-		(at 223.52 50.8 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board no)
-		(in_pos_files no)
-		(dnp no)
-		(uuid "12af2378-fc8a-5a75-8d95-65f20fab1dad")
-		(property "Reference" "#FLG02"
-			(at 223.52 48.26 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "PWR_FLAG"
-			(at 223.52 46.99 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 223.52 50.8 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 223.52 50.8 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 223.52 50.8 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "7d20a983-a1b1-5844-92f2-6d6324c5c408")
-		)
-		(instances
-			(project "vet3000_placa"
-				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#FLG02")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:+5V")
-		(at 223.52 55.88 180)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board no)
-		(in_pos_files no)
-		(dnp no)
-		(uuid "097fe65f-348a-544f-a62e-ebedf4a4ec0a")
-		(property "Reference" "#PWR062"
-			(at 223.52 55.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "+5V"
-			(at 223.52 60.96 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 223.52 55.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 223.52 55.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 223.52 55.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "3cbf23db-c52f-5394-a45a-01c25bc260dc")
-		)
-		(instances
-			(project "vet3000_placa"
-				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR062")
+					(reference "#PWR060")
 					(unit 1)
 				)
 			)
@@ -6045,7 +6259,7 @@
 		(in_pos_files no)
 		(dnp no)
 		(uuid "538df4a8-0239-50e3-82f9-5ae49ff591ec")
-		(property "Reference" "#FLG03"
+		(property "Reference" "#FLG01"
 			(at 248.92 48.26 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6105,7 +6319,7 @@
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#FLG03")
+					(reference "#FLG01")
 					(unit 1)
 				)
 			)
@@ -6121,8 +6335,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "3f212eba-d73f-595f-8d2c-12b968a1d90f")
-		(property "Reference" "#PWR063"
+		(uuid "f64228b8-a223-5df1-abfb-6440663ebb83")
+		(property "Reference" "#PWR061"
 			(at 248.92 55.88 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6177,166 +6391,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "49cc48fc-db13-5c49-b3bc-41b5dc7b7808")
+			(uuid "658a70e2-a9bd-554f-b5ae-a60638b575c9")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR063")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:PWR_FLAG")
-		(at 274.32 50.8 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board no)
-		(in_pos_files no)
-		(dnp no)
-		(uuid "ff126e44-ea86-59d0-92af-1963ee16af93")
-		(property "Reference" "#FLG04"
-			(at 274.32 48.26 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "PWR_FLAG"
-			(at 274.32 46.99 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 274.32 50.8 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 274.32 50.8 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 274.32 50.8 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "52133921-6e77-58b9-b60c-bd55fd3171ce")
-		)
-		(instances
-			(project "vet3000_placa"
-				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#FLG04")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:-5V")
-		(at 274.32 55.88 180)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board no)
-		(in_pos_files no)
-		(dnp no)
-		(uuid "601f73a3-dd5e-5b95-b345-66992f570b52")
-		(property "Reference" "#PWR064"
-			(at 274.32 55.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "-5V"
-			(at 274.32 60.96 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 274.32 55.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 274.32 55.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 274.32 55.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "2c75ea1b-8e7f-5a87-853a-e4095f5b1e6e")
-		)
-		(instances
-			(project "vet3000_placa"
-				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR064")
+					(reference "#PWR061")
 					(unit 1)
 				)
 			)
@@ -6353,7 +6413,7 @@
 		(in_pos_files no)
 		(dnp no)
 		(uuid "ad47cbbb-ce29-5b1b-b216-71bab52bd4a6")
-		(property "Reference" "#FLG05"
+		(property "Reference" "#FLG02"
 			(at 299.72 48.26 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6413,7 +6473,7 @@
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#FLG05")
+					(reference "#FLG02")
 					(unit 1)
 				)
 			)
@@ -6429,8 +6489,8 @@
 		(on_board no)
 		(in_pos_files no)
 		(dnp no)
-		(uuid "9b0adf84-161a-5a4a-8293-cc5aeda56707")
-		(property "Reference" "#PWR065"
+		(uuid "097fe65f-348a-544f-a62e-ebedf4a4ec0a")
+		(property "Reference" "#PWR062"
 			(at 299.72 55.88 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6485,12 +6545,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "174fad7b-ec60-56e8-9239-522153867d88")
+			(uuid "3cbf23db-c52f-5394-a45a-01c25bc260dc")
 		)
 		(instances
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1/6356bf42-75c5-540c-8193-c8410135d5d2"
-					(reference "#PWR065")
+					(reference "#PWR062")
 					(unit 1)
 				)
 			)

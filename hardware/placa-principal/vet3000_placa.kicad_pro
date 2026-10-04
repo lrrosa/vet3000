@@ -141,35 +141,35 @@
         "pattern": "A9"
       },
       {
-        "netclass": "Parcial",
+        "netclass": "Medido",
         "pattern": "D0"
       },
       {
-        "netclass": "Parcial",
+        "netclass": "Medido",
         "pattern": "D1"
       },
       {
-        "netclass": "Parcial",
+        "netclass": "Medido",
         "pattern": "D2"
       },
       {
-        "netclass": "Parcial",
+        "netclass": "Medido",
         "pattern": "D3"
       },
       {
-        "netclass": "Parcial",
+        "netclass": "Medido",
         "pattern": "D4"
       },
       {
-        "netclass": "Parcial",
+        "netclass": "Medido",
         "pattern": "D5"
       },
       {
-        "netclass": "Parcial",
+        "netclass": "Medido",
         "pattern": "D6"
       },
       {
-        "netclass": "Parcial",
+        "netclass": "Medido",
         "pattern": "D7"
       },
       {
@@ -185,8 +185,68 @@
         "pattern": "IO_SEL_N"
       },
       {
-        "netclass": "Parcial",
+        "netclass": "Medido",
         "pattern": "IRQ_N"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "KB_C1"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "KB_C2"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "KB_C3"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "KB_C4"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "KB_C5"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "KB_C6"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "KB_C7"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "KB_C8"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "KB_L1"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "KB_L2"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "KB_L3"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "KB_L4"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "KB_L5"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "KB_L6"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "KB_L7"
       },
       {
         "netclass": "Parcial",
@@ -229,6 +289,10 @@
     [
       "74fbbede-e63f-54c8-9d5e-663d794bb3f0",
       "Parte anal\u00f3gica (a desenhar)"
+    ],
+    [
+      "f81ca1a6-4839-5427-98e0-83676e107a95",
+      "Fonte"
     ]
   ],
   "text_variables": {},

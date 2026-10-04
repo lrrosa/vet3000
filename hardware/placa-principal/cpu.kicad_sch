@@ -4380,7 +4380,7 @@
 		)
 		(uuid "5c57f3cf-4e82-58ab-adc9-c09a44e127ee")
 	)
-	(text "No VET, o /NMI (pino 2) vai direto ao +5 V e o /IRQ vai ao CN1 (medido).\nNa revista era o contrário: /NMI na porta de expansão com R8, /IRQ em +5 V.\nR29/R30 (4k7): qual deles é o do /HALT e qual o do /IRQ não foi verificado.\n/OE da EPROM no GND e /OE da RAM em U23 (NÃO(/HALT·R/W)): revista, não medidos.\nO CN1 a11 foi medido no pino 6 do U15 (antes do diodo D11); na revista\na porta usava o outro lado do diodo (pino 15)."
+	(text "No VET, o /NMI (pino 2) vai direto ao +5 V e o /IRQ vai ao CN1 (medido).\nNa revista era o contrário: /NMI na porta de expansão com R8, /IRQ em +5 V.\nR30 (4k7) é o pull-up do /HALT e R29 (4k7) o do /IRQ (medido).\n/OE da EPROM no GND (medido); /OE da RAM em U23 (NÃO(/HALT·R/W)), segundo a revista.\nO CN1 a11 foi medido no pino 6 do U15 (antes do diodo D11); na revista\na porta usava o outro lado do diodo (pino 15)."
 		(exclude_from_sim no)
 		(at 290.83 20.32 0)
 		(effects
@@ -8230,7 +8230,7 @@
 			)
 		)
 	)
-	(global_label "HALT_N"
+	(global_label "IRQ_N"
 		(shape passive)
 		(at 210.82 240.03 270)
 		(fields_autoplaced yes)
@@ -8252,7 +8252,7 @@
 			)
 		)
 	)
-	(global_label "IRQ_N"
+	(global_label "HALT_N"
 		(shape passive)
 		(at 228.6 240.03 270)
 		(fields_autoplaced yes)
@@ -10010,7 +10010,7 @@
 				(hide yes)
 			)
 		)
-		(property "Revista" "rev. R39"
+		(property "Revista" "rev. R8"
 			(at 214.63 237.49 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10100,7 +10100,7 @@
 				(hide yes)
 			)
 		)
-		(property "Revista" "rev. R8"
+		(property "Revista" "rev. R39"
 			(at 232.41 237.49 90)
 			(show_name no)
 			(do_not_autoplace no)

@@ -34,9 +34,10 @@ em [../hardware/placa-principal/](../hardware/placa-principal/README.md), com um
 | U15 | **74LS139** (ST) | Decodificador de endereços (duplo 2→4) |
 | U16 | **74LS273** | Latch de escrita da linha do teclado (`$8002`) |
 | U22 | **74LS244** + R52-R59 | Buffer de leitura das colunas do teclado (`$8002`), com *pull-ups* |
-| — | Conector 2×8 | Membrana do teclado: 8 trilhas em cada camada |
+| CN3 | Conector 2×8 | Membranas do teclado, 8 trilhas cada. Pino 1 embaixo à esquerda: ímpares (fileira de baixo) = membrana inferior, pares (fileira de cima) = superior |
+| CN2 | Conector de 5 vias | Entrada da alimentação, vinda da placa da fonte |
 | D10, D11 + R48, R49 (3k3) | 1N914 | OU com diodos da seleção da ROM (ROM SEL) e da E/S (I/O SEL), como D5/D6 e R41/R42 da revista |
-| R28 (5k1), R29, R30 (4k7) | Resistores | *Pull-up* do /RESET e de /HALT e /IRQ |
+| R28 (5k1), R29, R30 (4k7) | Resistores | *Pull-ups*: R28 do /RESET, R29 do /IRQ e R30 do /HALT (R29 e R30 medidos) |
 | D8, R26, R27 (2k2) | Zener e resistores | Nível de 3 estados do RESET/SYNC do VDP (revista: D2, R17, R18) |
 | CN1 | Borda de placa 2×18 | Conector traseiro "interface": barramento da CPU. Ver [conector-cn1.md](conector-cn1.md) |
 
@@ -62,9 +63,18 @@ da revista.
 
 ### Fonte
 
-Transformador LIDER, regulador **7805** (LM340T-5), filtros de 3300 µF e 2200 µF. O conector da fonte,
-conforme a etiqueta no gabinete, tem **−5 V, +5 V, +3 V BAT, +12 V e GND**. A linha **+3 V BAT** alimenta
+Transformador LIDER, regulador **7805** (LM340T-5), filtros de 3300 µF e 2200 µF. O conector da fonte
+(CN2 na placa principal), conforme a etiqueta no gabinete, tem **−5 V, +5 V, +3 V BAT, +12 V e GND**. A linha **+3 V BAT** alimenta
 a RAM (pino 28 da HY6264) e mantém os títulos com o aparelho desligado.
+
+O esquema, levantado das fotos dos dois lados da placa, está na folha Fonte do
+[esquema em KiCad](../hardware/placa-principal/README.md#fonte). O secundário do transformador tem
+derivação central e a ponte usa o próprio negativo como GND: o CT dá cerca de +12 V para o 7805 (que
+fica fora da placa, num dissipador) e o positivo da ponte, cerca de +24 V para o **7812**. O −5 V sai
+de um **7905** alimentado por uma bomba de carga ligada ao secundário. O +3 V BAT é um OU com diodos
+entre duas pilhas AA e uma tensão que fica uma queda de diodo acima do +5 V, alimentada pelo bruto de
+12 V por um resistor de 100 Ω. Os cerca de 60 mA desse resistor entram na linha de +5 V: testada sem
+carga, a fonte mostra uns 11 V no +5 V, o que é normal nesse circuito.
 
 ## Clocks
 

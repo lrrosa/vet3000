@@ -2,12 +2,19 @@
 
 ![Teclado](img/teclado.jpg)
 
-O teclado é de membrana com duas camadas de 8 trilhas cada, ligadas à placa por um conector 2×8.
+O teclado é de membrana com duas camadas de 8 trilhas cada, ligadas à placa pelo conector **CN3**
+(2×8). A camada de cima vai à fileira de cima do conector e a de baixo à fileira de baixo, com as
+trilhas na mesma ordem, da esquerda para a direita. O pino 1 fica embaixo à esquerda: os pinos
+ímpares (fileira de baixo) são as trilhas 1-8 da camada inferior e os pares (fileira de cima), as da
+superior. Todas as trilhas foram medidas até os CIs e os *pull-ups*.
 
 - A camada **inferior** recebe a seleção de **linha** do latch **74LS273** (U16), escrito em `$8002`.
   A trilha 8 não tem conexão física: são 7 linhas.
 - A camada **superior** devolve as **colunas** pelo buffer **74LS244** (U22), lido em `$8002`, com
   *pull-ups* R52-R59.
+
+Os dois CIs seguem a pinagem da revista: os pinos de dados do 74LS273 e do 74LS244, medidos até o
+barramento, vão a D0-D7 como no esquema da *Radio-Electronics*, e o `/CLR` do 74LS273 vai ao +5 V. Ver o [esquema da placa](../hardware/placa-principal/README.md).
 
 Tudo é **ativo em 0**. Para ler a linha *n* (1-7), escreva em `$8002` um byte com o bit *n−1* em 0 e
 os demais em 1. Depois leia `$8002`: um bit em 0 indica tecla apertada naquela coluna.

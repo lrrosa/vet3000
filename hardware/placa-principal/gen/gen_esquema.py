@@ -4,13 +4,14 @@
 # Hardware aberto sob a CERN-OHL-S v2 (ver hardware/placa-principal/LICENSE).
 # Source location: https://github.com/lrrosa/vet3000
 #
-"""Gera o esquema aproximado (KiCad 10) da placa principal do VET 3000: parte digital.
+"""Gera o esquema aproximado (KiCad 10) da placa principal do VET 3000 (parte digital) e da fonte.
 
     python gen_esquema.py [pasta_das_bibliotecas_de_simbolos_do_KiCad]
 
-O circuito vem de duas fontes, marcadas ligação a ligação:
+O circuito vem de três fontes, marcadas ligação a ligação:
   - medidas de continuidade no aparelho (docs/medidas-originais e docs/origem.md);
-  - o "Build This Video Titler" da Radio-Electronics (12/1985 e 01/1986), de onde o VET deriva.
+  - o "Build This Video Titler" da Radio-Electronics (12/1985 e 01/1986), de onde o VET deriva;
+  - na placa da fonte, que não está na revista, as trilhas vistas nas fotos dos dois lados.
 
 Cada pino é ligado por um fio curto a um rótulo de rede (ou a um símbolo de alimentação), então o
 circuito fica descrito aqui como tabelas de ligação. O script também gera a biblioteca de símbolos
@@ -237,13 +238,20 @@ FP = {"DIP14": "Package_DIP:DIP-14_W7.62mm", "DIP16": "Package_DIP:DIP-16_W7.62m
       "DIP40": "Package_DIP:DIP-40_W15.24mm", "R": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal",
       "C": "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm", "CP": "Capacitor_THT:CP_Radial_D5.0mm_P2.00mm",
       "D": "Diode_THT:D_DO-35_SOD27_P7.62mm_Horizontal", "TO92": "Package_TO_SOT_THT:TO-92_Inline",
-      "EDGE": "", "HDR16": "Connector_PinHeader_2.54mm:PinHeader_2x08_P2.54mm_Vertical"}
+      "EDGE": "", "HDR16": "Connector_PinHeader_2.54mm:PinHeader_2x08_P2.54mm_Vertical",
+      "TO220": "Package_TO_SOT_THT:TO-220-3_Vertical", "DO41": "Diode_THT:D_DO-41_SOD81_P10.16mm_Horizontal",
+      "CP10": "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm", "CP16": "Capacitor_THT:CP_Radial_D16.0mm_P7.50mm",
+      "LED": "LED_THT:LED_D5.0mm", "HDR5": "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical"}
 
 
 # campos que colidiriam com pinos (x, y, rotação, alinhamento em coordenadas da biblioteca)
 FIELD_OVERRIDE = {
     "HY6264AxP": {"Reference": (-2.54, 24.13, 0, "right"), "Value": (-2.54, 21.59, 0, "right")},
     "27128": {"Value": (-1.27, -31.75, 0, "right")},
+    "L7805": {"Reference": (-1.27, 3.175, 0, "right"), "Value": (1.27, 3.175, 0, "left")},
+    "L7812": {"Reference": (-1.27, 3.175, 0, "right"), "Value": (1.27, 3.175, 0, "left")},
+    "L7905": {"Reference": (-1.27, -3.175, 0, "right"), "Value": (1.27, -3.175, 0, "left")},
+    "Battery": {"Reference": (3.81, 1.27, 0, "left"), "Value": (3.81, -1.27, 0, "left")},
 }
 
 
@@ -307,9 +315,13 @@ CN1 = {"a1": "IRQ_N", "a10": "ROM_SEL_N", "a11": "IO_SEL_N", "a12": "R_W", "a13"
 CN1.update({"a%d" % (i + 2): "D%d" % i for i in range(8)})
 CN1.update({"b%d" % (i + 2): "A%d" % i for i in range(14)})
 
-CN2 = {str(i + 1): "KB_C%d" % (i + 1) for i in range(8)}          # membrana superior (colunas)
-CN2.update({str(i + 9): "KB_L%d" % (i + 1) for i in range(7)})    # membrana inferior (linhas)
-CN2["16"] = None                                                  # trilha 8 inferior: sem ligação
+# CN3 (teclado): pino 1 embaixo à esquerda; ímpares = fileira de baixo (membrana inferior, linhas),
+# pares = fileira de cima (membrana superior, colunas), trilhas contadas da esquerda para a direita
+CN3 = {str(2 * i + 1): "KB_L%d" % (i + 1) for i in range(7)}
+CN3["15"] = None                                                  # trilha 8 inferior: sem ligação
+CN3.update({str(2 * i + 2): "KB_C%d" % (i + 1) for i in range(8)})
+# CN2: entrada da fonte na placa principal (mesma ordem do CN201 da folha Fonte, não medida no CN2)
+CN2 = {"1": "-5V", "2": "+5V", "3": "+3V_BAT", "4": "+12V", "5": "GND"}
 
 
 def two(a, b):
@@ -345,8 +357,8 @@ SHEETS = [
          ("R28", "Device", "R", "5k1", FP["R"], [(1, 167.64, 233.68)], two("+5V", "RESET_N"), "R38", "foto"),
          ("C102", "Device", "C_Polarized", "22uF", FP["CP"], [(1, 185.42, 233.68)], two("RESET_N", "GND"),
           "C45", "prov"),
-         ("R29", "Device", "R", "4k7", FP["R"], [(1, 210.82, 233.68)], two("+5V", "HALT_N"), "R39", "foto"),
-         ("R30", "Device", "R", "4k7", FP["R"], [(1, 228.6, 233.68)], two("+5V", "IRQ_N"), "R8", "foto"),
+         ("R29", "Device", "R", "4k7", FP["R"], [(1, 210.82, 233.68)], two("+5V", "IRQ_N"), "R8", "foto"),
+         ("R30", "Device", "R", "4k7", FP["R"], [(1, 228.6, 233.68)], two("+5V", "HALT_N"), "R39", "foto"),
      ],
      "notes": [
          (25.4, 20.32, 2.0, "CPU, memórias e decodificação de endereços"),
@@ -359,8 +371,8 @@ SHEETS = [
          (290.83, 20.32, 1.27,
           "No VET, o /NMI (pino 2) vai direto ao +5 V e o /IRQ vai ao CN1 (medido).\\n"
           "Na revista era o contrário: /NMI na porta de expansão com R8, /IRQ em +5 V.\\n"
-          "R29/R30 (4k7): qual deles é o do /HALT e qual o do /IRQ não foi verificado.\\n"
-          "/OE da EPROM no GND e /OE da RAM em U23 (NÃO(/HALT·R/W)): revista, não medidos.\\n"
+          "R30 (4k7) é o pull-up do /HALT e R29 (4k7) o do /IRQ (medido).\\n"
+          "/OE da EPROM no GND (medido); /OE da RAM em U23 (NÃO(/HALT·R/W)), segundo a revista.\\n"
           "O CN1 a11 foi medido no pino 6 do U15 (antes do diodo D11); na revista\\n"
           "a porta usava o outro lado do diodo (pino 15)."),
          (25.4, 256.54, 1.27,
@@ -390,7 +402,6 @@ SHEETS = [
          ("R105", "Device", "R", "470", FP["R"], [(1, 299.72, 233.68)], two("VDP_BY", "GND"), "R19", "prov"),
          ("C105", "Device", "C", "220pF", FP["C"], [(1, 314.96, 233.68)], two("VDP_BY", "GND"), "C17", "prov"),
      ],
-     "flags": [("+12V", 25.4, 208.28)],
      "notes": [
          (25.4, 20.32, 2.0, "Vídeo: VDP TMS9128 e 16 KB de VRAM"),
          (25.4, 26.67, 1.27,
@@ -400,7 +411,7 @@ SHEETS = [
           "D0 do barramento vai ao CD7 (pino 17) e D7 ao CD0 (pino 24): a TI numera ao contrário (medido)."),
          (304.8, 20.32, 1.27,
           "VRAM (Fig. 10 da revista): AD0-AD7 do VDP vão a A7-A0 das DRAMs,\\n"
-          "RD0-RD3 a uma e RD4-RD7 à outra; /OE das DRAMs no GND.\\n"
+          "RD0-RD3 a uma e RD4-RD7 à outra; /OE das DRAMs no GND (medido).\\n"
           "Qual das duas é U14 e qual é U21 não foi verificado."),
          (25.4, 185.42, 1.27,
           "RESET/SYNC (pino 34), 3 níveis: 0 V reseta o VDP (RESET_N no boot);\\n"
@@ -413,8 +424,8 @@ SHEETS = [
      "parts": [
          ("U16", "74xx", "74LS273", "74LS273", FP["DIP20"], [(1, 114.3, 91.44)], KB_W, "IC21", "foto"),
          ("U22", "74xx", "74LS244", "74LS244", FP["DIP20"], [(1, 114.3, 175.26)], KB_R, "IC22", "foto"),
-         ("CN2", "Connector_Generic", "Conn_02x08_Top_Bottom", "Membranas do teclado", FP["HDR16"],
-          [(1, 294.64, 132.08)], CN2, "J (16 vias)", "prov"),
+         ("CN3", "Connector_Generic", "Conn_02x08_Odd_Even", "Membranas do teclado", FP["HDR16"],
+          [(1, 294.64, 132.08)], CN3, "J (16 vias)", "foto"),
      ] + [("R%d" % (52 + i), "Device", "R", "10k", FP["R"], [(1, 205.74 + i * 12.7, 208.28)],
            two("+5V", "KB_C%d" % (i + 1)), "RN1", "foto") for i in range(8)],
      "notes": [
@@ -422,21 +433,24 @@ SHEETS = [
          (25.4, 26.67, 1.27,
           "Escrita em $8002: U16 guarda o byte; a linha n recebe o bit n-1 (ativo em 0). Leitura: U22 põe as\\n"
           "8 colunas no barramento (bit m-1 = coluna m, ativo em 0), com os pull-ups R52-R59. Isso foi medido\\n"
-          "pelo lado do teclado (docs/teclado.md). Os pinos de U16/U22 usados aqui são os da revista:\\n"
-          "a placa do VET foi redesenhada e pode trocar a ordem dos bits nos pinos."),
+          "pelo lado do teclado (docs/teclado.md). Os pinos de U16/U22 são os da revista (Fig. 14).\\n"
+          "Medido: U16 e U22 até D0-D7 e até o CN3, os pull-ups R52-R59 e o /CLR (pino 1) do U16 no +5 V.\\n"
+          "Falta: o clock do U16 (pino 11) e os enables do U22 (pinos 1 e 19) até o U15."),
          (254.0, 96.52, 1.27,
-          "CN2: conector 2x8 das duas membranas (nome provisório).\\n"
-          "1-8: membrana superior, trilhas 1-8 (colunas).\\n"
-          "9-16: membrana inferior, trilhas 1-8 (linhas);\\n"
-          "a trilha 8 não tem ligação física.\\n"
-          "Qual fileira do conector é de qual membrana\\n"
-          "e a ordem de R52-R59 não foram verificadas."),
+          "CN3: conector 2x8 das duas membranas (medido).\\n"
+          "Pino 1 embaixo à esquerda. Ímpares (fileira de baixo):\\n"
+          "membrana inferior (linhas). Pares (fileira de cima):\\n"
+          "membrana superior (colunas). Trilhas contadas da\\n"
+          "esquerda para a direita; a trilha 8 inferior (pino 15)\\n"
+          "não tem ligação física."),
      ]},
     {"file": "conectores.kicad_sch", "name": "CN1 e alimentação", "page": "5",
      "title": "Conector CN1 e alimentação",
      "parts": [
          ("CN1", "Connector_Generic", "Conn_02x18_Row_Letter_First", "CN1 interface (borda 2x18)", FP["EDGE"],
           [(1, 101.6, 124.46)], CN1, "porta de expansão (Fig. 19)", "foto"),
+         ("CN2", "Connector_Generic", "Conn_01x05", "Alimentação (da fonte)", FP["HDR5"],
+          [(1, 342.9, 106.68)], CN2, "fonte na placa (Fig. 6)", "foto"),
          ("C106", "Device", "C_Polarized", "47uF", FP["CP"], [(1, 203.2, 190.5)], two("+5V", "GND"),
           "C46 (6809)", "prov"),
          ("C112", "Device", "C_Polarized", "100uF", FP["CP"], [(1, 223.52, 190.5)], two("+5V", "GND"),
@@ -446,7 +460,8 @@ SHEETS = [
           for i, rv in enumerate(["C47 (139)", "C48 (EPROM)", "C49 (273)", "C50 (74LS00)", "C51 (244)"])]
        + [("C%d" % (113 + i), "Device", "C", "100nF", FP["C"], [(1, 345.44 + i * 20.32, 190.5)],
            two("+5V", "GND"), rv, "prov") for i, rv in enumerate(["C60 (VRAM)", "C61 (VRAM)"])],
-     "flags": [("+5V", 223.52, 50.8), ("GND", 248.92, 50.8), ("-5V", 274.32, 50.8), ("+3V_BAT", 299.72, 50.8)],
+     # +5V, +12V e -5V já têm fonte de verdade (os reguladores da folha Fonte); GND e +3V_BAT não
+     "flags": [("GND", 248.92, 50.8), ("+3V_BAT", 299.72, 50.8)],
      "notes": [
          (25.4, 20.32, 2.0, "Conector traseiro CN1 e alimentação"),
          (25.4, 26.67, 1.27,
@@ -454,10 +469,10 @@ SHEETS = [
           "Lido de a17 para a1 e de b17 para b1, repete a porta de expansão da revista (Fig. 19).\\n"
           "a16 = /E CLK (U23), a14 = XROM (Y1), a11 = I/O SEL (Y2), a10 = ROM SEL (/CE da EPROM)."),
          (203.2, 101.6, 1.27,
-          "Alimentação: vem da placa da fonte (7805 e reguladores) por um conector\\n"
-          "de pinagem não levantada: +5V, +12V, -5V, +3V_BAT e GND.\\n"
-          "+3V_BAT alimenta a RAM (pino 28): +5 V com o aparelho ligado,\\n"
-          "3 V da bateria desligado (OU com diodos na fonte, como na revista).\\n"
+          "Alimentação: vem da placa da fonte (CN201, folha Fonte) pelo CN2, de 5 vias:\\n"
+          "-5V, +5V, +3V_BAT, +12V e GND, na ordem da etiqueta (não medida no CN2).\\n"
+          "+3V_BAT alimenta a RAM (pino 28): cerca de 5 V com o aparelho ligado,\\n"
+          "3 V da bateria desligado (OU com os diodos D207 e D208 da fonte).\\n"
           "+12 V e -5 V servem sobretudo à parte analógica."),
          (203.2, 215.9, 1.27,
           "Desacoplamento: valores e posições da revista, referências provisórias."),
@@ -477,6 +492,115 @@ SHEETS = [
           "U2/U10/U17 4066, U3 CA339E, U4 74LS221, U8 SN75108, U9 74LS05, U19 CA3126 (raspado),\\n"
           "LM1889, portas b e c de U23, XTAL1, CV1, CV2, RV1-RV3 e L1.\\n"
           "Esquemas de referência: Radio-Electronics, dez./1985, Figs. 7, 8, 11 e 13."),
+     ]},
+    # Placa da fonte: ligações levantadas das fotos dos dois lados (outubro de 2026). A placa não tem
+    # serigrafia de componentes: todas as referências são provisórias e o campo "Nota" diz onde a peça fica.
+    {"file": "fonte.kicad_sch", "name": "Fonte", "page": "7", "title": "placa separada, levantada das fotos",
+     "board": "fonte", "date": "2026-10-03", "source": "fotos", "field": "Nota",
+     "comment3": "Esquema aproximado: levantado das fotos da placa da fonte, a medir",
+     "parts": [
+         ("T201", "Device", "Transformer_1P_SS", "LIDER, 19,75 VAC com CT (medido)", "", [(1, 50.8, 96.52)],
+          {"1": None, "2": None, "3": "CA2", "4": "BRUTO_12V", "5": "CA1"}, "fora da placa", "prov"),
+         ("D201", "Diode", "1N4007", "1N400x", FP["DO41"], [(1, 106.68, 78.74)], two("CA1", "GND"),
+          "ponte, 1º de cima", "prov"),
+         ("D202", "Diode", "1N4007", "1N400x", FP["DO41"], [(1, 106.68, 91.44)], two("BRUTO_24V", "CA1"),
+          "ponte, 2º de cima", "prov"),
+         ("D203", "Diode", "1N4007", "1N400x", FP["DO41"], [(1, 106.68, 104.14)], two("BRUTO_24V", "CA2"),
+          "ponte, 3º de cima", "prov"),
+         ("D204", "Diode", "1N4007", "1N400x", FP["DO41"], [(1, 106.68, 116.84)], two("CA2", "GND"),
+          "ponte, 4º de cima", "prov"),
+         ("C201", "Device", "C_Polarized", "3300uF 25V", FP["CP16"], [(1, 139.7, 96.52)], two("BRUTO_12V", "GND"),
+          "fora da placa, à esquerda (terminais com espaguete vermelho)", "prov"),
+         ("C202", "Device", "C_Polarized", "2200uF 16V", FP["CP16"], [(1, 160.02, 96.52)], two("BRUTO_12V", "GND"),
+          "preto, embaixo à esquerda", "prov"),
+         ("C203", "Device", "C_Polarized", "2200uF 25V", FP["CP16"], [(1, 180.34, 96.52)], two("BRUTO_24V", "GND"),
+          "laranja Siemens, em cima", "prov"),
+         ("U201", "Regulator_Linear", "L7805", "LM340T-5 (7805)", FP["TO220"], [(1, 226.06, 96.52)],
+          {"1": "BRUTO_12V", "2": "GND", "3": "+5V"}, "fora da placa, no dissipador (fios amarelo, azul e laranja)",
+          "prov"),
+         ("C210", "Device", "C_Polarized", "100uF 50V", FP["CP"], [(1, 256.54, 96.52)], two("+5V", "GND"),
+          "preto, perto dos fios da bateria", "prov"),
+         ("C211", "Device", "C", "100nF", FP["C"], [(1, 274.32, 96.52)], two("+5V", "GND"),
+          "cerâmico, à esquerda do C210", "prov"),
+         ("C212", "Device", "C_Polarized", "1uF 50V", FP["CP"], [(1, 292.1, 96.52)], two("+5V", "GND"),
+          "azul pequeno, abaixo do conector", "prov"),
+         ("U202", "Regulator_Linear", "L7812", "7812", FP["TO220"], [(1, 226.06, 137.16)],
+          {"1": "BRUTO_24V", "2": "GND", "3": "+12V"}, "TO-220 em pé, em cima à direita", "prov"),
+         ("C206", "Device", "C_Polarized", "100uF 50V", FP["CP"], [(1, 256.54, 137.16)], two("+12V", "GND"),
+          "preto, abaixo do 7812", "prov"),
+         ("C207", "Device", "C", "100nF", FP["C"], [(1, 274.32, 137.16)], two("+12V", "GND"),
+          "cerâmico, abaixo do C206", "prov"),
+         ("CN201", "Connector_Generic", "Conn_01x05", "Saída para a placa principal", FP["HDR5"],
+          [(1, 345.44, 134.62)], {"1": "-5V", "2": "+5V", "3": "+3V_BAT", "4": "+12V", "5": "GND"},
+          "barra de 5 pinos, fio preto = GND", "prov"),
+         ("C204", "Device", "C_Polarized", "100uF 40V", FP["CP"], [(1, 60.96, 182.88)], two("CA1", "BOMBA"),
+          "laranja pequeno, no alto", "prov"),
+         ("D205", "Diode", "1N4007", "1N400x", FP["DO41"], [(1, 99.06, 175.26)], two("GND", "BOMBA"),
+          "deitado, no centro", "prov"),
+         ("D206", "Diode", "1N4007", "1N400x", FP["DO41"], [(1, 99.06, 190.5)], two("BOMBA", "BRUTO_NEG"),
+          "em pé, ao lado do azul grande da direita", "prov"),
+         ("C205", "Device", "C_Polarized", "470uF 25V", FP["CP10"], [(1, 137.16, 182.88)], two("GND", "BRUTO_NEG"),
+          "azul médio, perto do 7905", "prov"),
+         ("U203", "Regulator_Linear", "L7905", "7905", FP["TO220"], [(1, 226.06, 182.88)],
+          {"1": "GND", "2": "BRUTO_NEG", "3": "-5V"}, "TO-220 em pé, ao lado do conector", "prov"),
+         ("C208", "Device", "C_Polarized", "22uF 50V", FP["CP"], [(1, 256.54, 182.88)], two("GND", "-5V"),
+          "azul pequeno, abaixo do 7905", "prov"),
+         ("C209", "Device", "C", "100nF", FP["C"], [(1, 274.32, 182.88)], two("GND", "-5V"),
+          "cerâmico, logo abaixo do 7905", "prov"),
+         ("R201", "Device", "R", "100", FP["R"], [(1, 45.72, 233.68)], two("BRUTO_12V", "BKP_ALIM"),
+          "deitado, ao lado do 2200uF 16V", "prov"),
+         ("D210", "Diode", "1N4148", "1N? (vidro)", FP["D"], [(1, 78.74, 226.06)], two("+5V", "BKP_ALIM"),
+          "vidro vermelho, em pé ao lado do cerâmico C211", "prov"),
+         ("C213", "Device", "C_Polarized", "1000uF 25V", FP["CP10"], [(1, 109.22, 233.68)], two("BKP_ALIM", "GND"),
+          "azul grande, central", "prov"),
+         ("D207", "Diode", "1N4148", "1N4148", FP["D"], [(1, 147.32, 226.06)], two("+3V_BAT", "BKP_ALIM"),
+          "vidro, o da esquerda do par", "prov"),
+         ("D208", "Diode", "1N4148", "1N4148", FP["D"], [(1, 147.32, 241.3)], two("+3V_BAT", "BAT_POS"),
+          "vidro, o da direita do par", "prov"),
+         ("C214", "Device", "C_Polarized", "22uF 50V", FP["CP"], [(1, 175.26, 233.68)], two("+3V_BAT", "GND"),
+          "azul pequeno, acima do azul grande", "prov"),
+         ("BT201", "Device", "Battery", "2x AA (3V)", "", [(1, 195.58, 233.68)], two("BAT_POS", "GND"),
+          "suporte fora da placa (fios vermelho e preto)", "prov"),
+         ("D209", "Device", "LED", "LED", FP["LED"], [(1, 238.76, 226.06)], two("LED_K", "BRUTO_24V"),
+          "painel (fios vermelho e creme)", "prov"),
+         ("R203", "Device", "R", "2k4", FP["R"], [(1, 271.78, 233.68)], two("LED_K", "GND"),
+          "em pé, junto aos fios do LED", "prov"),
+     ],
+     "flags": [("BRUTO_12V", 330.2, 198.12), ("BRUTO_24V", 350.52, 198.12), ("BRUTO_NEG", 370.84, 198.12)],
+     "notes": [
+         (25.4, 20.32, 2.0, "Fonte: placa separada, levantada das fotos"),
+         (25.4, 26.67, 1.27,
+          "Transformador com derivação central (CT). A ponte D201-D204 usa o próprio negativo como GND, então o CT\\n"
+          "fica em cerca de +12 V (BRUTO_12V: C201, C202 e a entrada do 7805) e o positivo da ponte em cerca de\\n"
+          "+24 V (BRUTO_24V: C203, 7812 e o LED). Ligações levantadas das fotos dos dois lados da placa, ainda a\\n"
+          "medir; valores lidos no aparelho. A placa não tem serigrafia de componentes: todas as referências são\\n"
+          "provisórias, e o campo Nota de cada peça diz onde ela fica."),
+         (127.0, 53.34, 1.27,
+          "Com 19,75 VAC medidos no secundário, sem carga: BRUTO_12V ~13 V,\\n"
+          "BRUTO_24V ~26,5 V e BRUTO_NEG ~-26 V. C203 e C205 (25 V) ficam\\n"
+          "acima do limite: o certo é trocá-los por capacitores de 35 V."),
+         (203.2, 50.8, 1.27,
+          "U201 fica fora da placa, num dissipador, com as pernas para cima e a escrita de cabeça\\n"
+          "para baixo. Nessa posição o pino da ESQUERDA é a SAÍDA e o da DIREITA é a ENTRADA.\\n"
+          "Fios: amarelo = entrada (BRUTO_12V), azul = GND, laranja = saída (+5V). As cores no\\n"
+          "regulador foram conferidas no aparelho; as chegadas na placa vêm das fotos."),
+         (25.4, 144.78, 1.27,
+          "-5 V: bomba de carga em CA1. C204 e D205 (grampo no GND) fazem a tensão de CA1\\n"
+          "descer abaixo do GND, e D206 a retifica em C205: cerca de -26 V na entrada do 7905.\\n"
+          "Na placa, a ligação de C204 a D205 e D206 passa por um jumper de fio."),
+         (25.4, 256.54, 1.27,
+          "Backup da RAM (+3V_BAT): ligado, vem de BKP_ALIM por D207; desligado, das pilhas por D208. D210 prende\\n"
+          "BKP_ALIM uma queda de diodo acima do +5V (~5,6 V), e assim a RAM recebe ~5 V. A corrente de R201\\n"
+          "(~60 mA, ~0,5 W no resistor) passa por D210 e entra na linha de +5V. Sem carga no +5V (placa principal\\n"
+          "desligada), ela não tem para onde ir, porque o 7805 não absorve corrente: a linha sobe a ~11 V.\\n"
+          "Teste a fonte com carga. Se D210 abrir, o +5V fica normal, mas o +3V_BAT sobe a ~12 V."),
+         (203.2, 254.0, 1.27,
+          "LED do painel: o fio creme vai ao BRUTO_24V (provável)\\n"
+          "e o vermelho a R203, ligado ao GND."),
+         (317.5, 149.86, 1.27,
+          "CN201 na ordem da etiqueta do gabinete:\\n"
+          "-5 V, +5 V, +3 V BAT, +12 V e GND (fio preto).\\n"
+          "Na placa, o +5V chega ao pino 2 por um jumper de fio."),
      ]},
 ]
 
@@ -498,6 +622,16 @@ for i in range(14):
     meas("CN1.b%d" % (i + 2), "U102.%s" % EPROM_A[i], "U101.%d" % (8 + i))
     if i < 13:
         meas("U103.%s" % EPROM_A[i])
+# 2026-10-03: pull-ups (R30 = /HALT, R29 = /IRQ), /OE da EPROM e das DRAMs no GND, /CLR do U16 no +5 V
+meas("R29.1", "R29.2", "R30.1", "R30.2", "U102.22", "U14.1", "U21.1",
+     "U16.1", "U16.10", "U16.20", "U22.10", "U22.20")
+# dados do teclado: cada pino D do U16 com um pino Y do U22 (8 pares da revista) e o U16 até a EPROM
+meas(*["U16." + d for d in L273_D], *["U22." + y for y in L244_O])
+# CN3 até as saídas Q do U16 (linhas), as entradas do U22 e os pull-ups (colunas)
+for k in range(7):
+    meas("CN3.%d" % (2 * k + 1), "U16." + L273_Q[k])
+for k in range(8):
+    meas("CN3.%d" % (2 * k + 2), "U22." + L244_I[k], "R%d.2" % (52 + k))
 NOT_CONNECTED_MEASURED = [("U104.16", "U101.3", "/INT do VDP e /IRQ do 6809: sem continuidade")]
 
 # ---------------------------------------------------------------------------
@@ -634,8 +768,11 @@ def build_sheet(sh, sheet_uuid):
             else:                                                     # CI: do lado de fora dos campos
                 ys = [fields["Reference"][0][1], vy]
                 rv = (vx, min(ys) - 2.54 if vy_lib > 0 else max(ys) + 2.54, 0, fields["Value"][1][1], False, 1.0)
-            extra_props = [("Revista", ("rev. " + revista) if unit == units[0][0] else "", rv[0], rv[1], rv[2],
-                            rv[3], rv[4] or unit != units[0][0], rv[5])]
+            # placa principal: "rev. ICnn" visível; fonte: campo "Nota" (onde a peça fica), oculto
+            fname = sh.get("field", "Revista")
+            ftext = ("rev. " + revista if fname == "Revista" else revista) if unit == units[0][0] else ""
+            extra_props = [(fname, ftext, rv[0], rv[1], rv[2], rv[3],
+                            rv[4] or unit != units[0][0] or fname != "Revista", rv[5])]
             syms.append(placed(lib, name, ref, value, fp, unit, x, y, pins=[p[2] for p in upins],
                                fields=fields, extra_props=extra_props))
             for (_u, pname, pnum, px, py, ang) in upins:
@@ -671,10 +808,15 @@ def build_sheet(sh, sheet_uuid):
                                  "Value": ((x, y - 3.81), (0, None), False)}, power=True)
             extra.append(blk)
             wire(x, y, x, y + 5.08, k)
-            power_symbol(net, x, y + 5.08, (0, 1), k)       # todos apontam para baixo, longe da bandeira
+            if net in POWER_NETS:
+                power_symbol(net, x, y + 5.08, (0, 1), k)   # todos apontam para baixo, longe da bandeira
+            else:
+                label(net, x, y + 5.08, 270, k)             # tensões brutas da fonte (só PWR_FLAG)
 
     out = ['(kicad_sch', '\t(version 20260101)', '\t(generator "eeschema")', '\t(generator_version "10.0")',
-           '\t(uuid "%s")' % uid("file", sh["file"]), '\t(paper "A3")', title_block(sh["title"], sh["page"]),
+           '\t(uuid "%s")' % uid("file", sh["file"]), '\t(paper "A3")',
+           title_block(sh["title"], sh["page"], sh.get("board", "placa principal"), sh.get("date", DATE),
+                       sh.get("comment3", COMMENT3)),
            '\t(lib_symbols']
     for lib, name in used:
         blk = flatten(lib, name)
@@ -686,13 +828,17 @@ def build_sheet(sh, sheet_uuid):
     return "\n".join(out) + "\n"
 
 
-def title_block(title, page):
-    return ('\t(title_block\n\t\t(title "VET 3000 - placa principal: %s")\n\t\t(date "%s")\n\t\t(rev "0.1")\n'
+COMMENT3 = "Esquema aproximado: medidas no aparelho + Radio-Electronics 1985-86"
+
+
+def title_block(title, page, board="placa principal", date=DATE, comment3=COMMENT3):
+    return ('\t(title_block\n\t\t(title "VET 3000 - %s: %s")\n\t\t(date "%s")\n\t\t(rev "0.1")\n'
             '\t\t(company "Leonardo Roman da Rosa")\n'
             '\t\t(comment 1 "Copyright (C) 2026 Leonardo Roman da Rosa - CERN-OHL-S-2.0")\n'
             '\t\t(comment 2 "Source location: https://github.com/lrrosa/vet3000")\n'
-            '\t\t(comment 3 "Esquema aproximado: medidas no aparelho + Radio-Electronics 1985-86")\n'
-            '\t\t(comment 4 "Gerado por hardware/placa-principal/gen/gen_esquema.py")\n\t)' % (title, DATE))
+            '\t\t(comment 3 "%s")\n'
+            '\t\t(comment 4 "Gerado por hardware/placa-principal/gen/gen_esquema.py")\n\t)'
+            % (board, title, date, comment3))
 
 
 def text_blocks(notes, key):
@@ -709,7 +855,8 @@ def root_sheet(sheet_uuids):
         (25.4, 29.21, 1.27,
          "Primeira versão: parte digital. A parte analógica (PLL, sincronismo, croma, mixer) ainda é um bloco.\\n"
          "O circuito junta as medidas de continuidade feitas no aparelho com o \\\"Build This Video Titler\\\"\\n"
-         "(Radio-Electronics, nov./1985 a mar./1986), de onde o VET deriva (docs/origem.md)."),
+         "(Radio-Electronics, nov./1985 a mar./1986), de onde o VET deriva (docs/origem.md).\\n"
+         "A folha Fonte traz a placa da fonte, levantada das fotos dos dois lados (referências 2xx provisórias)."),
         (25.4, 45.72, 1.27,
          "Cores das redes (classes de rede do projeto, com fios mais grossos):\\n"
          "  azul = todas as ligações da rede foram medidas no aparelho;\\n"
@@ -717,8 +864,8 @@ def root_sheet(sheet_uuids):
          "  cor padrão (rótulo vermelho-escuro, fio fino) = segundo a revista, ainda a medir.\\n"
          "O roteiro ligação a ligação está em continuidade.md."),
         (25.4, 71.12, 1.27,
-         "Referências: U14, U15, U16, U21, U22, U23, D8, D10, D11, R26-R30, R48, R49 e R52-R59 foram lidas na\\n"
-         "placa (fotos). U101-U104, T101, C101-C114, R103-R105, CN2 e #BLK1 são provisórias: as da placa\\n"
+         "Referências: U14, U15, U16, U21, U22, U23, D8, D10, D11, R26-R30, R48, R49, R52-R59 e CN1-CN3 são\\n"
+         "as da placa. U101-U104, T101, C101-C114, R103-R105 e #BLK1 são provisórias: as da placa\\n"
          "não aparecem nas fotos. O campo \\\"rev.\\\" de cada peça dá o equivalente na revista."),
         (25.4, 91.44, 1.27,
          "Diferenças já conhecidas em relação à revista: EPROM 27128 (16 KB em $C000); /IRQ no CN1 e /NMI\\n"
@@ -746,11 +893,15 @@ def root_sheet(sheet_uuids):
     return "\n".join(out) + "\n"
 
 
+PHOTO_SHEETS = {sh["name"] for sh in SHEETS if sh.get("source") == "fotos"}
+
+
 def net_status(net):
     pins = [p for p, _n, _s in all_pins[net]]
     m = [p for p in pins if p in MEASURED]
     if not m:
-        return "revista"
+        # a fonte não está na revista: as ligações dela vêm das fotos da placa
+        return "fotos" if all(s in PHOTO_SHEETS for _p, _n, s in all_pins[net]) else "revista"
     return "medido" if len(m) == len(pins) else "parcial"
 
 
@@ -779,7 +930,7 @@ def write_project():
         if net in POWER_NETS:
             continue
         st = net_status(net)
-        if st == "revista":
+        if st in ("revista", "fotos"):
             continue
         pattern = net
         pats.append({"netclass": "Medido" if st == "medido" else "Parcial", "pattern": pattern})
@@ -799,13 +950,13 @@ def pin_text(name):
 
 
 def write_checklist():
-    L = ["# Roteiro de continuidade da placa principal", "",
+    L = ["# Roteiro de continuidade da placa principal e da fonte", "",
          "Gerado por `gen/gen_esquema.py`. Cada rede lista os pinos ligados a ela no esquema. **✓** = ligação",
-         "medida no aparelho; **·** = tirada da revista, ainda a medir. Pinos de U101-U104 (6809, EPROM,",
-         "RAM e VDP) usam a numeração do CI; as referências provisórias estão explicadas no",
-         "[README](README.md).", "",
+         "medida no aparelho; **·** = tirada da revista, ainda a medir. Na fonte (situação `fotos`), **·** =",
+         "ligação levantada das fotos da placa, ainda a medir. Pinos de U101-U104 (6809, EPROM, RAM e VDP)",
+         "usam a numeração do CI; as referências provisórias estão explicadas no [README](README.md).", "",
          "| Rede | Situação | Pinos |", "|---|---|---|"]
-    order = {"medido": 0, "parcial": 1, "revista": 2}
+    order = {"medido": 0, "parcial": 1, "revista": 2, "fotos": 3}
 
     def natkey(n):
         return [int(t) if t.isdigit() else t for t in re.split(r"(\d+)", n)]
@@ -814,21 +965,30 @@ def write_checklist():
         cells = ", ".join("%s %s%s" % ("✓" if p in MEASURED else "·", p, " (%s)" % pin_text(pn)
                                         if pn and not pn.startswith("Pin_") else "") for p, pn, _s in pins)
         L.append("| `%s` | %s | %s |" % (net, net_status(net), cells))
-    L += ["", "## Alimentação", "", "| Rede | Pinos medidos | Pinos segundo a revista |", "|---|---|---|"]
+    L += ["", "## Alimentação", "",
+          "| Rede | Pinos medidos | Pinos segundo a revista | Pinos segundo as fotos (fonte) |", "|---|---|---|---|"]
     for net in POWER_NETS:
         if net not in all_pins:
             continue
         pins = sorted(all_pins[net], key=lambda p: natkey(p[0]))
         m = [p for p, _n, _s in pins if p in MEASURED]
-        r = [p for p, _n, _s in pins if p not in MEASURED]
-        L.append("| `%s` | %s | %s |" % (net, ", ".join(m) or "—", ", ".join(r) or "—"))
+        r = [p for p, _n, s in pins if p not in MEASURED and s not in PHOTO_SHEETS]
+        f = [p for p, _n, s in pins if p not in MEASURED and s in PHOTO_SHEETS]
+        L.append("| `%s` | %s | %s | %s |" % (net, ", ".join(m) or "—", ", ".join(r) or "—", ", ".join(f) or "—"))
     L += ["", "## Ausência de ligação medida", ""]
     for a, b, txt in NOT_CONNECTED_MEASURED:
         L.append("- %s × %s: %s." % (a, b, txt))
     L += ["", "## Peças", "", "| Ref. | Valor | Revista | Referência | Folha |", "|---|---|---|---|---|"]
     orig = {"foto": "lida na placa", "prov": "provisória"}
     for ref, value, revista, origem, sheet in sorted(components, key=lambda c: natkey(c[0])):
-        L.append("| %s | %s | %s | %s | %s |" % (ref, value, revista, orig[origem], sheet))
+        if sheet not in PHOTO_SHEETS:
+            L.append("| %s | %s | %s | %s | %s |" % (ref, value, revista, orig[origem], sheet))
+    L += ["", "## Peças da fonte", "",
+          "A placa da fonte não tem serigrafia de componentes: as referências são todas provisórias.", "",
+          "| Ref. | Valor | Onde fica |", "|---|---|---|"]
+    for ref, value, nota, _origem, sheet in sorted(components, key=lambda c: natkey(c[0])):
+        if sheet in PHOTO_SHEETS:
+            L.append("| %s | %s | %s |" % (ref, value, nota))
     open(os.path.join(OUTDIR, "continuidade.md"), "w", encoding="utf-8", newline="\n").write("\n".join(L) + "\n")
 
 

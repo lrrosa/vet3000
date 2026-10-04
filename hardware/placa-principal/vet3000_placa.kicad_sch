@@ -27,7 +27,7 @@
 		)
 		(uuid "32a19804-d371-56e4-859c-e5c4dec30444")
 	)
-	(text "Primeira versão: parte digital. A parte analógica (PLL, sincronismo, croma, mixer) ainda é um bloco.\nO circuito junta as medidas de continuidade feitas no aparelho com o \"Build This Video Titler\"\n(Radio-Electronics, nov./1985 a mar./1986), de onde o VET deriva (docs/origem.md)."
+	(text "Primeira versão: parte digital. A parte analógica (PLL, sincronismo, croma, mixer) ainda é um bloco.\nO circuito junta as medidas de continuidade feitas no aparelho com o \"Build This Video Titler\"\n(Radio-Electronics, nov./1985 a mar./1986), de onde o VET deriva (docs/origem.md).\nA folha Fonte traz a placa da fonte, levantada das fotos dos dois lados (referências 2xx provisórias)."
 		(exclude_from_sim no)
 		(at 25.4 29.21 0)
 		(effects
@@ -49,7 +49,7 @@
 		)
 		(uuid "bcb0d228-2de9-5870-ab7a-d35c8db0b01a")
 	)
-	(text "Referências: U14, U15, U16, U21, U22, U23, D8, D10, D11, R26-R30, R48, R49 e R52-R59 foram lidas na\nplaca (fotos). U101-U104, T101, C101-C114, R103-R105, CN2 e #BLK1 são provisórias: as da placa\nnão aparecem nas fotos. O campo \"rev.\" de cada peça dá o equivalente na revista."
+	(text "Referências: U14, U15, U16, U21, U22, U23, D8, D10, D11, R26-R30, R48, R49, R52-R59 e CN1-CN3 são\nas da placa. U101-U104, T101, C101-C114, R103-R105 e #BLK1 são provisórias: as da placa\nnão aparecem nas fotos. O campo \"rev.\" de cada peça dá o equivalente na revista."
 		(exclude_from_sim no)
 		(at 25.4 71.12 0)
 		(effects
@@ -272,6 +272,47 @@
 			(project "vet3000_placa"
 				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1"
 					(page "6")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 317.5 127)
+		(size 71.12 22.86)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "f81ca1a6-4839-5427-98e0-83676e107a95")
+		(property "Sheetname" "Fonte"
+			(at 317.5 126.24 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "fonte.kicad_sch"
+			(at 317.5 150.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "vet3000_placa"
+				(path "/5e7a3000-0c4a-4e0c-9a11-00000000b0a1"
+					(page "7")
 				)
 			)
 		)

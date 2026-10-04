@@ -74,7 +74,7 @@ Abaixo, "revista" é o projeto da *Radio-Electronics*, com os números de CI da 
 | Bobina | **L1** 56 µH | **L1** | mesmo nome |
 | Trimmers capacitivos | C12 (VCO), C27 (croma) | **CV1** junto ao MC4024, **CV2** junto ao XTAL1 | mesmas posições |
 | Trimpots | R29, R32, R46 | RV1, RV2, RV3 | três em ambos |
-| Fonte | 7812, 7805, 79L05, bateria de lítio de 3 V | placa separada: 7805, saídas +12 V, −5 V e +3 V BAT | mesmas tensões |
+| Fonte | 7812, 7805, 79L05, bateria de lítio de 3 V | placa separada: 7805, 7812 e 7905 (com bomba de carga), saídas +12 V, −5 V e +3 V BAT | mesmas tensões |
 
 Os designadores dos componentes passivos não seguem a revista: o resistor de 680 Ω do oscilador de
 croma, R23 na revista, é o **R51** no VET. Um capacitor ao lado do cristal se chama C65 nas duas
@@ -325,7 +325,8 @@ e pino 1 (entrada de croma, pelo filtro com L1).
 - o conjunto de CIs, o cristal de 3,579545 MHz e os ajustes (2 trimmers e 3 trimpots) correspondem aos da revista;
 - o mapa de memória e de E/S e o esquema de decodificação são os mesmos;
 - o CN1 repete a ordem dos pinos da porta de expansão;
-- a matriz do teclado é a da revista, ampliada;
+- a matriz do teclado é a da revista, ampliada, e o 74LS273 e o 74LS244 ligam D0-D7 aos mesmos pinos
+  da Fig. 14 (medido);
 - registradores do VDP, sequência de cores, comandos, abertura e fonte coincidem com os do MFJ-1480B;
 - a revista especifica 10,738635 MHz no modo interno e o 6809 alimentado pelo CPUCLK do VDP;
 - U19 é um CA3126 (ligações dos pinos 5, 6, 9 e 12 medidas);
@@ -359,6 +360,12 @@ e pino 1 (entrada de croma, pelo filtro com L1).
    (/IRQ) do 6809, como na revista (no Fig. 10 o pino 16 nem aparece, e no Fig. 14 o /IRQ vai
    direto ao +5 V). O driver do MAME 0.289 supõe essa ligação, e o patch a remove. A demo, que esperava o quadro com `SYNC`, passou a
    ler o status (ver [programando-cartuchos.md](programando-cartuchos.md#4-sincronismo-com-o-quadro-sem-vetores)).
+7. **Teclado, pull-ups e `/OE`.** Feito em 03/10/2026: os pinos de dados do U16 (74LS273) e do U22
+   (74LS244) vão a D0-D7 exatamente como na Fig. 14 (cada pino D do U16 ligado a um pino Y do U22 e
+   à EPROM), e o `/CLR` do U16 vai ao +5 V. R30 é o pull-up do
+   `/HALT` e R29 o do `/IRQ`. O `/OE` da EPROM e os das duas µPD41416 vão ao GND, como na revista.
+   O conector do teclado (CN3) liga as trilhas das membranas às saídas Q do U16, às entradas do U22 e
+   aos *pull-ups* R52-R59, na ordem do esquema.
 
 ## 12. Um esquema do VET 3000 a partir da revista
 
