@@ -12,3 +12,4 @@ hardware/placa-principal/*-backups/
 hardware/placa-principal/fp-info-cache
 hardware/placa-principal/*.rpt
 hardware/placa-principal/*.net
+hardware/*/.history/
