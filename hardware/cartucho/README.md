@@ -19,6 +19,7 @@ Copyright © 2026 Leonardo Roman da Rosa. Hardware aberto sob a **CERN-OHL-S-2.0
 | `fabricacao/vet3000_cartucho_gerbers.zip` | Gerbers + furação para enviar à fábrica |
 | `fabricacao/vet3000_cartucho_esquematico.pdf` | Esquemático em PDF |
 | `fabricacao/vet3000_cartucho_bom.csv` | Lista de materiais |
+| `fiacao-prototipo.svg` | Diagrama de fiação para montar em placa protótipo de uma face (gerado por `gen/gen_fiacao.py`, conferido contra o netlist) |
 | `gen/` | Scripts que geram tudo (ver "Regenerar") |
 
 Verificação: ERC sem violações; DRC sem violações, sem pads desconectados e com paridade
@@ -104,6 +105,7 @@ python gen/gen_schematic.py            # esquemático
 kicad-cli sch erc vet3000_cartucho.kicad_sch
 kicad-cli sch export netlist --format kicadsexpr -o vet3000_cartucho.net vet3000_cartucho.kicad_sch
 "C:/Program Files/KiCad/10.0/bin/python.exe" gen/gen_pcb.py   # ATENÇÃO: recria a placa sem trilhas
+python gen/gen_fiacao.py               # diagrama de fiação da placa protótipo (lê o .net)
 ```
 
 Roteamento (caminhos **sem espaços** para o Freerouting):
