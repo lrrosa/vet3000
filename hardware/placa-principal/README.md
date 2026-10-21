@@ -59,35 +59,35 @@ unidades não posicionadas e pinos de entrada em unidades não posicionadas (por
 
 ## Medido e a verificar
 
-O roteiro completo está em [continuidade.md](continuidade.md): 38 redes totalmente medidas, 6
-parcialmente e 39 só da revista, mais 9 redes internas da fonte, levantadas das fotos. Pontos que
+O roteiro completo está em [continuidade.md](continuidade.md): 40 redes totalmente medidas, 6
+parcialmente e 37 só da revista, mais 9 redes internas da fonte, levantadas das fotos. Pontos que
 mais pedem conferência:
 
-1. **Seleção do teclado.** O clock do U16 (pino 11) e os enables do U22 (pinos 1 e 19) até o U15
-   (pinos 10 e 9).
-2. **D10/R48 e D11/R49.** A atribuição à ROM (D10/R48) e à E/S (D11/R49) segue a posição na placa.
+1. **D10/R48 e D11/R49.** A atribuição à ROM (D10/R48) e à E/S (D11/R49) segue a posição na placa.
    O CN1 a11 foi medido no pino 6 do U15, antes do diodo; na revista a porta usava o pino 15.
-3. **`/OE` da RAM** pela porta NAND do U23 (`/HALT` com `R/W`), segundo a revista.
-4. **U14 e U21.** Qual DRAM recebe RD0-RD3 e qual recebe RD4-RD7.
-5. **Reset.** R28 (5k1) com um eletrolítico de 22 µF (C102, provavelmente o "C2?" ao lado do D8);
+2. **`/OE` da RAM** pela porta NAND do U23 (`/HALT` com `R/W`), segundo a revista.
+3. **U14 e U21.** Qual DRAM recebe RD0-RD3 e qual recebe RD4-RD7.
+4. **Reset.** R28 (5k1) com um eletrolítico de 22 µF (C102, provavelmente o "C2?" ao lado do D8);
    T101 e C101 do RESET/SYNC do VDP.
-6. **Desacoplamento.** Valores e posições da revista.
+5. **Desacoplamento.** Valores e posições da revista.
 
 Já confirmados: todo o barramento de endereços e de dados entre CPU, EPROM, RAM, VDP, CN1 e os CIs
 do teclado (U16 e U22, com os mesmos pinos da revista), as seleções do 74LS139 que chegam ao CN1 e a
 ausência de ligação entre o `/INT` do VDP e o `/IRQ` do 6809. Também medidos: R30 é o pull-up do
-`/HALT` e R29 o do `/IRQ`; o `/OE` da EPROM (pino 22) e os das duas µPD41416 (pino 1) vão ao GND; o
-`/CLR` do U16 vai ao +5 V; e o conector do teclado, CN3, liga cada trilha ao U16, ao U22 e aos
-pull-ups R52-R59. No CN3, o pino 1 fica embaixo à esquerda: os ímpares (fileira de baixo) são a
-membrana inferior (linhas) e os pares (fileira de cima), a superior (colunas).
+`/HALT` e R29 o do `/IRQ`; o `/OE` da EPROM (pino 22) e os das duas µPD41416 (pino 1) vão ao GND; e
+o teclado inteiro. O `/CLR` do U16 vai ao +5 V, a seleção vem do U15 (pino 10 ao clock do U16,
+pino 9 aos enables do U22), e o conector CN3 liga cada trilha ao U16, ao U22 e aos pull-ups R52-R59.
+No CN3, o pino 1 fica embaixo à esquerda: os ímpares (fileira de baixo) são a membrana inferior
+(linhas) e os pares (fileira de cima), a superior (colunas).
 
-O CN2, entrada da fonte na placa principal, está desenhado com a mesma ordem de pinos do CN201 da
-fonte (a da etiqueta do gabinete), ainda não conferida no CN2.
+O CN2, entrada da fonte na placa principal, tem a ordem inversa da do CN201 da placa da fonte: GND
+no pino 1, depois +12 V, +3 V BAT, +5 V e −5 V no pino 5 (medido).
 
 ## Fonte
 
 A fonte fica numa placa separada, sem serigrafia de componentes, ligada ao CN2 da placa principal por
 um conector de 5 vias: −5 V, +5 V, +3 V BAT, +12 V e GND (fio preto), na ordem da etiqueta do gabinete.
+No CN2 a ordem é a inversa: GND no pino 1 e −5 V no pino 5.
 A folha `fonte.kicad_sch` foi levantada das fotos dos dois lados da placa e ainda não tem ligações
 medidas.
 
@@ -111,13 +111,28 @@ medidas.
 - **LED do painel.** Provavelmente alimentado pelo `BRUTO_24V`, com R203 (2k4) para o GND.
 
 A tabela [Peças da fonte](continuidade.md#peças-da-fonte) do roteiro diz onde fica cada peça na placa
-e o valor lido. Falta a marcação do D210 (só se lê "1N") e a medição das ligações.
+e o valor lido. Falta a medição das ligações.
+
+Neste aparelho, o D210 (1N4148) estava aberto e foi trocado, junto com D207, D208, C203, C205 e R201.
+Depois do conserto, sem a placa principal e sem pilhas:
+
+| Saída | Carga de teste | Medido |
+|---|---|---|
+| +5 V | 50 Ω | 5,04 V |
+| −5 V | 100 Ω | −5,06 V (sem carga, −6,57 V) |
+| +3 V BAT | nenhuma | 5,65 V |
+
+Sem carga, o C214 (22 µF) guarda a tensão de testes anteriores e só descarrega pela entrada do
+multímetro: a leitura do +3 V BAT começou em 9,5 V e desceu devagar até os 5,65 V. Com a fonte ligada
+à placa principal, o VET liga e mostra a abertura.
 
 **Ao testar a fonte sozinha, ponha uma carga no +5 V.** A corrente de R201, cerca de 60 mA, passa por
 D210 e entra na linha de +5 V. Com a placa principal ligada, ela some no consumo da placa. Sem carga,
 não tem para onde ir, porque o 7805 só fornece corrente (não absorve), e a linha de +5 V sobe para uns
-11 V. Um resistor de 100 Ω (½ W) entre +5 V e GND basta para ver a tensão regulada. Se D210 abrir,
-acontece o contrário: o +5 V fica normal, mas o +3 V BAT sobe para uns 12 V e queima a RAM.
+11 V. Para ver a tensão regulada, a carga tem que puxar mais do que a corrente do R201: um resistor
+de 47 Ω (1 W), ou dois de 100 Ω em paralelo, entre +5 V e GND. Com um só de 100 Ω (50 mA) a linha
+ainda fica em uns 5,7 V. Se D210 abrir, acontece o contrário: o +5 V fica normal, mas o +3 V BAT
+sobe para uns 12 V e queima a RAM.
 
 Pontos fracos do projeto: sem carga, C203 e C205 (25 V) trabalham acima do limite e deveriam ser de
 35 V; R201 dissipa cerca de 0,5 W e precisa ser de pelo menos 1 W.

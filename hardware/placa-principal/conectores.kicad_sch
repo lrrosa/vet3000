@@ -2267,7 +2267,7 @@
 		)
 		(uuid "3e13cbc2-faf0-5b50-821f-1f342b83cb9d")
 	)
-	(text "Alimentação: vem da placa da fonte (CN201, folha Fonte) pelo CN2, de 5 vias:\n-5V, +5V, +3V_BAT, +12V e GND, na ordem da etiqueta (não medida no CN2).\n+3V_BAT alimenta a RAM (pino 28): cerca de 5 V com o aparelho ligado,\n3 V da bateria desligado (OU com os diodos D207 e D208 da fonte).\n+12 V e -5 V servem sobretudo à parte analógica."
+	(text "Alimentação: vem da placa da fonte (CN201, folha Fonte) pelo CN2, de 5 vias.\nO CN2 tem a ordem inversa da do CN201: GND no pino 1 e -5V no pino 5 (medido).\n+3V_BAT alimenta a RAM (pino 28): cerca de 5 V com o aparelho ligado,\n3 V da bateria desligado (OU com os diodos D207 e D208 da fonte).\n+12 V e -5 V servem sobretudo à parte analógica."
 		(exclude_from_sim no)
 		(at 203.2 101.6 0)
 		(effects
@@ -3627,7 +3627,7 @@
 			)
 		)
 	)
-	(global_label "-5V"
+	(global_label "GND"
 		(shape passive)
 		(at 335.28 101.6 180)
 		(fields_autoplaced yes)
@@ -3649,7 +3649,7 @@
 			)
 		)
 	)
-	(global_label "+5V"
+	(global_label "+12V"
 		(shape passive)
 		(at 335.28 104.14 180)
 		(fields_autoplaced yes)
@@ -3693,7 +3693,7 @@
 			)
 		)
 	)
-	(global_label "+12V"
+	(global_label "+5V"
 		(shape passive)
 		(at 335.28 109.22 180)
 		(fields_autoplaced yes)
@@ -3715,7 +3715,7 @@
 			)
 		)
 	)
-	(global_label "GND"
+	(global_label "-5V"
 		(shape passive)
 		(at 335.28 111.76 180)
 		(fields_autoplaced yes)

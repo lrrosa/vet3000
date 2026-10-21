@@ -1928,7 +1928,7 @@
 		)
 		(uuid "039689fc-7d13-5683-a375-adf16c4b0aea")
 	)
-	(text "Escrita em $8002: U16 guarda o byte; a linha n recebe o bit n-1 (ativo em 0). Leitura: U22 põe as\n8 colunas no barramento (bit m-1 = coluna m, ativo em 0), com os pull-ups R52-R59. Isso foi medido\npelo lado do teclado (docs/teclado.md). Os pinos de U16/U22 são os da revista (Fig. 14).\nMedido: U16 e U22 até D0-D7 e até o CN3, os pull-ups R52-R59 e o /CLR (pino 1) do U16 no +5 V.\nFalta: o clock do U16 (pino 11) e os enables do U22 (pinos 1 e 19) até o U15."
+	(text "Escrita em $8002: U16 guarda o byte; a linha n recebe o bit n-1 (ativo em 0). Leitura: U22 põe as\n8 colunas no barramento (bit m-1 = coluna m, ativo em 0), com os pull-ups R52-R59. Isso foi medido\npelo lado do teclado (docs/teclado.md). Os pinos de U16/U22 são os da revista (Fig. 14).\nMedido: U16 e U22 até D0-D7, até o CN3 e até o U15 (pinos 10 e 9), os pull-ups R52-R59 e o\n/CLR (pino 1) do U16 no +5 V."
 		(exclude_from_sim no)
 		(at 25.4 26.67 0)
 		(effects

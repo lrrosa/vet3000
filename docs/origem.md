@@ -362,10 +362,10 @@ e pino 1 (entrada de croma, pelo filtro com L1).
    ler o status (ver [programando-cartuchos.md](programando-cartuchos.md#4-sincronismo-com-o-quadro-sem-vetores)).
 7. **Teclado, pull-ups e `/OE`.** Feito em 03/10/2026: os pinos de dados do U16 (74LS273) e do U22
    (74LS244) vão a D0-D7 exatamente como na Fig. 14 (cada pino D do U16 ligado a um pino Y do U22 e
-   à EPROM), e o `/CLR` do U16 vai ao +5 V. R30 é o pull-up do
-   `/HALT` e R29 o do `/IRQ`. O `/OE` da EPROM e os das duas µPD41416 vão ao GND, como na revista.
-   O conector do teclado (CN3) liga as trilhas das membranas às saídas Q do U16, às entradas do U22 e
-   aos *pull-ups* R52-R59, na ordem do esquema.
+   à EPROM), e o `/CLR` do U16 vai ao +5 V. A seleção vem do U15 (74LS139): pino 10 no clock do
+   U16, pino 9 nos enables do U22. R30 é o pull-up do `/HALT` e R29 o do `/IRQ`. O `/OE` da EPROM e
+   os das duas µPD41416 vão ao GND, como na revista. O conector do teclado (CN3) liga as trilhas das
+   membranas às saídas Q do U16, às entradas do U22 e aos *pull-ups* R52-R59, na ordem do esquema.
 
 ## 12. Um esquema do VET 3000 a partir da revista
 

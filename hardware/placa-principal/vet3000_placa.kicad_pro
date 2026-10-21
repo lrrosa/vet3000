@@ -249,6 +249,14 @@
         "pattern": "KB_L7"
       },
       {
+        "netclass": "Medido",
+        "pattern": "KB_RD_N"
+      },
+      {
+        "netclass": "Medido",
+        "pattern": "KB_WR_N"
+      },
+      {
         "netclass": "Parcial",
         "pattern": "ROM_SEL_N"
       },

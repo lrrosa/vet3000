@@ -14,7 +14,9 @@ superior. Todas as trilhas foram medidas até os CIs e os *pull-ups*.
   *pull-ups* R52-R59.
 
 Os dois CIs seguem a pinagem da revista: os pinos de dados do 74LS273 e do 74LS244, medidos até o
-barramento, vão a D0-D7 como no esquema da *Radio-Electronics*, e o `/CLR` do 74LS273 vai ao +5 V. Ver o [esquema da placa](../hardware/placa-principal/README.md).
+barramento, vão a D0-D7 como no esquema da *Radio-Electronics*, e o `/CLR` do 74LS273 vai ao +5 V.
+A seleção também é a da revista: o pino 10 do 74LS139 (U15) dá o clock do 74LS273 e o pino 9
+habilita o 74LS244. Ver o [esquema da placa](../hardware/placa-principal/README.md).
 
 Tudo é **ativo em 0**. Para ler a linha *n* (1-7), escreva em `$8002` um byte com o bit *n−1* em 0 e
 os demais em 1. Depois leia `$8002`: um bit em 0 indica tecla apertada naquela coluna.

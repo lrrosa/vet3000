@@ -320,8 +320,8 @@ CN1.update({"b%d" % (i + 2): "A%d" % i for i in range(14)})
 CN3 = {str(2 * i + 1): "KB_L%d" % (i + 1) for i in range(7)}
 CN3["15"] = None                                                  # trilha 8 inferior: sem ligação
 CN3.update({str(2 * i + 2): "KB_C%d" % (i + 1) for i in range(8)})
-# CN2: entrada da fonte na placa principal (mesma ordem do CN201 da folha Fonte, não medida no CN2)
-CN2 = {"1": "-5V", "2": "+5V", "3": "+3V_BAT", "4": "+12V", "5": "GND"}
+# CN2: entrada da fonte na placa principal, na ordem inversa da do CN201 da folha Fonte (medido)
+CN2 = {"1": "GND", "2": "+12V", "3": "+3V_BAT", "4": "+5V", "5": "-5V"}
 
 
 def two(a, b):
@@ -434,8 +434,8 @@ SHEETS = [
           "Escrita em $8002: U16 guarda o byte; a linha n recebe o bit n-1 (ativo em 0). Leitura: U22 põe as\\n"
           "8 colunas no barramento (bit m-1 = coluna m, ativo em 0), com os pull-ups R52-R59. Isso foi medido\\n"
           "pelo lado do teclado (docs/teclado.md). Os pinos de U16/U22 são os da revista (Fig. 14).\\n"
-          "Medido: U16 e U22 até D0-D7 e até o CN3, os pull-ups R52-R59 e o /CLR (pino 1) do U16 no +5 V.\\n"
-          "Falta: o clock do U16 (pino 11) e os enables do U22 (pinos 1 e 19) até o U15."),
+          "Medido: U16 e U22 até D0-D7, até o CN3 e até o U15 (pinos 10 e 9), os pull-ups R52-R59 e o\\n"
+          "/CLR (pino 1) do U16 no +5 V."),
          (254.0, 96.52, 1.27,
           "CN3: conector 2x8 das duas membranas (medido).\\n"
           "Pino 1 embaixo à esquerda. Ímpares (fileira de baixo):\\n"
@@ -469,8 +469,8 @@ SHEETS = [
           "Lido de a17 para a1 e de b17 para b1, repete a porta de expansão da revista (Fig. 19).\\n"
           "a16 = /E CLK (U23), a14 = XROM (Y1), a11 = I/O SEL (Y2), a10 = ROM SEL (/CE da EPROM)."),
          (203.2, 101.6, 1.27,
-          "Alimentação: vem da placa da fonte (CN201, folha Fonte) pelo CN2, de 5 vias:\\n"
-          "-5V, +5V, +3V_BAT, +12V e GND, na ordem da etiqueta (não medida no CN2).\\n"
+          "Alimentação: vem da placa da fonte (CN201, folha Fonte) pelo CN2, de 5 vias.\\n"
+          "O CN2 tem a ordem inversa da do CN201: GND no pino 1 e -5V no pino 5 (medido).\\n"
           "+3V_BAT alimenta a RAM (pino 28): cerca de 5 V com o aparelho ligado,\\n"
           "3 V da bateria desligado (OU com os diodos D207 e D208 da fonte).\\n"
           "+12 V e -5 V servem sobretudo à parte analógica."),
@@ -549,8 +549,8 @@ SHEETS = [
           "cerâmico, logo abaixo do 7905", "prov"),
          ("R201", "Device", "R", "100", FP["R"], [(1, 45.72, 233.68)], two("BRUTO_12V", "BKP_ALIM"),
           "deitado, ao lado do 2200uF 16V", "prov"),
-         ("D210", "Diode", "1N4148", "1N? (vidro)", FP["D"], [(1, 78.74, 226.06)], two("+5V", "BKP_ALIM"),
-          "vidro vermelho, em pé ao lado do cerâmico C211", "prov"),
+         ("D210", "Diode", "1N4148", "1N4148", FP["D"], [(1, 78.74, 226.06)], two("+5V", "BKP_ALIM"),
+          "vidro, em pé ao lado do cerâmico C211", "prov"),
          ("C213", "Device", "C_Polarized", "1000uF 25V", FP["CP10"], [(1, 109.22, 233.68)], two("BKP_ALIM", "GND"),
           "azul grande, central", "prov"),
          ("D207", "Diode", "1N4148", "1N4148", FP["D"], [(1, 147.32, 226.06)], two("+3V_BAT", "BKP_ALIM"),
@@ -593,14 +593,15 @@ SHEETS = [
           "BKP_ALIM uma queda de diodo acima do +5V (~5,6 V), e assim a RAM recebe ~5 V. A corrente de R201\\n"
           "(~60 mA, ~0,5 W no resistor) passa por D210 e entra na linha de +5V. Sem carga no +5V (placa principal\\n"
           "desligada), ela não tem para onde ir, porque o 7805 não absorve corrente: a linha sobe a ~11 V.\\n"
-          "Teste a fonte com carga. Se D210 abrir, o +5V fica normal, mas o +3V_BAT sobe a ~12 V."),
+          "Teste com carga acima de ~70 mA (47 ohms). Se D210 abrir, o +5V fica normal e o +3V_BAT vai a ~12 V."),
          (203.2, 254.0, 1.27,
           "LED do painel: o fio creme vai ao BRUTO_24V (provável)\\n"
           "e o vermelho a R203, ligado ao GND."),
          (317.5, 149.86, 1.27,
           "CN201 na ordem da etiqueta do gabinete:\\n"
           "-5 V, +5 V, +3 V BAT, +12 V e GND (fio preto).\\n"
-          "Na placa, o +5V chega ao pino 2 por um jumper de fio."),
+          "Na placa, o +5V chega ao pino 2 por um jumper de fio.\\n"
+          "No CN2 da placa principal, a ordem é a inversa."),
      ]},
 ]
 
@@ -632,6 +633,8 @@ for k in range(7):
     meas("CN3.%d" % (2 * k + 1), "U16." + L273_Q[k])
 for k in range(8):
     meas("CN3.%d" % (2 * k + 2), "U22." + L244_I[k], "R%d.2" % (52 + k))
+# seleção do teclado pelo U15 (2ª metade) e ordem dos pinos do CN2
+meas("U15.10", "U16.11", "U15.9", "U22.1", "U22.19", "CN2.1", "CN2.2", "CN2.3", "CN2.4", "CN2.5")
 NOT_CONNECTED_MEASURED = [("U104.16", "U101.3", "/INT do VDP e /IRQ do 6809: sem continuidade")]
 
 # ---------------------------------------------------------------------------

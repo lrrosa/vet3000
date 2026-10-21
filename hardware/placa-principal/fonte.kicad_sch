@@ -3254,7 +3254,7 @@
 		)
 		(uuid "2fa71e3d-8ecb-5264-8119-64299fca2b1a")
 	)
-	(text "Backup da RAM (+3V_BAT): ligado, vem de BKP_ALIM por D207; desligado, das pilhas por D208. D210 prende\nBKP_ALIM uma queda de diodo acima do +5V (~5,6 V), e assim a RAM recebe ~5 V. A corrente de R201\n(~60 mA, ~0,5 W no resistor) passa por D210 e entra na linha de +5V. Sem carga no +5V (placa principal\ndesligada), ela não tem para onde ir, porque o 7805 não absorve corrente: a linha sobe a ~11 V.\nTeste a fonte com carga. Se D210 abrir, o +5V fica normal, mas o +3V_BAT sobe a ~12 V."
+	(text "Backup da RAM (+3V_BAT): ligado, vem de BKP_ALIM por D207; desligado, das pilhas por D208. D210 prende\nBKP_ALIM uma queda de diodo acima do +5V (~5,6 V), e assim a RAM recebe ~5 V. A corrente de R201\n(~60 mA, ~0,5 W no resistor) passa por D210 e entra na linha de +5V. Sem carga no +5V (placa principal\ndesligada), ela não tem para onde ir, porque o 7805 não absorve corrente: a linha sobe a ~11 V.\nTeste com carga acima de ~70 mA (47 ohms). Se D210 abrir, o +5V fica normal e o +3V_BAT vai a ~12 V."
 		(exclude_from_sim no)
 		(at 25.4 256.54 0)
 		(effects
@@ -3276,7 +3276,7 @@
 		)
 		(uuid "da13dd0f-e6f5-5a18-9020-21d84342c56e")
 	)
-	(text "CN201 na ordem da etiqueta do gabinete:\n-5 V, +5 V, +3 V BAT, +12 V e GND (fio preto).\nNa placa, o +5V chega ao pino 2 por um jumper de fio."
+	(text "CN201 na ordem da etiqueta do gabinete:\n-5 V, +5 V, +3 V BAT, +12 V e GND (fio preto).\nNa placa, o +5V chega ao pino 2 por um jumper de fio.\nNo CN2 da placa principal, a ordem é a inversa."
 		(exclude_from_sim no)
 		(at 317.5 149.86 0)
 		(effects
@@ -7345,7 +7345,7 @@
 				)
 			)
 		)
-		(property "Value" "1N? (vidro)"
+		(property "Value" "1N4148"
 			(at 78.74 228.6 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7388,7 +7388,7 @@
 				(hide yes)
 			)
 		)
-		(property "Nota" "vidro vermelho, em pé ao lado do cerâmico C211"
+		(property "Nota" "vidro, em pé ao lado do cerâmico C211"
 			(at 78.74 231.14 0)
 			(show_name no)
 			(do_not_autoplace no)

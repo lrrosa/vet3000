@@ -44,6 +44,8 @@ usam a numeração do CI; as referências provisórias estão explicadas no [REA
 | `KB_L5` | medido | ✓ CN3.9, ✓ U16.6 (Q2) |
 | `KB_L6` | medido | ✓ CN3.11, ✓ U16.15 (Q5) |
 | `KB_L7` | medido | ✓ CN3.13, ✓ U16.9 (Q3) |
+| `KB_RD_N` | medido | ✓ U15.9 (O3), ✓ U22.1 (OEa), ✓ U22.19 (OEb) |
+| `KB_WR_N` | medido | ✓ U15.10 (O2), ✓ U16.11 (Cp) |
 | `XROM_N` | medido | ✓ CN1.a14, ✓ U15.5 (O1) |
 | `A1` | parcial | ✓ CN1.b3, · U15.13 (A1), ✓ U101.9 (A1), ✓ U102.9 (A1), ✓ U103.9 (A1) |
 | `E_CLK_N` | parcial | ✓ CN1.a16, ✓ U15.1 (E), · U23.11 |
@@ -58,8 +60,6 @@ usam a numeração do CI; as referências provisórias estão explicadas no [REA
 | `CSW_N` | revista | · U15.12 (O0), · U104.14 (/CSW) |
 | `E` | revista | · U23.13, · U101.34 (E) |
 | `IO_EN_N` | revista | · D11.2 (A), · R49.2, · U15.15 (E) |
-| `KB_RD_N` | revista | · U15.9 (O3), · U22.1 (OEa), · U22.19 (OEb) |
-| `KB_WR_N` | revista | · U15.10 (O2), · U16.11 (Cp) |
 | `RAM_CS_N` | revista | · U15.4 (O0), · U103.20 (/CS1) |
 | `RD_N` | revista | · U23.3, · U103.22 (/OE) |
 | `RESET_N` | revista | · C102.1, · D8.1 (K), · R27.2, · R28.2, · U101.37 (/RESET) |
@@ -104,11 +104,11 @@ usam a numeração do CI; as referências provisórias estão explicadas no [REA
 
 | Rede | Pinos medidos | Pinos segundo a revista | Pinos segundo as fotos (fonte) |
 |---|---|---|---|
-| `+5V` | CN1.a15, R29.1, R30.1, U16.1, U16.20, U22.20, U101.2, U101.4, U101.7, U101.33, U101.36, U102.1, U102.27, U102.28, U104.33 | C106.1, C107.1, C108.1, C109.1, C110.1, C111.1, C112.1, C113.1, C114.1, CN2.2, R28.1, R48.1, R49.1, R52.1, R53.1, R54.1, R55.1, R56.1, R57.1, R58.1, R59.1, U14.9, U15.16, U21.9, U23.14, U103.26 | C210.1, C211.1, C212.1, CN201.2, D210.1, U201.3 |
-| `GND` | CN1.a17, CN1.b17, U14.1, U16.10, U21.1, U22.10, U102.22 | C102.2, C103.2, C104.2, C105.2, C106.2, C107.2, C108.2, C109.2, C110.2, C111.2, C112.2, C113.2, C114.2, CN2.5, D8.2, R103.2, R104.2, R105.2, U14.18, U15.8, U21.18, U23.7, U101.1, U101.39, U102.14, U103.14, U104.12 | BT201.2, C201.2, C202.2, C203.2, C205.1, C206.2, C207.2, C208.1, C209.1, C210.2, C211.2, C212.2, C213.2, C214.2, CN201.5, D201.2, D204.2, D205.1, R203.2, U201.2, U202.2, U203.1 |
-| `+12V` | — | CN2.4, R26.1, T101.1 | C206.1, C207.1, CN201.4, U202.3 |
-| `-5V` | CN1.b16 | CN2.1 | C208.2, C209.2, CN201.1, U203.3 |
-| `+3V_BAT` | CN1.b1, U103.28 | CN2.3 | C214.1, CN201.3, D207.1, D208.1 |
+| `+5V` | CN1.a15, CN2.4, R29.1, R30.1, U16.1, U16.20, U22.20, U101.2, U101.4, U101.7, U101.33, U101.36, U102.1, U102.27, U102.28, U104.33 | C106.1, C107.1, C108.1, C109.1, C110.1, C111.1, C112.1, C113.1, C114.1, R28.1, R48.1, R49.1, R52.1, R53.1, R54.1, R55.1, R56.1, R57.1, R58.1, R59.1, U14.9, U15.16, U21.9, U23.14, U103.26 | C210.1, C211.1, C212.1, CN201.2, D210.1, U201.3 |
+| `GND` | CN1.a17, CN1.b17, CN2.1, U14.1, U16.10, U21.1, U22.10, U102.22 | C102.2, C103.2, C104.2, C105.2, C106.2, C107.2, C108.2, C109.2, C110.2, C111.2, C112.2, C113.2, C114.2, D8.2, R103.2, R104.2, R105.2, U14.18, U15.8, U21.18, U23.7, U101.1, U101.39, U102.14, U103.14, U104.12 | BT201.2, C201.2, C202.2, C203.2, C205.1, C206.2, C207.2, C208.1, C209.1, C210.2, C211.2, C212.2, C213.2, C214.2, CN201.5, D201.2, D204.2, D205.1, R203.2, U201.2, U202.2, U203.1 |
+| `+12V` | CN2.2 | R26.1, T101.1 | C206.1, C207.1, CN201.4, U202.3 |
+| `-5V` | CN1.b16, CN2.5 | — | C208.2, C209.2, CN201.1, U203.3 |
+| `+3V_BAT` | CN1.b1, CN2.3, U103.28 | — | C214.1, CN201.3, D207.1, D208.1 |
 
 ## Ausência de ligação medida
 
@@ -200,7 +200,7 @@ A placa da fonte não tem serigrafia de componentes: as referências são todas 
 | D207 | 1N4148 | vidro, o da esquerda do par |
 | D208 | 1N4148 | vidro, o da direita do par |
 | D209 | LED | painel (fios vermelho e creme) |
-| D210 | 1N? (vidro) | vidro vermelho, em pé ao lado do cerâmico C211 |
+| D210 | 1N4148 | vidro, em pé ao lado do cerâmico C211 |
 | R201 | 100 | deitado, ao lado do 2200uF 16V |
 | R203 | 2k4 | em pé, junto aos fios do LED |
 | T201 | LIDER, 19,75 VAC com CT (medido) | fora da placa |
