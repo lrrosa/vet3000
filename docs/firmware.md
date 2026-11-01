@@ -94,7 +94,7 @@ Códigos **< `$30`** são comandos: `JSR [cmd_table + 2×código]`. Antes do des
 | `$12` | SHIFT+BORDER BLK | `CMD_BACKDROP` `$E784` | Próxima cor de fundo (R7) |
 | `$13` | SHIFT+CLEAR | `CMD_CLEAR_PAGE` `$E932` | Apaga a página |
 | `$14` | SHIFT+OBJ | `CMD_OBJ_SHAPE` `$E77A` | Próxima forma do objeto (4 formas) |
-| `$15` | SHIFT+EXT MODE | `CMD_EXTVID` | Igual a EXT MODE (a demo usa esta entrada para voltar ao cartucho) |
+| `$15` | SHIFT+EXT MODE | `CMD_EXTVID` | Igual a EXT MODE (no aparelho SHIFT e EXT MODE juntas não são lidas direito: ver [teclado.md](teclado.md#teclas-na-mesma-coluna)) |
 | `$16` | SHIFT+CURSOR | `CMD_CAPS` `$E7B7` | Trava de maiúsculas |
 | `$19` | SHIFT+←→ | `CMD_RIGHT` `$E70E` | Cursor à direita |
 | `$1A` | SHIFT+↑↓ | `CMD_UP` `$E74E` | Cursor para cima |
@@ -106,7 +106,7 @@ Códigos **< `$30`** são comandos: `JSR [cmd_table + 2×código]`. Antes do des
 
 Como a tabela fica em RAM (`$0040-$007F`), **um cartucho pode trocar ou acrescentar comandos** e
 voltar para o titulador (`RTS`), que passa a usá-los. O cartucho de demonstração faz isso com
-SHIFT+EXT MODE (ver [programando-cartuchos.md](programando-cartuchos.md#voltar-do-titulador-para-o-cartucho)).
+CONTROL+BORDER BLK (ver [programando-cartuchos.md](programando-cartuchos.md#voltar-do-titulador-para-o-cartucho)).
 
 ## Tela e páginas
 

@@ -9,6 +9,7 @@ end
 local readback = os.getenv("VET_READBACK") == "1"
 local frame, held, failed = 0, {}, false
 local saw_laser = false
+local display_on
 local min_stack = 0x200
 breakout_stack_tap=mem:install_write_tap(0x190,0x1ff,"stack_guard",function(a,data)
     local s=m.devices[":maincpu"].state.S.value
@@ -39,7 +40,8 @@ local actions = {
     [420]=function() key(3,0x80) end, -- return to title
     [440]=function() key(3,8) end, -- firmware
     [600]=function() key(3,0x80) end, -- dismiss firmware title / editor
-    [720]=function() key(1,8); key(3,8) end, -- SHIFT+EXT MODE
+    [640]=function() key(4,0x80) end, -- BORDER BLK alone: original command
+    [720]=function() key(2,8); key(4,0x80) end, -- CONTROL+BORDER BLK
     [860]=function() key(3,0x80) end,
     [1190]=function() key(3,0x80) end,
     [1410]=function() key(3,0x80) end,
@@ -75,8 +77,10 @@ breakout_persist_frame=emu.add_machine_frame_notifier(function()
         end
         if frame==340 then snap("breakout_initials") end
         if frame==415 then check_scores(); check_titles(); snap("breakout_scores") end
+        if frame==630 then display_on=mem:read_u8(0x12) end
         if frame==680 then
             assert(m.devices[":maincpu"].state.PC.value>=0xc000,"not in firmware")
+            assert(mem:read_u8(0x12)==display_on~0x40,"BORDER BLK alone did not toggle the image")
             check_scores(); check_titles()
         end
         if frame==850 then

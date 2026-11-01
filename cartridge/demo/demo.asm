@@ -18,8 +18,10 @@
 *     assinatura "POWER" ($0030-$0034) ficam intactos.
 *   - EXT MODE volta ao titulador (reset com a marca "EXIT" em $0080).
 *   - Segurar EXT MODE ao ligar pula o cartucho.
-*   - No editor do titulador, SHIFT+EXT MODE volta à demo: o cartucho troca
-*     esse comando (que só repetia o EXT MODE) na tabela em RAM do firmware.
+*   - No editor do titulador, CONTROL+BORDER BLK volta à demo: o cartucho troca
+*     esse comando (que só repetia o BORDER BLK) na tabela em RAM do firmware.
+*     SHIFT+EXT MODE não serve: SHIFT e EXT MODE ficam na mesma coluna da
+*     matriz, sem diodos, e juntas não são lidas direito no aparelho.
 *   - Sincronismo lendo o bit F do status do VDP, com IRQ e FIRQ mascaradas.
 *     No aparelho o /INT do VDP não está ligado ao IRQ do 6809 (medido), então
 *     SYNC travaria; no MAME o driver liga os dois e esconderia o problema.
@@ -112,7 +114,9 @@ attract_keys equ $3D
 serve_clock equ $3E            ; passos com a bola presa (lançamento automático)
 extra_balls equ $3F            ; bolas extras em jogo: bit0 = BALL2, bit1 = BALL3
 CMD_TABLE	equ	$0040		; tabela de comandos do titulador (recriada no boot)
-CMD_SHIFT_EXT	equ	$15		; código de SHIFT+EXT MODE
+CMD_BORDER	equ	$02		; código de BORDER BLK (com ou sem CONTROL)
+CMD_SPARE	equ	$17		; entrada sem tecla: guarda o BORDER BLK original
+FW_KEY_CTRL	equ	$25		; firmware: CONTROL apertado na última leitura
 BARBUF		equ	$0040		; 64 bytes: cor de cada linha das barras
 EXIT_MAGIC	equ	$0080		; "EXIT" = voltar ao titulador após o reset
 BRICKS		equ	$0084		; 10 palavras: tijolos de cada linha (bit15 = coluna 0)
@@ -166,7 +170,7 @@ STACK_TOP	equ	$0200
 		fcc	"OBJECT"		; assinatura
 		fdb	cart_vec		; a ROM faz LDX [$4006]: ponteiro para...
 cart_vec	fdb	entry-$4000		; ...o deslocamento da entrada (JSR $4000,X)
-		fcc	"VET 3000 DEMO 1.5 (C) 2026 LEONARDO ROMAN DA ROSA - GPL-3.0",0
+		fcc	"VET 3000 DEMO 1.6 (C) 2026 LEONARDO ROMAN DA ROSA - GPL-3.0",0
 
 * ===========================================================================
 *  Entrada: chamada pela ROM com JSR durante o boot (VDP já inicializado,
@@ -186,8 +190,10 @@ entry		ldd	EXIT_MAGIC		; voltando da demo por EXT MODE?
 		lda	KEYBOARD
 		bita	#$08			; EXT MODE apertado?
 		bne	start			; solta: roda a demo
-2		ldd	#back_to_demo		; indo para o titulador: lá, SHIFT+EXT MODE
-		std	CMD_TABLE+2*CMD_SHIFT_EXT	; passa a trazer a demo de volta
+2		ldd	CMD_TABLE+2*CMD_BORDER	; indo para o titulador: lá, CONTROL+
+		std	CMD_TABLE+2*CMD_SPARE	; BORDER BLK passa a trazer a demo de
+		ldd	#border_hook		; volta (BORDER BLK sozinha continua
+		std	CMD_TABLE+2*CMD_BORDER	; igual)
 		rts
 
 start		orcc	#$50			; IRQ e FIRQ mascaradas (sem interrupções)
@@ -221,21 +227,27 @@ exit_to_titler
 		jmp	[$FFFE]
 
 * ---------------------------------------------------------------------------
-*  back_to_demo: comando SHIFT+EXT MODE instalado na tabela do titulador
-*  pela entrada. Apaga a tela, espera EXT MODE ficar solta (apertada, ela faz
-*  o boot pular o cartucho) e reinicia a máquina, que volta a rodar a demo.
+*  border_hook: comando BORDER BLK instalado na tabela do titulador pela
+*  entrada. Com CONTROL volta à demo; sem ele, chama o comando original.
+*  back_to_demo apaga a tela, espera todas as teclas ficarem soltas (EXT MODE
+*  apertada faria o boot pular o cartucho) e reinicia a máquina, que volta a
+*  rodar a demo.
 * ---------------------------------------------------------------------------
+border_hook	tst	FW_KEY_CTRL		; CONTROL+BORDER BLK?
+		bne	back_to_demo
+		jmp	[CMD_TABLE+2*CMD_SPARE]	; só BORDER BLK: liga/desliga a imagem
+
 back_to_demo	orcc	#$50
 		lda	#$82			; R1: imagem e interrupção desligadas
 		ldb	#1
 		lbsr	vdp_reg
 		clr	EXIT_MAGIC
-1		ldx	#1000			; ~28 ms seguidos com a tecla solta
-2		lda	#$FB			; linha 3: EXT MODE (bit 3)
-		sta	KEYBOARD
+1		ldx	#1000			; ~28 ms seguidos sem tecla nenhuma
+2		clrb				; todas as linhas de uma vez
+		stb	KEYBOARD
 		lda	KEYBOARD
-		bita	#$08
-		beq	1B			; ainda apertada: recomeça a contagem
+		inca				; $FF = nenhuma coluna em 0
+		bne	1B			; alguma apertada: recomeça a contagem
 		leax	-1,X
 		bne	2B
 		jmp	[$FFFE]

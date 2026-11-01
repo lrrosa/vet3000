@@ -124,9 +124,9 @@ No boot, se `"POWER"` não está em `$0030`, o firmware grava a assinatura e pre
 atributos com `$40` (espaço). Por isso **um cartucho pode usar `$0000-$002F`, `$0035-$009F` e
 `$0190-$01FF` sem apagar os títulos**.
 
-### Reserva da demo 1.2–1.5
+### Reserva da demo 1.2–1.6
 
-O cartucho demo 1.2–1.5 reserva `$0190-$01CF` (64 bytes) para dez recordes com iniciais,
+O cartucho demo 1.2–1.6 reserva `$0190-$01CF` (64 bytes) para dez recordes com iniciais,
 assinatura e soma de verificação. Sua pilha usa `$01D0-$01FF`, ainda com S inicial em `$0200`.
 Na versão 1.3, a abertura compartilha `$0040` entre barras e sprites. O jogo usa `$0040-$0067`
 para prata/ouro, `$006B-$0083` para sprites e `$0084-$0097` para os tijolos. A marca `EXIT`

@@ -73,21 +73,31 @@ Assim o usuário usa o titulador sem tirar o cartucho.
 
 O firmware só chama o cartucho no boot, mas a tabela de comandos fica em RAM e é recriada antes
 dessa chamada. Antes do `RTS`, o cartucho pode trocar uma entrada por uma rotina sua. O editor do
-titulador a chama com `JSR` quando a tecla correspondente é apertada. A demo usa o código `$15`
-(SHIFT+EXT MODE), que no firmware só repetia o EXT MODE:
+titulador a chama com `JSR` quando a tecla correspondente é apertada. A demo usa CONTROL+BORDER BLK:
+o firmware ignora o CONTROL nessa tecla (código `$02`), e a variável `$25` diz se ele estava
+apertado. A rotina da demo fica no lugar do BORDER BLK e chama o original quando não há CONTROL:
 
 ```asm
 CMD_TABLE equ $0040             ; 32 ponteiros, um por código de tecla
-        ldd  #volta
-        std  CMD_TABLE+2*$15    ; SHIFT+EXT MODE
+        ldd  CMD_TABLE+2*$02    ; BORDER BLK original...
+        std  CMD_TABLE+2*$17    ; ...numa entrada que nenhuma tecla gera
+        ldd  #borda
+        std  CMD_TABLE+2*$02
         rts                     ; segue para o titulador
-volta   ...                     ; espera EXT MODE ser solta e faz jmp [$FFFE]
+borda   tst  $25                ; CONTROL apertado?
+        bne  volta
+        jmp  [CMD_TABLE+2*$17]  ; não: liga/desliga a imagem, como antes
+volta   ...                     ; espera as teclas serem soltas e faz jmp [$FFFE]
 ```
 
-O código `$15` é aceito com o cursor desligado e com a imagem desligada (BORDER BLK). Na tela de
-abertura do titulador ("Pressione qualquer tecla") a ROM trata EXT MODE sem passar pela tabela, então
-o atalho só vale depois de entrar no editor. Espere a tecla ser solta antes do reset: a demo pula o
-cartucho se EXT MODE estiver apertada no boot.
+O código `$02` é aceito em qualquer estado do editor: com o cursor desligado, com a imagem desligada
+e no modo OBJ. Na tela de abertura do titulador ("Pressione qualquer tecla") a ROM trata as teclas
+sem passar pela tabela, então o atalho só vale depois de entrar no editor. Espere as teclas serem
+soltas antes do reset: a demo pula o cartucho se EXT MODE estiver apertada no boot.
+
+Ao escolher o atalho, não combine SHIFT ou CONTROL com EXT MODE: as três ficam na mesma coluna da
+matriz e, juntas, não são lidas direito no aparelho (no MAME funcionam). A demo usava SHIFT+EXT MODE
+(código `$15`) e só funcionava no emulador. Ver [teclado.md](teclado.md#teclas-na-mesma-coluna).
 
 ### RAM: não apague os títulos do usuário
 

@@ -64,6 +64,23 @@ manual diz que a A é o AUTO CENTER e que B, C e CNTL ficaram reservadas para ca
 VET chamou o A de AUTO CENTER, manteve o C sem função e eliminou o B. A posição sem tecla da linha 6,
 bit 6 (código `$1F`) pode ser a do antigo B.
 
+## Teclas na mesma coluna
+
+A membrana não tem diodos, e as linhas vêm das saídas totem-pole do 74LS273: a linha selecionada fica
+em 0 e as outras ficam em 1, sem resistor. Duas teclas apertadas na **mesma coluna**, em linhas
+diferentes, ligam pela coluna uma saída em 0 a uma saída em 1. A tensão da coluna passa a depender da
+resistência dos contatos da membrana e pode ficar entre os níveis lógicos do 74LS244.
+
+A coluna do bit 3 junta SHIFT, CONTROL, EXT MODE e o C amarelo. Por isso **SHIFT+EXT MODE e
+CONTROL+EXT MODE não são confiáveis no aparelho**: o EXT MODE pode não ser visto, ou ser visto sem o
+modificador. Talvez seja esse o motivo de o firmware dar a SHIFT+EXT MODE (código `$15`) a mesma
+função do EXT MODE. SHIFT e CONTROL com teclas de outras colunas funcionam normalmente
+(SHIFT+PAGE, SHIFT+BORDER BLK, CONTROL+CURSOR...).
+
+O MAME trata a matriz como ideal e aceita essas combinações. A demo usava SHIFT+EXT MODE para voltar
+do titulador: funcionava no emulador, mas não no VET real (testado em 01/11/2026). Desde então usa
+CONTROL+BORDER BLK.
+
 ## Códigos de tecla (KEYMAP)
 
 Letras e dígitos geram o próprio código ASCII (`a`-`z` minúsculas, `0`-`9`, `:`). O espaço gera `$40`.

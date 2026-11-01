@@ -102,7 +102,8 @@ Sem o build local, usa o caminho padrão configurado no `.bat`. O `.bat` chama:
 
 Controles da demo: **ESPAÇO** joga, **Z/X** (ou O/P, ou ←→ com e sem SHIFT) movem a raquete,
 **RETURN** pausa, **V** sobrepõe ao vídeo externo e **EXT MODE** volta ao titulador. Segurar
-**EXT MODE** ao ligar pula o cartucho. No editor do titulador, **SHIFT+EXT MODE** volta à demo.
+**EXT MODE** ao ligar pula o cartucho. No editor do titulador, **CONTROL+BORDER BLK** volta à demo
+(no MAME, Ctrl esquerdo + vírgula).
 
 ## Documentação
 

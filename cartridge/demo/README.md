@@ -1,4 +1,4 @@
-# Cartucho de demonstração: VET 3000 DEMO 1.5
+# Cartucho de demonstração: VET 3000 DEMO 1.6
 
 Copyright © 2026 Leonardo Roman da Rosa, sob a GPL-3.0-or-later.
 
@@ -132,7 +132,7 @@ mas não aparece como anúncio na abertura.
 | V | Sobrepõe ao vídeo externo |
 | EXT MODE | Volta ao titulador |
 | EXT MODE segurado ao ligar | Pula o cartucho |
-| SHIFT+EXT MODE, no editor do titulador | Volta à demo |
+| CONTROL+BORDER BLK, no editor do titulador | Volta à demo (no MAME, Ctrl esquerdo + vírgula) |
 
 ## Recordes na SRAM com bateria
 
@@ -166,14 +166,21 @@ podem usar essa área; a demo antiga usava `$0190` para sprites e pode invalidar
   `$0190-$01CF` (ranking) e `$01D0-$01FF` (pilha). Os vetores em `$0039-$003D`
   não são usados como vetores durante a demo, que mantém IRQ/FIRQ mascaradas.
   **Os títulos gravados na RAM ficam intactos**:
-  testado no MAME digitando um título, saindo com EXT MODE, voltando à demo com SHIFT+EXT MODE e de
+  testado no MAME digitando um título, saindo com EXT MODE, voltando à demo com CONTROL+BORDER BLK e de
   novo ao titulador.
 - **Volta do titulador para a demo:** sempre que devolve o controle ao firmware (saída por EXT MODE
-  ou EXT MODE segurado no boot), a entrada troca o comando de SHIFT+EXT MODE (código `$15`, que só
-  repetia o EXT MODE) na tabela de comandos em RAM (`$006A`). O comando novo apaga a tela, espera
-  EXT MODE ser solta (apertada, ela faria o boot pular o cartucho) e reinicia a máquina. O firmware
-  recria a tabela a cada boot, então sem o cartucho o titulador volta a ser o original. Na tela de
-  abertura do titulador o EXT MODE é tratado direto pela ROM; o atalho vale no editor.
+  ou EXT MODE segurado no boot), a entrada troca o comando de BORDER BLK (código `$02`, em `$0044`)
+  na tabela de comandos em RAM por uma rotina da demo e guarda o original na entrada `$17`
+  (`$006E`), que nenhuma tecla gera. Sem CONTROL, a rotina chama o BORDER BLK original; com
+  CONTROL, que no firmware não mudava nada nessa tecla, apaga a tela, espera todas as teclas ficarem
+  soltas (EXT MODE apertada faria o boot pular o cartucho) e reinicia a máquina. O firmware recria a
+  tabela a cada boot, então sem o cartucho o titulador volta a ser o original. Na tela de abertura
+  do titulador a ROM trata as teclas sem passar pela tabela; o atalho vale no editor.
+- **Por que não SHIFT+EXT MODE:** até a versão de 01/11/2026 o atalho era SHIFT+EXT MODE (código
+  `$15`). Funcionava no MAME, mas não no aparelho: SHIFT e EXT MODE ficam na mesma coluna da matriz
+  (bit 3), a membrana não tem diodos e as linhas são saídas totem-pole do 74LS273. Com as duas
+  apertadas, a linha selecionada (em 0) e a outra (em 1) brigam pela coluna, que fica num nível
+  indefinido. Ver [teclado.md](../../docs/teclado.md#teclas-na-mesma-coluna).
 - Sincroniza lendo o bit F do status do VDP, como o firmware, com IRQ e FIRQ mascaradas. No aparelho,
   o `/INT` do VDP não está ligado ao IRQ do 6809 (medido), então esperar com `SYNC` travaria. As
   imagens anteriores a 29/09/2026 usavam `SYNC`. Funcionavam no MAME 0.289, cujo driver liga o
